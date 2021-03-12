@@ -1,4 +1,4 @@
-import { Post } from "../types";
+import { Post, User } from "../types";
 
 export interface UserProfileStackParams {
 	ProfilePage: undefined;
@@ -28,11 +28,21 @@ export type SignInNavigationParams = {
 	Signup: undefined;
 };
 
+export type HomeStackNavigationParams = {
+	Home: undefined;
+	Comments: {
+		post: Pick<Post, "caption" | "postedAt" | "postId">;
+		user: {
+			username: string;
+			profilePic: string | null;
+		};
+	};
+};
+
 export type TabNavigationParams = {
 	Home: undefined;
 	Explore: undefined;
 	Activity: undefined;
 	New: undefined;
-
 	Profile: undefined;
 };

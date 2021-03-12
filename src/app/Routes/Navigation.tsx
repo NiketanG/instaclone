@@ -11,6 +11,7 @@ import SignedOutStack from "./SignedOutNavigation";
 import ProfilePageStack from "./ProfileStack";
 import NewPost from "../Screens/NewPost";
 import { useTheme } from "react-native-paper";
+import HomePageStack from "./HomeStack";
 
 const Tab = createBottomTabNavigator<TabNavigationParams>();
 
@@ -48,7 +49,7 @@ export const TabNavigation = () => {
 			>
 				<Tab.Screen
 					name="Home"
-					component={Home}
+					component={HomePageStack}
 					options={{
 						tabBarIcon: ({ color, focused }) => (
 							<TabBarIcon

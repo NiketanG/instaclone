@@ -25,3 +25,12 @@ export type Follower = {
 	follower: string;
 	following: string;
 };
+
+export type Comment = {
+	commentId: string;
+	postId: string;
+	comment: string;
+	username: string | "";
+	profilePic: string | null;
+	postedAt: Date;
+};

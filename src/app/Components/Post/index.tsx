@@ -1,12 +1,20 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Image, Text, useWindowDimensions } from "react-native";
-import { Caption, Card, Paragraph, Title, useTheme } from "react-native-paper";
+import {
+	Caption,
+	Card,
+	IconButton,
+	Paragraph,
+	Title,
+	useTheme,
+} from "react-native-paper";
 
 import Icon from "react-native-vector-icons/Ionicons";
 import { Post as PostType } from "../../types";
 import { postImageHeight } from "../../utils/constants";
 import firestore from "@react-native-firebase/firestore";
 import { AppContext } from "../../utils/authContext";
+import { useNavigation } from "@react-navigation/native";
 
 type AvatarProps = {
 	profilePicture?: string | null;
@@ -59,6 +67,8 @@ const Post: React.FC<Props> = ({
 	postedAt,
 	user: { username, profilePic },
 }) => {
+	const navigation = useNavigation();
+
 	const [liked, setLiked] = useState(false);
 	const toggleLike = () => {
 		if (liked) {
@@ -147,6 +157,11 @@ const Post: React.FC<Props> = ({
 				left={(props) => (
 					<UserAvatar iconProps={props} profilePicture={profilePic} />
 				)}
+				right={(props) =>
+					currentUsername === username ? (
+						<IconButton {...props} icon="dots-vertical" />
+					) : null
+				}
 				titleStyle={{
 					fontSize: 18,
 					marginLeft: -16,
@@ -191,7 +206,19 @@ const Post: React.FC<Props> = ({
 						paddingRight: 0,
 					}}
 					color={colors.text}
-					onPress={() => {}}
+					onPress={() => {
+						navigation.navigate("Comments", {
+							post: {
+								caption,
+								postedAt,
+								postId,
+							},
+							user: {
+								username,
+								profilePic,
+							},
+						});
+					}}
 					backgroundColor="transparent"
 					name="chatbubble-outline"
 					size={22}
