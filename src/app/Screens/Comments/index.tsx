@@ -115,6 +115,10 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 
 	const [selectedComment, setSelectedComment] = useState<string | null>(null);
 
+	const selectComment = (username: string, commentId: string) => {
+		if (username === currentUsername) setSelectedComment(commentId);
+	};
+
 	const goBack = () => {
 		if (selectedComment) {
 			setSelectedComment(null);
@@ -199,7 +203,10 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 						.map((comment) => (
 							<TouchableHighlight
 								onLongPress={() => {
-									setSelectedComment(comment.commentId);
+									selectComment(
+										comment.username,
+										comment.commentId
+									);
 								}}
 								key={comment.commentId}
 							>
