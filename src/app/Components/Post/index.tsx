@@ -1,9 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Image, Text, useWindowDimensions } from "react-native";
+import {
+	Image,
+	Text,
+	ToastAndroid,
+	useWindowDimensions,
+	View,
+} from "react-native";
 import {
 	Caption,
 	Card,
 	IconButton,
+	List,
 	Paragraph,
 	Title,
 	useTheme,
@@ -15,11 +22,72 @@ import { postImageHeight } from "../../utils/constants";
 import firestore from "@react-native-firebase/firestore";
 import { AppContext } from "../../utils/authContext";
 import { useNavigation } from "@react-navigation/native";
+import Modal from "react-native-modal";
 
 type AvatarProps = {
 	profilePicture?: string | null;
 	iconProps: any;
 };
+
+type ModalProps = {
+	closeModal: () => void;
+	ownPost: boolean;
+	postId: string;
+	username: string;
+};
+const PostModal: React.FC<ModalProps> = ({
+	postId,
+	username,
+	closeModal,
+	ownPost,
+}) => {
+	const { width } = useWindowDimensions();
+	const postsCollection = firestore().collection("posts");
+
+	const deletePost = async () => {
+		try {
+			await postsCollection.doc(postId).delete();
+			closeModal();
+		} catch (err) {
+			console.error(err);
+			ToastAndroid.show("An error occured", ToastAndroid.LONG);
+		}
+	};
+	const viewProfile = () => {
+		closeModal();
+	};
+	return (
+		<View
+			style={{
+				width,
+				backgroundColor: "#2f2f2f",
+				justifyContent: "center",
+				position: "absolute",
+				bottom: 0,
+				paddingVertical: 16,
+			}}
+		>
+			{ownPost && (
+				<List.Item
+					title="Delete Post"
+					onPress={deletePost}
+					style={{
+						paddingHorizontal: 16,
+					}}
+				/>
+			)}
+
+			<List.Item
+				title="View Profile"
+				onPress={viewProfile}
+				style={{
+					paddingHorizontal: 16,
+				}}
+			/>
+		</View>
+	);
+};
+
 const UserAvatar: React.FC<AvatarProps> = ({ iconProps, profilePicture }) => {
 	const { dark } = useTheme();
 
@@ -146,118 +214,151 @@ const Post: React.FC<Props> = ({
 		}
 	};
 
-	return (
-		<Card
-			style={{
-				backgroundColor: colors.surface,
-			}}
-		>
-			<Card.Title
-				title={username}
-				left={(props) => (
-					<UserAvatar iconProps={props} profilePicture={profilePic} />
-				)}
-				right={(props) =>
-					currentUsername === username ? (
-						<IconButton {...props} icon="dots-vertical" />
-					) : null
-				}
-				titleStyle={{
-					fontSize: 18,
-					marginLeft: -16,
-				}}
-				style={{
-					borderBottomColor: colors.placeholder,
-					borderBottomWidth: 0.5,
-				}}
-			/>
+	const [showModal, setShowModal] = useState(false);
 
-			<Image
-				source={{ uri: imageUrl }}
+	const openModal = () => {
+		setShowModal(true);
+	};
+
+	const closeModal = () => setShowModal(false);
+
+	return (
+		<>
+			<Modal
+				hideModalContentWhileAnimating
+				isVisible={showModal}
+				useNativeDriverForBackdrop
+				onBackdropPress={closeModal}
+				onBackButtonPress={closeModal}
+				animationIn="slideInUp"
 				style={{
-					width,
-					height: width,
-				}}
-				width={postImageHeight}
-				height={postImageHeight}
-			/>
-			<Card.Actions
-				style={{
-					marginTop: -4,
-					marginBottom: -8,
+					margin: 0,
 				}}
 			>
-				<Icon.Button
-					style={{
-						margin: 0,
-						paddingLeft: 8,
-						paddingRight: 0,
-					}}
-					onPress={toggleLike}
-					color={colors.text}
-					backgroundColor="transparent"
-					name={liked ? "heart" : "heart-outline"}
-					size={22}
+				<PostModal
+					username={username}
+					postId={postId}
+					ownPost={currentUsername === username}
+					closeModal={closeModal}
 				/>
-				<Icon.Button
+			</Modal>
+			<Card
+				style={{
+					backgroundColor: colors.surface,
+				}}
+			>
+				<Card.Title
+					title={username}
+					left={(props) => (
+						<UserAvatar
+							iconProps={props}
+							profilePicture={profilePic}
+						/>
+					)}
+					right={(props) => (
+						<IconButton
+							{...props}
+							icon="dots-vertical"
+							onPress={openModal}
+						/>
+					)}
+					titleStyle={{
+						fontSize: 18,
+						marginLeft: -16,
+					}}
 					style={{
-						margin: 0,
-						paddingLeft: 8,
-						paddingRight: 0,
+						borderBottomColor: colors.placeholder,
+						borderBottomWidth: 0.5,
 					}}
-					color={colors.text}
-					onPress={() => {
-						navigation.navigate("Comments", {
-							post: {
-								caption,
-								postedAt,
-								postId,
-							},
-							user: {
-								username,
-								profilePic,
-							},
-						});
-					}}
-					backgroundColor="transparent"
-					name="chatbubble-outline"
-					size={22}
 				/>
-			</Card.Actions>
-			<Card.Content>
-				{likes > 0 && (
-					<Text>{likes > 1 ? `${likes} likes` : `1 like`} </Text>
-				)}
-				<Title>{username}</Title>
-				<Paragraph
-					numberOfLines={expandedCaption ? undefined : 1}
-					onPress={toggleExpandCaption}
-				>
-					{caption}
-				</Paragraph>
 
-				{caption.length > 50 && (
-					<Text
+				<Image
+					source={{ uri: imageUrl }}
+					style={{
+						width,
+						height: width,
+					}}
+					width={postImageHeight}
+					height={postImageHeight}
+				/>
+				<Card.Actions
+					style={{
+						marginTop: -4,
+						marginBottom: -8,
+					}}
+				>
+					<Icon.Button
 						style={{
-							fontWeight: "bold",
+							margin: 0,
+							paddingLeft: 8,
+							paddingRight: 0,
 						}}
+						onPress={toggleLike}
+						color={colors.text}
+						backgroundColor="transparent"
+						name={liked ? "heart" : "heart-outline"}
+						size={22}
+					/>
+					<Icon.Button
+						style={{
+							margin: 0,
+							paddingLeft: 8,
+							paddingRight: 0,
+						}}
+						color={colors.text}
+						onPress={() => {
+							navigation.navigate("Comments", {
+								post: {
+									caption,
+									postedAt,
+									postId,
+								},
+								user: {
+									username,
+									profilePic,
+								},
+							});
+						}}
+						backgroundColor="transparent"
+						name="chatbubble-outline"
+						size={22}
+					/>
+				</Card.Actions>
+				<Card.Content>
+					{likes > 0 && (
+						<Text>{likes > 1 ? `${likes} likes` : `1 like`} </Text>
+					)}
+					<Title>{username}</Title>
+					<Paragraph
+						numberOfLines={expandedCaption ? undefined : 1}
+						onPress={toggleExpandCaption}
 					>
-						{expandedCaption ? "Less" : "More"}
-					</Text>
-				)}
-				<Caption>
-					{postedAt.toLocaleString()}
-					{/* 5 Hours ago */}
-				</Caption>
-				{/* {comments && comments > 0 && (
+						{caption}
+					</Paragraph>
+
+					{caption.length > 50 && (
+						<Text
+							style={{
+								fontWeight: "bold",
+							}}
+						>
+							{expandedCaption ? "Less" : "More"}
+						</Text>
+					)}
+					<Caption>
+						{postedAt.toLocaleString()}
+						{/* 5 Hours ago */}
+					</Caption>
+					{/* {comments && comments > 0 && (
 					<Caption onPress={() => {}}>
 						{comments > 1
 							? `View ${comments} comments`
 							: `View 1 comment`}{" "}
 					</Caption>
 				)} */}
-			</Card.Content>
-		</Card>
+				</Card.Content>
+			</Card>
+		</>
 	);
 };
 
