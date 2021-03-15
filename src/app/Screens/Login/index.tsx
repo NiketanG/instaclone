@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { ToastAndroid, View } from "react-native";
 import { GoogleSignin } from "@react-native-community/google-signin";
 import auth from "@react-native-firebase/auth";
-import { Button } from "react-native-paper";
+import { Button, useTheme } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SignInNavigationParams } from "../../types/navigation";
@@ -54,9 +54,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};
+
+	const { colors } = useTheme();
 	return (
 		<View
 			style={{
+				backgroundColor: colors.background,
 				display: "flex",
 				height: "100%",
 				alignItems: "center",
@@ -68,7 +71,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 				style={{
 					padding: 4,
 				}}
-				color="white"
+				color={colors.surface}
 				icon="google"
 				onPress={signIn}
 			>

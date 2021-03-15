@@ -13,7 +13,11 @@ const ProfilePageStack = () => {
 	return (
 		<NavigationContainer independent>
 			<Stack.Navigator headerMode="none" initialRouteName="ProfilePage">
-				<Stack.Screen name="ProfilePage" component={Profile} />
+				<Stack.Screen
+					name="ProfilePage"
+					component={Profile}
+					initialParams={{ isCurrentUser: true }}
+				/>
 				<Stack.Screen name="Posts" component={PostList} />
 				<Stack.Screen name="EditProfile" component={EditProfile} />
 				<Stack.Screen name="Settings" component={Settings} />

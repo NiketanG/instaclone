@@ -15,6 +15,8 @@ const theme: ReactNativePaper.Theme = {
 	colors: {
 		...DarkTheme.colors,
 		primary: "white",
+		background: "#0f0f0f",
+		surface: "#262626",
 	},
 };
 

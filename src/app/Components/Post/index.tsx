@@ -23,11 +23,7 @@ import firestore from "@react-native-firebase/firestore";
 import { AppContext } from "../../utils/authContext";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
-
-type AvatarProps = {
-	profilePicture?: string | null;
-	iconProps: any;
-};
+import { UserAvatar } from "../UserAvatar";
 
 type ModalProps = {
 	closeModal: () => void;
@@ -88,33 +84,6 @@ const PostModal: React.FC<ModalProps> = ({
 	);
 };
 
-const UserAvatar: React.FC<AvatarProps> = ({ iconProps, profilePicture }) => {
-	const { dark } = useTheme();
-
-	// <Avatar.Icon {...props} icon="heart" size={30} />
-	return profilePicture ? (
-		<Image
-			source={{
-				uri: profilePicture,
-			}}
-			width={28}
-			height={28}
-			style={{
-				width: 28,
-				height: 28,
-				borderRadius: 14,
-			}}
-		/>
-	) : (
-		<Icon
-			{...iconProps}
-			name="person-circle-outline"
-			size={32}
-			color={dark ? "white" : "black"}
-		/>
-	);
-};
-
 type User = {
 	username: string;
 	profilePic?: string | null;
@@ -154,6 +123,8 @@ const Post: React.FC<Props> = ({
 	const { username: currentUsername } = useContext(AppContext);
 	const likesCollection = firestore().collection("likes");
 
+	const usersCollection = firestore().collection("users");
+
 	useEffect(() => {
 		(async () => {
 			if (!postId) return;
@@ -170,6 +141,29 @@ const Post: React.FC<Props> = ({
 			}
 		})();
 	}, [currentUsername, likesCollection, postId]);
+
+	const [userProfilePic, setUserProfilePic] = useState<string | null>(null);
+	useEffect(() => {
+		(async () => {
+			if (!username) return;
+			if (profilePic) {
+				setUserProfilePic(profilePic);
+				return;
+			} else {
+				const userRes = await usersCollection
+					.where("username", "==", username)
+					.get();
+				if (userRes.docs.length === 0) {
+					setUserProfilePic(null);
+					return;
+				} else {
+					setUserProfilePic(
+						userRes.docs[0].get("profilePic") as string
+					);
+				}
+			}
+		})();
+	}, [currentUsername, usersCollection, username, profilePic]);
 
 	const likePost = async () => {
 		try {
@@ -244,17 +238,12 @@ const Post: React.FC<Props> = ({
 			</Modal>
 			<Card
 				style={{
-					backgroundColor: colors.surface,
+					backgroundColor: colors.background,
 				}}
 			>
 				<Card.Title
 					title={username}
-					left={(props) => (
-						<UserAvatar
-							iconProps={props}
-							profilePicture={profilePic}
-						/>
-					)}
+					left={() => <UserAvatar profilePicture={userProfilePic} />}
 					right={(props) => (
 						<IconButton
 							{...props}
@@ -346,7 +335,7 @@ const Post: React.FC<Props> = ({
 						</Text>
 					)}
 					<Caption>
-						{postedAt.toLocaleString()}
+						{postedAt}
 						{/* 5 Hours ago */}
 					</Caption>
 					{/* {comments && comments > 0 && (

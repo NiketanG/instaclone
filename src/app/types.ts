@@ -13,7 +13,7 @@ export type Post = {
 	caption: string | "";
 	likes: number;
 	username: string;
-	postedAt: Date;
+	postedAt: string;
 };
 
 export type Like = {

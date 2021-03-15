@@ -5,13 +5,12 @@ import Home from "../Screens/Home";
 import { TabNavigationParams } from "../types/navigation";
 import Icon from "react-native-vector-icons/Ionicons";
 
-import Profile from "../Screens/Profile";
-import Explore from "../Screens/Explore";
 import SignedOutStack from "./SignedOutNavigation";
 import ProfilePageStack from "./ProfileStack";
 import NewPost from "../Screens/NewPost";
 import { useTheme } from "react-native-paper";
 import HomePageStack from "./HomeStack";
+import ExplorePageStack from "./ExploreStack";
 
 const Tab = createBottomTabNavigator<TabNavigationParams>();
 
@@ -44,6 +43,9 @@ export const TabNavigation = () => {
 			<Tab.Navigator
 				tabBarOptions={{
 					showLabel: false,
+					style: {
+						backgroundColor: colors.background,
+					},
 					keyboardHidesTabBar: true,
 				}}
 			>
@@ -61,7 +63,7 @@ export const TabNavigation = () => {
 				/>
 				<Tab.Screen
 					name="Explore"
-					component={Explore}
+					component={ExplorePageStack}
 					options={{
 						tabBarIcon: ({ color, focused }) => (
 							<TabBarIcon

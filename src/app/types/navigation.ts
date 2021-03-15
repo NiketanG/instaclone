@@ -1,14 +1,23 @@
-import { Post, User } from "../types";
+import { Post } from "../types";
 
-export interface UserProfileStackParams {
-	ProfilePage: undefined;
-	Followers: undefined;
-	Following: undefined;
-	Posts: undefined;
-}
+export type SignInNavigationParams = {
+	Login: undefined;
+	Signup: undefined;
+};
+
+export type HomeStackNavigationParams = {
+	Home: undefined;
+	Comments: {
+		post: Pick<Post, "caption" | "postedAt" | "postId">;
+		user: {
+			username: string;
+			profilePic?: string | null;
+		};
+	};
+};
 
 export type ProfileStackParams = {
-	ProfilePage: undefined;
+	ProfilePage: ProfilePageProps;
 	Followers: undefined;
 	Following: undefined;
 	Posts: {
@@ -23,20 +32,27 @@ export type ProfileStackParams = {
 	EditProfile: undefined;
 };
 
-export type SignInNavigationParams = {
-	Login: undefined;
-	Signup: undefined;
-};
+export interface UserProfile {
+	username?: string;
+	profilePic?: string;
+	isCurrentUser?: boolean;
+}
 
-export type HomeStackNavigationParams = {
-	Home: undefined;
-	Comments: {
-		post: Pick<Post, "caption" | "postedAt" | "postId">;
+type ProfilePageProps = UserProfile;
+
+export type ExploreStackNavigationParams = {
+	Explore: undefined;
+	PostDetail: {
+		post: Pick<
+			Post,
+			"caption" | "postedAt" | "postId" | "imageUrl" | "likes"
+		>;
 		user: {
 			username: string;
-			profilePic: string | null;
+			profilePic?: string | null;
 		};
 	};
+	ProfilePage: ProfilePageProps;
 };
 
 export type TabNavigationParams = {

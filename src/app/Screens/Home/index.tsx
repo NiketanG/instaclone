@@ -1,28 +1,64 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
 	RefreshControl,
 	FlatList,
 	StatusBar,
 	ToastAndroid,
+	View,
 } from "react-native";
-import { Divider, Text, useTheme } from "react-native-paper";
+import { ActivityIndicator, Divider, Text, useTheme } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { Post as PostType } from "../../types";
 import mapPosts from "../../utils/mapPosts";
 import { PostContainer } from "../../Components/PostContainer";
+import { AppContext } from "../../utils/authContext";
 
 const Home = () => {
 	const { colors, dark } = useTheme();
 	const [loading, setLoading] = useState(true);
 
 	const [posts, setPosts] = useState<Array<PostType> | null>(null);
+	const followersCollection = firestore().collection("followers");
+	const postsCollection = firestore().collection("posts");
+	const { username } = useContext(AppContext);
 
 	const fetchPosts = async () => {
 		try {
-			const postsCollection = firestore().collection("posts");
-			const allPosts = await postsCollection.get();
+			if (!username) return;
+			const followingRes = await followersCollection
+				.where("follower", "==", username)
+				.get();
 
-			setPosts(mapPosts(allPosts));
+			if (followingRes.docs.length === 0) {
+				ToastAndroid.show(
+					"Follow someone to see their posts.",
+					ToastAndroid.LONG
+				);
+				setPosts([]);
+				return;
+			}
+
+			followingRes.docs.forEach((user) => {
+				if (user.get("following")) {
+					postsCollection
+						.where("following", "==", user.get("following"))
+						.get()
+						.then((post) => {
+							if (post.docs.length > 0) {
+								if (posts) {
+									let newPosts = [...posts];
+									newPosts.concat(mapPosts(post));
+								} else {
+									setPosts(mapPosts(post));
+								}
+							} else {
+								setPosts([]);
+							}
+						});
+				} else {
+					setPosts([]);
+				}
+			});
 		} catch (err) {
 			console.error(err);
 			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
@@ -33,20 +69,49 @@ const Home = () => {
 
 	useEffect(() => {
 		fetchPosts();
-	}, []);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [username]);
 
 	return (
-		<>
+		<View
+			style={{
+				flex: 1,
+				backgroundColor: colors.background,
+			}}
+		>
 			<StatusBar
 				backgroundColor={colors.background}
 				barStyle={dark ? "light-content" : "dark-content"}
 				animated
 			/>
-			{loading && <Text>Loading</Text>}
-			{!loading && posts && (
+			{loading && (
+				<View
+					style={{
+						flex: 1,
+						alignItems: "center",
+						justifyContent: "center",
+					}}
+				>
+					<ActivityIndicator color={colors.text} />
+				</View>
+			)}
+			{posts?.length === 0 && (
+				<View
+					style={{
+						flex: 1,
+						alignItems: "center",
+						justifyContent: "center",
+					}}
+				>
+					<Text>Nothing to see here, yet.</Text>
+				</View>
+			)}
+			{!loading && posts && posts.length > 0 && (
 				<FlatList
 					data={posts.sort(
-						(a, b) => b.postedAt.getTime() - a.postedAt.getTime()
+						(a, b) =>
+							new Date(b.postedAt).getTime() -
+							new Date(a.postedAt).getTime()
 					)}
 					ItemSeparatorComponent={Divider}
 					renderItem={PostContainer}
@@ -64,7 +129,7 @@ const Home = () => {
 					}
 				/>
 			)}
-		</>
+		</View>
 	);
 };
 

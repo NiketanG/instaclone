@@ -67,7 +67,9 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 					ref={listRef}
 					getItemLayout={getItemLayout}
 					data={route.params.postList.sort(
-						(a, b) => b.postedAt.getTime() - a.postedAt.getTime()
+						(a, b) =>
+							new Date(b.postedAt).getTime() -
+							new Date(a.postedAt).getTime()
 					)}
 					ItemSeparatorComponent={Divider}
 					renderItem={PostContainer}

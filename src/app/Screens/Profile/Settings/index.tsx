@@ -1,6 +1,6 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
-import { Appbar, List } from "react-native-paper";
+import { Appbar, List, useTheme } from "react-native-paper";
 import { ProfileStackParams } from "../../../types/navigation";
 import auth from "@react-native-firebase/auth";
 import { StatusBar, View } from "react-native";
@@ -10,7 +10,7 @@ type Props = {
 };
 const Settings: React.FC<Props> = ({ navigation }) => {
 	const goBack = () => navigation.goBack();
-
+	const { colors } = useTheme();
 	const signOut = () => auth().signOut();
 
 	return (
@@ -24,7 +24,12 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 				<Appbar.Action icon="arrow-left" onPress={goBack} />
 				<Appbar.Content title="Settings" />
 			</Appbar.Header>
-			<View>
+			<View
+				style={{
+					backgroundColor: colors.background,
+					flex: 1,
+				}}
+			>
 				<List.Item
 					title="Logout"
 					onPress={signOut}

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Image, ScrollView, StatusBar, ToastAndroid, View } from "react-native";
+import { ScrollView, StatusBar, ToastAndroid, View } from "react-native";
 import {
 	Appbar,
 	Caption,
@@ -11,8 +11,7 @@ import {
 	TextInput,
 } from "react-native-paper";
 
-import Icon from "react-native-vector-icons/Ionicons";
-import { Comment, Post as PostType } from "../../types";
+import { Comment } from "../../types";
 import firestore, {
 	FirebaseFirestoreTypes,
 } from "@react-native-firebase/firestore";
@@ -21,35 +20,7 @@ import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { HomeStackNavigationParams } from "../../types/navigation";
 import { TouchableHighlight } from "react-native-gesture-handler";
-
-type AvatarProps = {
-	profilePicture?: string | null;
-};
-const UserAvatar: React.FC<AvatarProps> = ({ profilePicture }) => {
-	const { dark } = useTheme();
-
-	// <Avatar.Icon {...props} icon="heart" size={30} />
-	return profilePicture ? (
-		<Image
-			source={{
-				uri: profilePicture,
-			}}
-			width={20}
-			height={20}
-			style={{
-				width: 20,
-				height: 20,
-				borderRadius: 10,
-			}}
-		/>
-	) : (
-		<Icon
-			name="person-circle-outline"
-			size={24}
-			color={dark ? "white" : "black"}
-		/>
-	);
-};
+import { UserAvatar } from "../../Components/UserAvatar";
 
 type Props = {
 	route: RouteProp<HomeStackNavigationParams, "Comments">;
