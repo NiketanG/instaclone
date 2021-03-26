@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { ToastAndroid, View } from "react-native";
 import { GoogleSignin } from "@react-native-community/google-signin";
 import auth from "@react-native-firebase/auth";
@@ -17,19 +17,21 @@ type Props = {
 	navigation: StackNavigationProp<SignInNavigationParams, "Login">;
 };
 
-const Login: React.FC<Props> = ({ navigation }) => {
+const Login: React.FC<Props> = () => {
 	const usersCollection = firestore().collection("users");
 	const { setSignupDone, setUsername, setName, setProfilePic } = useContext(
 		AppContext
 	);
 
+	const [loading, setLoading] = useState(false);
+
 	const signIn = async () => {
 		try {
+			setLoading(true);
 			const { idToken } = await GoogleSignin.signIn();
 			const googleCredential = auth.GoogleAuthProvider.credential(
 				idToken
 			);
-
 			const res = await auth().signInWithCredential(googleCredential);
 			if (res.user.email) {
 				const userExists = await usersCollection
@@ -43,8 +45,10 @@ const Login: React.FC<Props> = ({ navigation }) => {
 					setUsername(userExists.docs[0].get("username"));
 					setName(userExists.docs[0].get("name"));
 					setProfilePic(userExists.docs[0].get("profilePic"));
+					setLoading(false);
 					setSignupDone(true);
 				} else {
+					setLoading(false);
 					setSignupDone(false);
 					navigation.navigate("Signup");
 				}
@@ -67,6 +71,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 			}}
 		>
 			<Button
+				loading={loading}
 				mode="contained"
 				style={{
 					padding: 4,

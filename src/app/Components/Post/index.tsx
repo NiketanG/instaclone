@@ -18,7 +18,6 @@ import {
 
 import Icon from "react-native-vector-icons/Ionicons";
 import { Post as PostType } from "../../types";
-import { postImageHeight } from "../../utils/constants";
 import firestore from "@react-native-firebase/firestore";
 import { AppContext } from "../../utils/authContext";
 import { useNavigation } from "@react-navigation/native";
@@ -31,19 +30,15 @@ type ModalProps = {
 	postId: string;
 	username: string;
 };
-const PostModal: React.FC<ModalProps> = ({
-	postId,
-	username,
-	closeModal,
-	ownPost,
-}) => {
+const PostModal: React.FC<ModalProps> = ({ postId, closeModal, ownPost }) => {
 	const { width } = useWindowDimensions();
 	const postsCollection = firestore().collection("posts");
-
+	const navigation = useNavigation();
 	const deletePost = async () => {
 		try {
 			await postsCollection.doc(postId).delete();
 			closeModal();
+			navigation.goBack();
 		} catch (err) {
 			console.error(err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
@@ -267,8 +262,8 @@ const Post: React.FC<Props> = ({
 						width,
 						height: width,
 					}}
-					width={postImageHeight}
-					height={postImageHeight}
+					width={width}
+					height={width}
 				/>
 				<Card.Actions
 					style={{

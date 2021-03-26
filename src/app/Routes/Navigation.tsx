@@ -1,7 +1,6 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../Screens/Home";
 import { TabNavigationParams } from "../types/navigation";
 import Icon from "react-native-vector-icons/Ionicons";
 
@@ -85,18 +84,7 @@ export const TabNavigation = () => {
 						),
 					}}
 				/>
-				<Tab.Screen
-					name="Activity"
-					component={Home}
-					options={{
-						tabBarIcon: ({ color, focused }) => (
-							<TabBarIcon
-								name={focused ? "heart" : "heart-outline"}
-								color={color}
-							/>
-						),
-					}}
-				/>
+
 				<Tab.Screen
 					name="Profile"
 					component={ProfilePageStack}

@@ -1,6 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Image, ToastAndroid, TouchableHighlight, View } from "react-native";
-import { TextInput, Button, Title, Text, Colors } from "react-native-paper";
+import {
+	TextInput,
+	Button,
+	Title,
+	Text,
+	Colors,
+	useTheme,
+} from "react-native-paper";
 import ImagePicker, {
 	Options,
 	Image as ImageResponse,
@@ -107,25 +114,26 @@ const Signup = () => {
 				profilePic: userImagePath || "",
 				email: auth().currentUser?.email,
 			});
-
+			setLoading(false);
 			setSignupDone(true);
 			saveUsername(username.toLowerCase());
 			if (userImagePath) setProfilePic(userImagePath);
 			setImagePath(null);
 			ToastAndroid.show("Signed up", ToastAndroid.LONG);
 		} catch (err) {
+			setLoading(false);
 			console.error(err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
-		} finally {
-			setLoading(false);
 		}
 	};
 
+	const { colors } = useTheme();
 	return (
 		<>
 			<View
 				style={{
-					margin: 16,
+					backgroundColor: colors.background,
+					padding: 16,
 					display: "flex",
 					flexDirection: "column",
 					justifyContent: "space-between",
@@ -185,6 +193,7 @@ const Signup = () => {
 						value={username}
 						onChangeText={(text) => setUsername(text)}
 						style={{
+							backgroundColor: colors.surface,
 							height: 48,
 							marginTop: 16,
 						}}
@@ -206,6 +215,7 @@ const Signup = () => {
 						value={name}
 						onChangeText={(text) => setName(text)}
 						style={{
+							backgroundColor: colors.surface,
 							marginTop: 16,
 							height: 48,
 						}}

@@ -1,4 +1,19 @@
-module.exports = function override(config, env) {
+const webpack = require("webpack");
+const path = require("path");
+const {
+	addExternalBabelPlugin,
+	override,
+	addBabelPreset,
+	fixBabelImports,
+	babelInclude,
+	addWebpackModuleRule,
+	addWebpackPlugin,
+	addWebpackAlias,
+} = require("customize-cra");
+
+const addConfig = (config) => {
+	config.plugins.push(new webpack.DefinePlugin({ __DEV__: true }));
+
 	config.module.rules.push({
 		test: /\.(js|tsx?)$/,
 		exclude: /node_modules[/\\](?!react-native-vector-icons)/,
@@ -11,7 +26,7 @@ module.exports = function override(config, env) {
 
 				// The configuration for compilation
 				presets: [
-					["@babel/preset-env", { useBuiltIns: "usage" }],
+					["@babel/preset-env", { useBuiltIns: "usage", corejs: 3 }],
 					"@babel/preset-react",
 					"@babel/preset-flow",
 					"@babel/preset-typescript",
@@ -24,5 +39,42 @@ module.exports = function override(config, env) {
 		},
 	});
 
+	config.resolve.alias = {
+		"react-native$": require.resolve("react-native-web"),
+	};
+
+	config.module.rules.push({
+		test: /\.(jpg|png|woff|woff2|ttf|eot|svg)$/,
+		loader: "file-loader",
+	});
+
+	config.module.rules.push({
+		test: /\.ttf$/,
+		loader: "url-loader", // or directly file-loader
+		include: path.resolve(
+			__dirname,
+			"node_modules/react-native-vector-icons"
+		),
+	});
 	return config;
 };
+
+module.exports = override(
+	addConfig,
+	fixBabelImports("module-resolver", {
+		alias: {
+			"^react-native$": "react-native-web",
+		},
+	}),
+	addWebpackAlias({
+		"react-native": "react-native-web",
+	}),
+	babelInclude([
+		path.resolve("src"),
+		path.resolve("node_modules/react-native-animatable"),
+	]),
+	addBabelPreset("@babel/preset-react"),
+	addBabelPreset("@babel/preset-flow"),
+	addBabelPreset("@babel/preset-typescript"),
+	addExternalBabelPlugin("@babel/plugin-proposal-class-properties")
+);

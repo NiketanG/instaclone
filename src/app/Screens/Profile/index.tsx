@@ -29,9 +29,11 @@ import { AppContext } from "../../utils/authContext";
 import firestore from "@react-native-firebase/firestore";
 
 import Icon from "react-native-vector-icons/Ionicons";
-import { Post } from "../../types";
 import mapPosts from "../../utils/mapPosts";
 import { UserAvatar } from "../../Components/UserAvatar";
+import PostsStore from "../../store/PostsStore";
+import Post from "../../Components/Post";
+import { fetchPostByUser } from "../../utils/utils";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "ProfilePage">;
@@ -209,13 +211,9 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 
 	const fetchPosts = useCallback(async () => {
 		if (!username || username.length === 0) return;
-		try {
-			const postsCollection = firestore().collection("posts");
-			const allPosts = await postsCollection
-				.where("username", "==", username.toLowerCase())
-				.get();
 
-			setPosts(mapPosts(allPosts));
+		try {
+			setPosts(await fetchPostByUser(username));
 		} catch (err) {
 			console.error(err);
 			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);

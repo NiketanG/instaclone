@@ -1,20 +1,7 @@
+import { Instance } from "mobx-state-tree";
+import { UserModel } from "./store/UsersStore";
+
 export type Theme = "light" | "dark";
-
-export type User = {
-	username: string;
-	name: string;
-	bio: string | "";
-	profilePic?: string;
-};
-
-export type Post = {
-	postId: string;
-	imageUrl: string;
-	caption: string | "";
-	likes: number;
-	username: string;
-	postedAt: string;
-};
 
 export type Like = {
 	postId: string;

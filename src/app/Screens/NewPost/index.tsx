@@ -23,10 +23,13 @@ import ImagePicker, {
 	Image as ImageResponse,
 } from "react-native-image-crop-picker";
 import { firebase } from "@react-native-firebase/storage";
-import firestore from "@react-native-firebase/firestore";
+import firestore, {
+	FirebaseFirestoreTypes,
+} from "@react-native-firebase/firestore";
 import "react-native-get-random-values";
 import { nanoid } from "nanoid";
 import { AppContext } from "../../utils/authContext";
+import PostsStore from "../../store/PostsStore";
 
 type Props = {
 	route: RouteProp<TabNavigationParams, "New">;
@@ -99,7 +102,7 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 			const imageUrl = await imageRef.getDownloadURL();
 
 			if (task && imageUrl) {
-				await postsCollection.add({
+				const newPost = await postsCollection.add({
 					postId: imageId,
 					caption,
 					imageUrl,
@@ -110,6 +113,22 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 				setUploading(false);
 				ToastAndroid.show("Posted", ToastAndroid.LONG);
 				setImagePath(null);
+				const data = await newPost.get();
+
+				if (username) {
+					PostsStore.addPost({
+						caption,
+						imageUrl,
+						likes: 0,
+						postId: newPost.id,
+						postedAt: (data.get(
+							"postedAt"
+						) as FirebaseFirestoreTypes.Timestamp)
+							.toDate()
+							.toISOString(),
+						username,
+					});
+				}
 				navigation.navigate("Home");
 			} else {
 				console.error("[Firestore] Post Creation failed");

@@ -58,7 +58,7 @@ export type ExploreStackNavigationParams = {
 export type TabNavigationParams = {
 	Home: undefined;
 	Explore: undefined;
-	Activity: undefined;
+	// Activity: undefined;
 	New: undefined;
 	Profile: undefined;
 };

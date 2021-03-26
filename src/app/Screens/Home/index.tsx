@@ -8,23 +8,39 @@ import {
 } from "react-native";
 import { ActivityIndicator, Divider, Text, useTheme } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
-import { Post as PostType } from "../../types";
 import mapPosts from "../../utils/mapPosts";
 import { PostContainer } from "../../Components/PostContainer";
 import { AppContext } from "../../utils/authContext";
+import { observer } from "mobx-react-lite";
+import PostsStore from "../../store/PostsStore";
+import { fetchPostByUser, updatePostList } from "../../utils/utils";
 
-const Home = () => {
+const Home = observer(() => {
 	const { colors, dark } = useTheme();
 	const [loading, setLoading] = useState(true);
 
-	const [posts, setPosts] = useState<Array<PostType> | null>(null);
+	// const [posts, setPosts] = useState<Array<PostType> | null>(null);
 	const followersCollection = firestore().collection("followers");
 	const postsCollection = firestore().collection("posts");
 	const { username } = useContext(AppContext);
 
-	const fetchPosts = async () => {
+	const fetchOwnPosts = async () => {
+		if (!username || username.length === 0) return;
 		try {
-			if (!username) return;
+			const ownPosts = await fetchPostByUser(username.toLowerCase());
+			updatePostList(ownPosts);
+		} catch (err) {
+			console.error(err);
+			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const fetchPosts = async () => {
+		if (!username || username.length === 0) return;
+
+		try {
 			const followingRes = await followersCollection
 				.where("follower", "==", username)
 				.get();
@@ -34,7 +50,7 @@ const Home = () => {
 					"Follow someone to see their posts.",
 					ToastAndroid.LONG
 				);
-				setPosts([]);
+				// setPosts([]);
 				return;
 			}
 
@@ -45,20 +61,15 @@ const Home = () => {
 						.get()
 						.then((post) => {
 							if (post.docs.length > 0) {
-								if (posts) {
-									let newPosts = [...posts];
-									newPosts.concat(mapPosts(post));
-								} else {
-									setPosts(mapPosts(post));
-								}
-							} else {
-								setPosts([]);
+								const mappedPosts = mapPosts(post);
+
+								updatePostList(mappedPosts);
 							}
 						});
-				} else {
-					setPosts([]);
 				}
 			});
+
+			await fetchOwnPosts();
 		} catch (err) {
 			console.error(err);
 			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
@@ -84,6 +95,7 @@ const Home = () => {
 				barStyle={dark ? "light-content" : "dark-content"}
 				animated
 			/>
+
 			{loading && (
 				<View
 					style={{
@@ -95,7 +107,7 @@ const Home = () => {
 					<ActivityIndicator color={colors.text} />
 				</View>
 			)}
-			{posts?.length === 0 && (
+			{!loading && PostsStore.posts.length === 0 && (
 				<View
 					style={{
 						flex: 1,
@@ -106,13 +118,16 @@ const Home = () => {
 					<Text>Nothing to see here, yet.</Text>
 				</View>
 			)}
-			{!loading && posts && posts.length > 0 && (
+
+			{!loading && PostsStore.posts && PostsStore.posts.length > 0 && (
 				<FlatList
-					data={posts.sort(
-						(a, b) =>
-							new Date(b.postedAt).getTime() -
-							new Date(a.postedAt).getTime()
-					)}
+					data={PostsStore.posts
+						.slice()
+						.sort(
+							(a, b) =>
+								new Date(b.postedAt).getTime() -
+								new Date(a.postedAt).getTime()
+						)}
 					ItemSeparatorComponent={Divider}
 					renderItem={PostContainer}
 					keyExtractor={(item) => item.postId}
@@ -131,6 +146,6 @@ const Home = () => {
 			)}
 		</View>
 	);
-};
+});
 
 export default Home;
