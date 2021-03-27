@@ -3,7 +3,8 @@ import {
 	deletePostFromDb,
 	fetchPostsByUserFromDb,
 } from "../utils/firebaseUtils";
-import { uniquePosts } from "../utils/utils";
+import { uniquePosts, updatePostList } from "../utils/utils";
+import FollowersStore, { Follower } from "./FollowersStore";
 
 export const PostModel = types.model("Post", {
 	caption: types.string,
@@ -68,12 +69,29 @@ const PostsStore = types
 			return postsByUser;
 		});
 
+		const getFeedPosts = flow(function* (currentUsername: string) {
+			if (!currentUsername || currentUsername.length === 0) return;
+
+			let feedPosts: Post[] | null = null;
+			const followingList: Follower[] = yield FollowersStore.getFollowing(
+				currentUsername
+			);
+
+			followingList.forEach(async (user) => {
+				const posts = await fetchPostsByUser(user.following);
+				updatePostList(posts);
+				feedPosts = posts;
+			});
+			return feedPosts;
+		});
+
 		return {
 			setPosts,
 			addPost,
 			deletePost,
 			editPost,
 			fetchPostsByUser,
+			getFeedPosts,
 		};
 	})
 	.views((self) => ({

@@ -23,6 +23,7 @@ import { firebase } from "@react-native-firebase/storage";
 import auth from "@react-native-firebase/auth";
 import "react-native-get-random-values";
 import { nanoid } from "nanoid";
+import UsersStore from "../../../store/UsersStore";
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Settings">;
 };
@@ -123,7 +124,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 				}
 			}
 
-			await usersCollection.doc(user.id).update({
+			await UsersStore.editUser(user.id, username.toLowerCase(), {
 				username: username.toLowerCase(),
 				name,
 				bio,

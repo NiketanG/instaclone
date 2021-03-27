@@ -31,6 +31,8 @@ import firestore from "@react-native-firebase/firestore";
 import Icon from "react-native-vector-icons/Ionicons";
 import { UserAvatar } from "../../Components/UserAvatar";
 import PostsStore, { Post } from "../../store/PostsStore";
+import UsersStore from "../../store/UsersStore";
+import FollowersStore from "../../store/FollowersStore";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "ProfilePage">;
@@ -124,48 +126,28 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 	const fetchUser = useCallback(
 		async (userToSearch: string) => {
 			if (!userToSearch) return;
-			const usersCollection = firestore().collection("users");
-
-			const userExists = await usersCollection
-				.where("username", "==", userToSearch.toLowerCase())
-				.get();
-
-			const user = userExists.docs[0];
+			const user = await UsersStore.getUser(userToSearch);
 			if (!user) {
 				ToastAndroid.show("User not found", ToastAndroid.LONG);
 				navigation.goBack();
+				return;
+			} else {
+				setBio(user.bio);
+				setProfilePic(user.profilePic);
+				setName(user.name);
 			}
 
-			const currentName = user.get("name")?.toString();
-			const currentUserName = user.get("username")?.toString();
+			const followersList = await FollowersStore.getFollowers(
+				userToSearch
+			);
+			if (followersList) setFollowers(followersList.length);
 
-			const currentProfilePic = user.get("profilePic")?.toString();
+			const followingList = await FollowersStore.getFollowing(
+				userToSearch
+			);
 
-			const currentBio = user.get("bio")?.toString();
-
-			if (currentName) setName(currentName);
-
-			if (currentUserName) setUsername(currentUserName);
-
-			if (currentProfilePic) setProfilePic(currentProfilePic);
-
-			if (currentBio) setBio(currentBio);
-
-			const followersRes = await followersCollection
-				.where("following", "==", currentUserName)
-				.get();
-
-			if (followersRes.docs.length > 0)
-				setFollowers(followersRes.docs.length);
-
-			const followingRes = await followersCollection
-				.where("follower", "==", currentUserName)
-				.get();
-
-			if (followingRes.docs.length > 0)
-				setFollowing(followingRes.docs.length);
+			if (followingList) setFollowing(followingList.length);
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[navigation]
 	);
 

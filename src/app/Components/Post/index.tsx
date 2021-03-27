@@ -333,18 +333,7 @@ const Post: React.FC<Props> = ({
 						new Date().getTime() - 1 * 24 * 60 * 60 * 1000
 							? `${formatDistanceToNow(new Date(postedAt))} ago`
 							: format(new Date(postedAt), "LLLL dd, yyyy")}
-						{/* {
-						
-						} */}
-						{/* 5 Hours ago */}
 					</Caption>
-					{/* {comments && comments > 0 && (
-					<Caption onPress={() => {}}>
-						{comments > 1
-							? `View ${comments} comments`
-							: `View 1 comment`}{" "}
-					</Caption>
-				)} */}
 				</Card.Content>
 			</Card>
 		</>

@@ -1,5 +1,5 @@
 import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
-import { Post } from "../types";
+import { Post } from "../store/PostsStore";
 
 const mapPosts = (
 	allPosts: FirebaseFirestoreTypes.QuerySnapshot<FirebaseFirestoreTypes.DocumentData>

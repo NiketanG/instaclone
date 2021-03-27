@@ -10,7 +10,7 @@ import {
 	useTheme,
 	TextInput,
 } from "react-native-paper";
-
+import { format, formatDistanceToNow } from "date-fns";
 import { Comment } from "../../types";
 import firestore, {
 	FirebaseFirestoreTypes,
@@ -159,7 +159,15 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 						</Text>
 						<Paragraph>{route.params?.post?.caption}</Paragraph>
 						<Caption>
-							{route.params?.post?.postedAt?.toLocaleString()}
+							{new Date(route.params?.post?.postedAt).getTime() >
+							new Date().getTime() - 1 * 24 * 60 * 60 * 1000
+								? `${formatDistanceToNow(
+										new Date(route.params?.post?.postedAt)
+								  )} ago`
+								: format(
+										new Date(route.params?.post?.postedAt),
+										"LLLL dd, yyyy"
+								  )}
 						</Caption>
 					</View>
 				</View>
