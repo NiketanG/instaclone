@@ -29,11 +29,8 @@ import { AppContext } from "../../utils/authContext";
 import firestore from "@react-native-firebase/firestore";
 
 import Icon from "react-native-vector-icons/Ionicons";
-import mapPosts from "../../utils/mapPosts";
 import { UserAvatar } from "../../Components/UserAvatar";
-import PostsStore from "../../store/PostsStore";
-import Post from "../../Components/Post";
-import { fetchPostByUser } from "../../utils/utils";
+import PostsStore, { Post } from "../../store/PostsStore";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "ProfilePage">;
@@ -64,20 +61,6 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 
 	const { username: savedUsername } = useContext(AppContext);
 
-	// useEffect(() => {
-	// 	if (
-	// 		route.params.isCurrentUser ||
-	// 		route.params.username === savedUsername
-	// 	) {
-	// 		setUsername(savedUsername || "");
-	// 		setName(savedName || "");
-	// 		setBio(savedBio || "");
-	// 		setFollowers(0);
-	// 		setFollowing(0);
-	// 		if (savedProfilePic) setProfilePic(savedProfilePic);
-	// 	}
-	// }, [savedBio, savedName, savedUsername, savedProfilePic, route.params]);
-
 	const [followingUser, setFollowingUser] = useState(false);
 
 	const followersCollection = firestore().collection("followers");
@@ -86,6 +69,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 		if (!route.params.username) return;
 		if (isCurrentUser) return;
 		setFollowingUser(true);
+		setFollowers(followers + 1);
 		const followingRes = await followersCollection
 			.where("following", "==", route.params.username)
 			.where("follower", "==", savedUsername)
@@ -104,6 +88,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 		if (!route.params.username) return;
 
 		setFollowingUser(false);
+		setFollowers(followers - 1);
 
 		const followingRes = await followersCollection
 			.where("following", "==", route.params.username)
@@ -158,36 +143,29 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 
 			const currentBio = user.get("bio")?.toString();
 
-			if (currentName) {
-				setName(currentName);
-			}
-			if (currentUserName) {
-				setUsername(currentUserName);
-			}
-			if (currentProfilePic) {
-				setProfilePic(currentProfilePic);
-			}
+			if (currentName) setName(currentName);
 
-			if (currentBio) {
-				setBio(currentBio);
-			}
+			if (currentUserName) setUsername(currentUserName);
+
+			if (currentProfilePic) setProfilePic(currentProfilePic);
+
+			if (currentBio) setBio(currentBio);
 
 			const followersRes = await followersCollection
 				.where("following", "==", currentUserName)
 				.get();
 
-			if (followersRes.docs.length > 0) {
+			if (followersRes.docs.length > 0)
 				setFollowers(followersRes.docs.length);
-			}
 
 			const followingRes = await followersCollection
 				.where("follower", "==", currentUserName)
 				.get();
 
-			if (followingRes.docs.length > 0) {
+			if (followingRes.docs.length > 0)
 				setFollowing(followingRes.docs.length);
-			}
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[navigation]
 	);
 
@@ -213,7 +191,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 		if (!username || username.length === 0) return;
 
 		try {
-			setPosts(await fetchPostByUser(username));
+			setPosts(await PostsStore.fetchPostsByUser(username));
 		} catch (err) {
 			console.error(err);
 			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
@@ -226,7 +204,8 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 		if (username && username.length > 0) {
 			fetchPosts();
 		}
-	}, [fetchPosts, username]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [PostsStore.posts, fetchPosts, username]);
 
 	return (
 		<View

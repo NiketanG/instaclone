@@ -129,6 +129,7 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 						username,
 					});
 				}
+				setCaption("");
 				navigation.navigate("Home");
 			} else {
 				console.error("[Firestore] Post Creation failed");

@@ -15,22 +15,7 @@ export const updatePostList = (newList: Post[]) => {
 		...new Map(temp.map((item) => [item.postId, item])).values(),
 	]);
 };
-
-export const fetchPostByUser = async (username: string): Promise<Post[]> => {
-	let postsByUser: Post[] = PostsStore.postsByUser(username);
-	try {
-		const fetchedPosts = await fetchPostsByUserFromDb(username);
-		if (fetchedPosts) {
-			const tempArray = [...postsByUser, ...fetchedPosts];
-			postsByUser = [
-				...new Map(
-					tempArray.map((item) => [item.postId, item])
-				).values(),
-			];
-		}
-	} catch (err) {
-		console.error(err);
-	}
-
-	return postsByUser;
+export const uniquePosts = (postList: Post[], newList: Post[]) => {
+	const temp = [...postList, ...newList];
+	return [...new Map(temp.map((item) => [item.postId, item])).values()];
 };

@@ -15,14 +15,14 @@ import {
 	Title,
 	useTheme,
 } from "react-native-paper";
-
+import { format, formatDistanceToNow } from "date-fns";
 import Icon from "react-native-vector-icons/Ionicons";
-import { Post as PostType } from "../../types";
 import firestore from "@react-native-firebase/firestore";
 import { AppContext } from "../../utils/authContext";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
 import { UserAvatar } from "../UserAvatar";
+import PostsStore, { Post as PostType } from "../../store/PostsStore";
 
 type ModalProps = {
 	closeModal: () => void;
@@ -32,11 +32,10 @@ type ModalProps = {
 };
 const PostModal: React.FC<ModalProps> = ({ postId, closeModal, ownPost }) => {
 	const { width } = useWindowDimensions();
-	const postsCollection = firestore().collection("posts");
 	const navigation = useNavigation();
 	const deletePost = async () => {
 		try {
-			await postsCollection.doc(postId).delete();
+			await PostsStore.deletePost(postId);
 			closeModal();
 			navigation.goBack();
 		} catch (err) {
@@ -330,7 +329,13 @@ const Post: React.FC<Props> = ({
 						</Text>
 					)}
 					<Caption>
-						{postedAt}
+						{new Date(postedAt).getTime() >
+						new Date().getTime() - 1 * 24 * 60 * 60 * 1000
+							? `${formatDistanceToNow(new Date(postedAt))} ago`
+							: format(new Date(postedAt), "LLLL dd, yyyy")}
+						{/* {
+						
+						} */}
 						{/* 5 Hours ago */}
 					</Caption>
 					{/* {comments && comments > 0 && (

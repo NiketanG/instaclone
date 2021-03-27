@@ -13,7 +13,7 @@ import { PostContainer } from "../../Components/PostContainer";
 import { AppContext } from "../../utils/authContext";
 import { observer } from "mobx-react-lite";
 import PostsStore from "../../store/PostsStore";
-import { fetchPostByUser, updatePostList } from "../../utils/utils";
+import { updatePostList } from "../../utils/utils";
 
 const Home = observer(() => {
 	const { colors, dark } = useTheme();
@@ -27,7 +27,9 @@ const Home = observer(() => {
 	const fetchOwnPosts = async () => {
 		if (!username || username.length === 0) return;
 		try {
-			const ownPosts = await fetchPostByUser(username.toLowerCase());
+			const ownPosts = await PostsStore.fetchPostsByUser(
+				username.toLowerCase()
+			);
 			updatePostList(ownPosts);
 		} catch (err) {
 			console.error(err);

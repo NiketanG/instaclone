@@ -17,10 +17,11 @@ import {
 	useTheme,
 } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
-import { Post, User } from "../../types";
 import mapPosts from "../../utils/mapPosts";
 import { ExploreStackNavigationParams } from "../../types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { User } from "../../store/UsersStore";
+import { Post } from "../../store/PostsStore";
 
 type Props = {
 	navigation: StackNavigationProp<ExploreStackNavigationParams, "Explore">;
@@ -70,9 +71,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 					bio: userNikketan.get("bio"),
 					name: userNikketan.get("name"),
 					username: "nikketan",
-					profilePic: userNikketan.get("profilePic") as
-						| string
-						| undefined,
+					profilePic: userNikketan.get("profilePic") as string | null,
 				});
 				return;
 			}
@@ -94,7 +93,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 				bio: user.get("bio"),
 				name: user.get("name"),
 				username: user.get("username"),
-				profilePic: user.get("profilePic") as string | undefined,
+				profilePic: user.get("profilePic") as string | null,
 			});
 			return;
 		} else {
@@ -159,6 +158,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 					{searchResults && (
 						<TouchableHighlight
 							onPress={() => {
+								setSearchTerm("");
 								navigation.navigate("ProfilePage", {
 									username: searchResults.username,
 									profilePic: searchResults.profilePic,

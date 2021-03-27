@@ -1,4 +1,4 @@
-import { Post } from "../types";
+import { Post } from "../store/PostsStore";
 
 export type SignInNavigationParams = {
 	Login: undefined;
@@ -11,7 +11,7 @@ export type HomeStackNavigationParams = {
 		post: Pick<Post, "caption" | "postedAt" | "postId">;
 		user: {
 			username: string;
-			profilePic?: string | null;
+			profilePic: string | null;
 		};
 	};
 };
@@ -34,7 +34,7 @@ export type ProfileStackParams = {
 
 export interface UserProfile {
 	username?: string;
-	profilePic?: string;
+	profilePic: string | null;
 	isCurrentUser?: boolean;
 }
 
@@ -49,7 +49,7 @@ export type ExploreStackNavigationParams = {
 		>;
 		user: {
 			username: string;
-			profilePic?: string | null;
+			profilePic: string | null;
 		};
 	};
 	ProfilePage: ProfilePageProps;
