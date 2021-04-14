@@ -12,15 +12,21 @@ import ImagePicker, {
 	Options,
 	Image as ImageResponse,
 } from "react-native-image-crop-picker";
-
-import firestore from "@react-native-firebase/firestore";
-import { firebase } from "@react-native-firebase/storage";
 import Icon from "react-native-vector-icons/Ionicons";
 
-import auth from "@react-native-firebase/auth";
 import { AppContext } from "../../../utils/authContext";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { SignInNavigationParams } from "../../../types/navigation";
+import { RouteProp } from "@react-navigation/core";
+import { definitions } from "../../../types/supabase";
+import supabaseClient from "../../../utils/supabaseClient";
+import uploadToCloudinary from "../../../utils/uploadToCloudinary";
+type Props = {
+	navigation: StackNavigationProp<SignInNavigationParams, "Signup">;
+	route: RouteProp<SignInNavigationParams, "Signup">;
+};
 
-const Signup = () => {
+const Signup: React.FC<Props> = ({ route }) => {
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 
@@ -28,27 +34,27 @@ const Signup = () => {
 		setSignupDone,
 		setUsername: saveUsername,
 		setProfilePic,
+		setEmail,
+		setName: updateName,
 	} = useContext(AppContext);
 
 	useEffect(() => {
 		let isMounted = true;
 		if (isMounted) {
-			const currentUser = auth().currentUser;
-			if (currentUser) {
-				if (currentUser.displayName) {
-					setName(currentUser.displayName);
-					setUsername(
-						currentUser?.displayName.split(" ")[0].toLowerCase()
-					);
-				}
+			const currentUser = route.params;
 
-				setImagePath(currentUser.photoURL);
+			if (currentUser) {
+				if (currentUser.name) {
+					setName(currentUser.name);
+					setUsername(currentUser?.name.split(" ")[0].toLowerCase());
+				}
+				setImagePath(currentUser.profilePic);
 			}
 		}
 		return () => {
 			isMounted = false;
 		};
-	}, []);
+	}, [route.params]);
 
 	const [usernameAvailable, setUsernameAvailable] = useState(true);
 	const [loading, setLoading] = useState(false);
@@ -60,10 +66,12 @@ const Signup = () => {
 		cropping: true,
 		width: 1024,
 		height: 1024,
+		includeBase64: true,
 	};
 
-	const handleImage = (res: ImageResponse) =>
-		res.path ? setImagePath(res.path) : false;
+	const handleImage = (res: ImageResponse) => {
+		res.data ? setImagePath(`data:${res.mime};base64,${res.data}`) : false;
+	};
 
 	const selectFromGallery = async () => {
 		try {
@@ -75,22 +83,21 @@ const Signup = () => {
 		}
 	};
 
-	const storageBucket = firebase
-		.app()
-		.storage("gs://instaclone-5e1b6.appspot.com/");
-
-	const usersCollection = firestore().collection("users");
 	const signUp = async () => {
 		try {
 			if (username.length < 3) return;
 
 			setLoading(true);
-
-			const userExists = await usersCollection
-				.where("username", "==", username.toLowerCase())
-				.get();
-
-			if (userExists.docs.length > 0) {
+			const userExists = await supabaseClient
+				.from<definitions["users"]>("users")
+				.select("*")
+				.eq("username", username.toLowerCase());
+			if (userExists?.error) {
+				console.error(userExists.error);
+				ToastAndroid.show("An error occured", ToastAndroid.LONG);
+			}
+			if (userExists && userExists.data && userExists.data.length > 0) {
+				setLoading(false);
 				setUsernameAvailable(false);
 				return;
 			} else {
@@ -99,21 +106,35 @@ const Signup = () => {
 
 			let userImagePath;
 			if (imagePath) {
-				const imageRef = storageBucket.ref(username);
 				if (imagePath.startsWith("http")) {
 					userImagePath = imagePath;
 				} else {
-					await imageRef.putFile(imagePath);
-					userImagePath = await imageRef.getDownloadURL();
+					userImagePath = await uploadToCloudinary(imagePath);
 				}
 			}
+			const newUserRes = await supabaseClient
+				.from<definitions["users"]>("users")
+				.insert([
+					{
+						bio: "",
+						email: route.params.email,
+						username: username.toLowerCase(),
+						name,
+						profilePic: userImagePath?.toString() || "",
+					},
+				]);
 
-			await usersCollection.add({
-				username: username.toLowerCase(),
-				name,
-				profilePic: userImagePath || "",
-				email: auth().currentUser?.email,
-			});
+			if (newUserRes.error) {
+				setLoading(false);
+				console.error(newUserRes.error);
+				ToastAndroid.show(
+					"Error while creating user",
+					ToastAndroid.LONG
+				);
+			}
+
+			updateName(name);
+			setEmail(route.params.email);
 			setLoading(false);
 			setSignupDone(true);
 			saveUsername(username.toLowerCase());
@@ -187,6 +208,14 @@ const Signup = () => {
 								/>
 							</TouchableHighlight>
 						)}
+						<Text
+							onPress={selectFromGallery}
+							style={{
+								marginVertical: 8,
+							}}
+						>
+							Change Picture
+						</Text>
 					</View>
 					<TextInput
 						placeholder="Username"

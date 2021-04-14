@@ -1,11 +1,12 @@
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree";
-import { editUserInDb, fetchUserFromDb } from "../utils/firebaseUtils";
+import { definitions } from "../types/supabase";
+import { editUserInDb, fetchUserFromDb } from "../utils/supabaseUtils";
 
 export const UserModel = types.model("User", {
 	username: types.identifier,
 	name: types.string,
-	bio: types.optional(types.string, ""),
-	profilePic: types.maybeNull(types.string),
+	bio: types.maybe(types.string),
+	profilePic: types.maybe(types.string),
 	// profilePic: types.maybe(types.string),
 });
 
@@ -17,8 +18,12 @@ const UsersStore = types
 		const setUsers = (users: Array<User>) => {
 			self.users.replace(users);
 		};
-		const addUser = (user: User) => {
-			self.users.push(user);
+		const addUser = (newUser: User) => {
+			if (!self.users.find((user) => user.username === newUser.username))
+				self.users.push(newUser);
+		};
+		const addUsers = (users: Array<definitions["users"]>) => {
+			self.users.concat(users);
 		};
 		const deleteUser = (username: string) => {
 			const userToDelete = self.users.find(
@@ -26,16 +31,13 @@ const UsersStore = types
 			);
 			if (userToDelete) self.users.remove(userToDelete);
 		};
-		const editUser = flow(function* (
-			userId: string,
-			username: string,
-			newData: User
-		) {
+
+		const editUser = flow(function* (username: string, newData: User) {
 			const userToEdit = self.users.findIndex(
 				(user) => user.username === username
 			);
 			if (userToEdit) Object.assign(self.users[userToEdit], newData);
-			yield editUserInDb(userId, newData);
+			yield editUserInDb(username, newData);
 		});
 
 		const getUser = flow(function* (username: string) {
@@ -54,13 +56,7 @@ const UsersStore = types
 			return user;
 		});
 
-		return {
-			getUser,
-			setUsers,
-			addUser,
-			deleteUser,
-			editUser,
-		};
+		return { addUsers, getUser, setUsers, addUser, deleteUser, editUser };
 	})
 
 	.create({

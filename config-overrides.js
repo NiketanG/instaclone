@@ -6,8 +6,6 @@ const {
 	addBabelPreset,
 	fixBabelImports,
 	babelInclude,
-	addWebpackModuleRule,
-	addWebpackPlugin,
 	addWebpackAlias,
 } = require("customize-cra");
 
@@ -16,7 +14,7 @@ const addConfig = (config) => {
 
 	config.module.rules.push({
 		test: /\.(js|tsx?)$/,
-		exclude: /node_modules[/\\](?!react-native-vector-icons)/,
+		// exclude: /node_modules[/\\](?!react-native-vector-icons)/,
 		use: {
 			loader: "babel-loader",
 			options: {
@@ -24,9 +22,9 @@ const addConfig = (config) => {
 				babelrc: false,
 				configFile: false,
 
-				// The configuration for compilation
+				// The configration for compilation
 				presets: [
-					["@babel/preset-env", { useBuiltIns: "usage", corejs: 3 }],
+					"@babel/preset-env",
 					"@babel/preset-react",
 					"@babel/preset-flow",
 					"@babel/preset-typescript",
@@ -56,6 +54,7 @@ const addConfig = (config) => {
 			"node_modules/react-native-vector-icons"
 		),
 	});
+
 	return config;
 };
 

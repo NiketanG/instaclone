@@ -1,6 +1,7 @@
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
+import { View } from "react-native";
 import { Appbar, useTheme } from "react-native-paper";
 import Post from "../../Components/Post";
 import { ExploreStackNavigationParams } from "../../types/navigation";
@@ -13,7 +14,12 @@ type Props = {
 const PostDetail: React.FC<Props> = ({ route, navigation }) => {
 	const { colors } = useTheme();
 	return (
-		<>
+		<View
+			style={{
+				backgroundColor: colors.background,
+				flex: 1,
+			}}
+		>
 			<Appbar.Header
 				style={{
 					backgroundColor: colors.background,
@@ -30,7 +36,7 @@ const PostDetail: React.FC<Props> = ({ route, navigation }) => {
 				user={route.params.user}
 				likes={0}
 			/>
-		</>
+		</View>
 	);
 };
 

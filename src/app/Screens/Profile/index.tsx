@@ -24,18 +24,20 @@ import {
 } from "react-native-paper";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams } from "../../types/navigation";
+import {
+	ExploreStackNavigationParams,
+	ProfileStackParams,
+} from "../../types/navigation";
 import { AppContext } from "../../utils/authContext";
-import firestore from "@react-native-firebase/firestore";
 
 import Icon from "react-native-vector-icons/Ionicons";
 import { UserAvatar } from "../../Components/UserAvatar";
 import PostsStore, { Post } from "../../store/PostsStore";
 import UsersStore from "../../store/UsersStore";
-import FollowersStore from "../../store/FollowersStore";
+import FollowersStore, { Follower } from "../../store/FollowersStore";
 
 type Props = {
-	route: RouteProp<ProfileStackParams, "ProfilePage">;
+	route: RouteProp<ExploreStackNavigationParams, "ProfilePage">;
 	navigation: StackNavigationProp<ProfileStackParams, "ProfilePage">;
 };
 
@@ -44,7 +46,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
-	const [bio, setBio] = useState("");
+	const [bio, setBio] = useState<string | undefined>("");
 
 	const imageMargin = 2;
 	const imageWidth = (width - 0) / 3 - imageMargin * 2;
@@ -52,12 +54,15 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
 
 	const [isCurrentUser, setIsCurrentUser] = useState(false);
-	const [profilePic, setProfilePic] = useState<string | null>(null);
+	const [profilePic, setProfilePic] = useState<string | undefined>();
 
 	const [posts, setPosts] = useState<Array<Post> | null>(null);
 
-	const [followers, setFollowers] = useState(0);
-	const [following, setFollowing] = useState(0);
+	const [followers, setFollowers] = useState<Follower[]>([]);
+	const [followersCount, setFollowersCount] = useState(0);
+
+	const [following, setFollowing] = useState<Follower[]>([]);
+	const [followingCount, setFollowingCount] = useState(0);
 
 	const [loading, setLoading] = useState(true);
 
@@ -65,63 +70,49 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 
 	const [followingUser, setFollowingUser] = useState(false);
 
-	const followersCollection = firestore().collection("followers");
+	const goBack = () => {
+		if (route.params.goBack) {
+			route.params.goBack();
+		} else {
+			navigation.goBack();
+		}
+	};
 
 	const followUser = async () => {
-		if (!route.params.username) return;
-		if (isCurrentUser) return;
-		setFollowingUser(true);
-		setFollowers(followers + 1);
-		const followingRes = await followersCollection
-			.where("following", "==", route.params.username)
-			.where("follower", "==", savedUsername)
-			.get();
+		if (!route.params.username || isCurrentUser || !savedUsername) return;
 
-		if (followingRes.docs.length === 0) {
-			await followersCollection.add({
-				following: route.params.username,
-				follower: savedUsername,
-			});
-		}
+		setFollowingUser(true);
+		setFollowersCount(followersCount + 1);
+
+		FollowersStore.followUser(route.params.username, savedUsername);
 	};
 
 	const unfollowUser = async () => {
-		if (isCurrentUser) return;
-		if (!route.params.username) return;
+		if (isCurrentUser || !route.params.username || !savedUsername) return;
 
 		setFollowingUser(false);
-		setFollowers(followers - 1);
+		setFollowersCount(followersCount - 1);
 
-		const followingRes = await followersCollection
-			.where("following", "==", route.params.username)
-			.where("follower", "==", savedUsername)
-			.get();
-
-		if (followingRes.docs.length === 0) {
-			setFollowingUser(false);
-		} else {
-			const follower = followingRes.docs[0];
-			await followersCollection.doc(follower.id).delete();
-		}
+		FollowersStore.unfollowUser(route.params.username, savedUsername);
 	};
 
-	const checkFollowing = useCallback(
-		async (userToSearch: string) => {
-			if (!savedUsername) return;
-			const followingRes = await followersCollection
-				.where("following", "==", userToSearch)
-				.where("follower", "==", savedUsername)
-				.get();
-
-			if (followingRes.docs.length === 0) {
-				setFollowingUser(false);
-			} else {
-				setFollowingUser(true);
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[savedUsername]
-	);
+	const fetchDetails = async () => {
+		if (
+			savedUsername &&
+			(route.params.isCurrentUser ||
+				route.params.username === savedUsername)
+		) {
+			fetchUser(savedUsername);
+		}
+		if (route.params.username) {
+			fetchUser(route.params.username);
+			const isFollowing = await FollowersStore.checkFollowing(
+				route.params.username
+			);
+			setFollowingUser(isFollowing);
+		}
+		fetchPosts();
+	};
 
 	const fetchUser = useCallback(
 		async (userToSearch: string) => {
@@ -140,13 +131,19 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 			const followersList = await FollowersStore.getFollowers(
 				userToSearch
 			);
-			if (followersList) setFollowers(followersList.length);
+			if (followersList) {
+				setFollowers(followersList);
+				setFollowersCount(followersList.length);
+			}
 
 			const followingList = await FollowersStore.getFollowing(
 				userToSearch
 			);
 
-			if (followingList) setFollowing(followingList.length);
+			if (followingList) {
+				setFollowing(followingList);
+				setFollowingCount(followingList.length);
+			}
 		},
 		[navigation]
 	);
@@ -164,10 +161,14 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 		if (route.params.username) {
 			setUsername(route.params.username);
 			fetchUser(route.params.username);
-			checkFollowing(route.params.username);
+			FollowersStore.checkFollowing(route.params.username).then(
+				(isFollowing) => {
+					setFollowingUser(isFollowing);
+				}
+			);
 		}
 		if (route.params.profilePic) setProfilePic(route.params.profilePic);
-	}, [savedUsername, route.params, fetchUser, checkFollowing]);
+	}, [savedUsername, route.params, fetchUser]);
 
 	const fetchPosts = useCallback(async () => {
 		if (!username || username.length === 0) return;
@@ -226,9 +227,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 							style={{
 								marginRight: 16,
 							}}
-							onPress={() => {
-								navigation.goBack();
-							}}
+							onPress={goBack}
 						/>
 					)}
 					<Title
@@ -257,7 +256,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 				refreshControl={
 					<RefreshControl
 						refreshing={loading}
-						onRefresh={fetchPosts}
+						onRefresh={fetchDetails}
 					/>
 				}
 				contentContainerStyle={{
@@ -278,22 +277,44 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 									Posts
 								</Subheading>
 							</View>
-							<View style={styles.textContainer}>
-								<Headline style={styles.statNumber}>
-									{followers}
-								</Headline>
-								<Subheading style={styles.statTitle}>
-									Followers
-								</Subheading>
-							</View>
-							<View style={styles.textContainer}>
-								<Headline style={styles.statNumber}>
-									{following}
-								</Headline>
-								<Subheading style={styles.statTitle}>
-									Following
-								</Subheading>
-							</View>
+							<TouchableHighlight
+								onPress={() => {
+									navigation.navigate("Followers", {
+										isCurrentUser,
+										username,
+										profilePic: undefined,
+										followers,
+									});
+								}}
+							>
+								<View style={styles.textContainer}>
+									<Headline style={styles.statNumber}>
+										{followersCount}
+									</Headline>
+									<Subheading style={styles.statTitle}>
+										Followers
+									</Subheading>
+								</View>
+							</TouchableHighlight>
+							<TouchableHighlight
+								onPress={() => {
+									navigation.navigate("Following", {
+										isCurrentUser,
+										username,
+										profilePic: undefined,
+										following,
+									});
+								}}
+							>
+								<View style={styles.textContainer}>
+									<Headline style={styles.statNumber}>
+										{followingCount}
+									</Headline>
+									<Subheading style={styles.statTitle}>
+										Following
+									</Subheading>
+								</View>
+							</TouchableHighlight>
 						</View>
 					</View>
 					<View style={styles.userInfo}>
@@ -445,12 +466,14 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 										key={post.postId}
 										onPress={() => {
 											navigation.navigate("Posts", {
+												goBack: navigation.goBack,
 												user: {
 													username,
 													profilePic,
 												},
 												postId: post.postId,
 												postList: posts,
+												rootNavigation: navigation,
 											});
 										}}
 									>

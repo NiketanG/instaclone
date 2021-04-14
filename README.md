@@ -1,6 +1,6 @@
 # Instaclone
 
-Instagram clone built with firebase & React Native.
+Instagram clone built with Supabase & React Native.
 
 ## Installation
 
@@ -12,8 +12,8 @@ or
 npm install
 ```
 
-Setup Firebase Project and add application with SHA-1 in the console (required for Google Auth).
-Obtain google-services.json from Firebase and copy in android/app
+Setup Supabase Project.
+Set up Google Cloud Project and add Oauth Clients for Google Auth. Add the same in Supabase Auth Settings for Google Auth Provider
 
 Start metro bundler
 

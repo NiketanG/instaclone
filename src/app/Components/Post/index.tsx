@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
 	Image,
 	Text,
@@ -17,7 +17,6 @@ import {
 } from "react-native-paper";
 import { format, formatDistanceToNow } from "date-fns";
 import Icon from "react-native-vector-icons/Ionicons";
-import firestore from "@react-native-firebase/firestore";
 import { AppContext } from "../../utils/authContext";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
@@ -27,10 +26,15 @@ import PostsStore, { Post as PostType } from "../../store/PostsStore";
 type ModalProps = {
 	closeModal: () => void;
 	ownPost: boolean;
-	postId: string;
+	postId: number;
 	username: string;
 };
-const PostModal: React.FC<ModalProps> = ({ postId, closeModal, ownPost }) => {
+const PostModal: React.FC<ModalProps> = ({
+	postId,
+	closeModal,
+	ownPost,
+	username,
+}) => {
 	const { width } = useWindowDimensions();
 	const navigation = useNavigation();
 	const deletePost = async () => {
@@ -43,8 +47,16 @@ const PostModal: React.FC<ModalProps> = ({ postId, closeModal, ownPost }) => {
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};
+
+	const goBack = () => navigation.goBack();
+
 	const viewProfile = () => {
 		closeModal();
+		navigation.navigate("Profile", {
+			username: username,
+			isCurrentUser: false,
+			goBack: goBack,
+		});
 	};
 	return (
 		<View
@@ -83,17 +95,13 @@ type User = {
 	profilePic?: string | null;
 };
 
-type Props = Pick<
-	PostType,
-	"imageUrl" | "caption" | "likes" | "postedAt" | "postId"
-> & {
+type Props = Pick<PostType, "imageUrl" | "caption" | "postedAt" | "postId"> & {
 	user: User;
 };
 
 const Post: React.FC<Props> = ({
 	caption,
 	imageUrl,
-	likes,
 	postId,
 	postedAt,
 	user: { username, profilePic },
@@ -103,11 +111,12 @@ const Post: React.FC<Props> = ({
 	const [liked, setLiked] = useState(false);
 	const toggleLike = () => {
 		if (liked) {
-			unlikePost();
+			// unlikePost();
 		} else {
-			likePost();
+			// likePost();
 		}
 	};
+
 	const { colors } = useTheme();
 	const { width } = useWindowDimensions();
 
@@ -115,92 +124,89 @@ const Post: React.FC<Props> = ({
 	const toggleExpandCaption = () => setExpandedCaption(!expandedCaption);
 
 	const { username: currentUsername } = useContext(AppContext);
-	const likesCollection = firestore().collection("likes");
 
-	const usersCollection = firestore().collection("users");
-
-	useEffect(() => {
-		(async () => {
-			if (!postId) return;
-			if (!currentUsername) return;
-			const postRes = await likesCollection
-				.where("postId", "==", postId)
-				.where("username", "==", currentUsername)
-				.get();
-			if (postRes.docs.length === 0) {
-				setLiked(false);
-				return;
-			} else {
-				setLiked(true);
-			}
-		})();
-	}, [currentUsername, likesCollection, postId]);
+	// useEffect(() => {
+	// 	(async () => {
+	// 		if (!postId) return;
+	// 		if (!currentUsername) return;
+	// 		const postRes = await likesCollection
+	// 			.where("postId", "==", postId)
+	// 			.where("username", "==", currentUsername)
+	// 			.get();
+	// 		if (postRes.docs.length === 0) {
+	// 			setLiked(false);
+	// 			return;
+	// 		} else {
+	// 			setLiked(true);
+	// 		}
+	// 	})();
+	// }, [currentUsername, likesCollection, postId]);
 
 	const [userProfilePic, setUserProfilePic] = useState<string | null>(null);
-	useEffect(() => {
-		(async () => {
-			if (!username) return;
-			if (profilePic) {
-				setUserProfilePic(profilePic);
-				return;
-			} else {
-				const userRes = await usersCollection
-					.where("username", "==", username)
-					.get();
-				if (userRes.docs.length === 0) {
-					setUserProfilePic(null);
-					return;
-				} else {
-					setUserProfilePic(
-						userRes.docs[0].get("profilePic") as string
-					);
-				}
-			}
-		})();
-	}, [currentUsername, usersCollection, username, profilePic]);
+	// useEffect(() => {
+	// 	(async () => {
+	// 		if (!username) return;
+	// 		if (profilePic) {
+	// 			setUserProfilePic(profilePic);
+	// 			return;
+	// 		} else {
+	// 			const userRes = await usersCollection
+	// 				.where("username", "==", username)
+	// 				.get();
+	// 			if (userRes.docs.length === 0) {
+	// 				setUserProfilePic(null);
+	// 				return;
+	// 			} else {
+	// 				setUserProfilePic(
+	// 					userRes.docs[0].get("profilePic") as string
+	// 				);
+	// 			}
+	// 		}
+	// 	})();
+	// }, [currentUsername, usersCollection, username, profilePic]);
 
-	const likePost = async () => {
-		try {
-			setLiked(true);
-			if (!postId) return;
-			if (!currentUsername) return;
+	// const likePost = async () => {
+	// 	try {
+	// 		setLiked(true);
+	// 		if (!postId) return;
+	// 		if (!currentUsername) return;
 
-			const postRes = await likesCollection
-				.where("postId", "==", postId)
-				.where("username", "==", currentUsername)
-				.get();
-			if (postRes.docs.length === 0) {
-				await likesCollection.add({
-					postId,
-					username: currentUsername,
-					likedAt: firestore.FieldValue.serverTimestamp(),
-				});
-			}
-		} catch (err) {
-			console.error(err);
-		}
-	};
+	// 		const postRes = await likesCollection
+	// 			.where("postId", "==", postId)
+	// 			.where("username", "==", currentUsername)
+	// 			.get();
+	// 		if (postRes.docs.length === 0) {
+	// 			await likesCollection.add({
+	// 				postId,
+	// 				username: currentUsername,
+	// 				likedAt: firestore.FieldValue.serverTimestamp(),
+	// 			});
+	// 		}
+	// 	} catch (err) {
+	// 		console.error(err);
+	// 	}
+	// };
 
-	const unlikePost = async () => {
-		try {
-			setLiked(false);
-			if (!postId) return;
-			if (!currentUsername) return;
-			const postRes = await likesCollection
-				.where("postId", "==", postId)
-				.where("username", "==", currentUsername)
-				.get();
+	// const unlikePost = async () => {
+	// 	try {
+	// 		setLiked(false);
+	// 		if (!postId) return;
+	// 		if (!currentUsername) return;
+	// 		const postRes = await likesCollection
+	// 			.where("postId", "==", postId)
+	// 			.where("username", "==", currentUsername)
+	// 			.get();
 
-			if (postRes.docs.length === 0) {
-				setLiked(false);
-			} else {
-				const post = postRes.docs[0];
-				await likesCollection.doc(post.id).delete();
-			}
-		} catch (err) {
-			console.error(err);
-		}
-	};
+	// 		if (postRes.docs.length === 0) {
+	// 			setLiked(false);
+	// 		} else {
+	// 			const post = postRes.docs[0];
+	// 			await likesCollection.doc(post.id).delete();
+	// 		}
+	// 	} catch (err) {
+	// 		console.error(err);
+	// 	}
+	// };
 
 	const [showModal, setShowModal] = useState(false);
 
@@ -209,6 +215,16 @@ const Post: React.FC<Props> = ({
 	};
 
 	const closeModal = () => setShowModal(false);
+
+	const goBack = () => navigation.goBack();
+
+	const viewProfile = () => {
+		navigation.navigate("Profile", {
+			username: username,
+			isCurrentUser: false,
+			goBack: goBack,
+		});
+	};
 
 	return (
 		<>
@@ -237,7 +253,12 @@ const Post: React.FC<Props> = ({
 			>
 				<Card.Title
 					title={username}
-					left={() => <UserAvatar profilePicture={userProfilePic} />}
+					left={() => (
+						<UserAvatar
+							profilePicture={userProfilePic}
+							onPress={viewProfile}
+						/>
+					)}
 					right={(props) => (
 						<IconButton
 							{...props}
@@ -308,26 +329,31 @@ const Post: React.FC<Props> = ({
 					/>
 				</Card.Actions>
 				<Card.Content>
-					{likes > 0 && (
+					{/* {likes > 0 && (
 						<Text>{likes > 1 ? `${likes} likes` : `1 like`} </Text>
-					)}
+					)} */}
 					<Title>{username}</Title>
-					<Paragraph
-						numberOfLines={expandedCaption ? undefined : 1}
-						onPress={toggleExpandCaption}
-					>
-						{caption}
-					</Paragraph>
+					{caption ? (
+						<>
+							<Paragraph
+								numberOfLines={expandedCaption ? undefined : 1}
+								onPress={toggleExpandCaption}
+							>
+								{caption}
+							</Paragraph>
 
-					{caption.length > 50 && (
-						<Text
-							style={{
-								fontWeight: "bold",
-							}}
-						>
-							{expandedCaption ? "Less" : "More"}
-						</Text>
-					)}
+							{caption.length > 50 && (
+								<Text
+									style={{
+										fontWeight: "bold",
+										color: colors.placeholder,
+									}}
+								>
+									{expandedCaption ? "Less" : "More"}
+								</Text>
+							)}
+						</>
+					) : null}
 					<Caption>
 						{new Date(postedAt).getTime() >
 						new Date().getTime() - 1 * 24 * 60 * 60 * 1000

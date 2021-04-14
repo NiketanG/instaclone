@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { ScrollView, StatusBar, ToastAndroid, View } from "react-native";
+import { RefreshControl, StatusBar, ToastAndroid, View } from "react-native";
 import {
 	Appbar,
 	Caption,
@@ -11,72 +11,67 @@ import {
 	TextInput,
 } from "react-native-paper";
 import { format, formatDistanceToNow } from "date-fns";
-import { Comment } from "../../types";
-import firestore, {
-	FirebaseFirestoreTypes,
-} from "@react-native-firebase/firestore";
+
 import { AppContext } from "../../utils/authContext";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { HomeStackNavigationParams } from "../../types/navigation";
-import { TouchableHighlight } from "react-native-gesture-handler";
+import { PostStackNavigationParams } from "../../types/navigation";
+import { FlatList } from "react-native-gesture-handler";
 import { UserAvatar } from "../../Components/UserAvatar";
+import CommentsStore, { Comment } from "../../store/CommentsStore";
+import { observer } from "mobx-react-lite";
+import { CommentItem } from "./CommentItem";
 
 type Props = {
-	route: RouteProp<HomeStackNavigationParams, "Comments">;
-	navigation: StackNavigationProp<HomeStackNavigationParams, "Comments">;
+	route: RouteProp<PostStackNavigationParams, "Comments">;
+	navigation: StackNavigationProp<PostStackNavigationParams, "Comments">;
 };
 
-const Comments: React.FC<Props> = ({ route, navigation }) => {
+const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 	const { colors } = useTheme();
-	const [comments, setComments] = useState<Array<Comment> | null>(null);
+	const [comments, setComments] = useState<Array<Comment>>([]);
+	const [loading, setLoading] = useState(true);
 
-	const commentsCollection = firestore().collection("comments");
+	const fetchComments = async () => {
+		try {
+			setComments(
+				(await CommentsStore.getComments(route.params.post.postId)) ||
+					[]
+			);
+		} catch (err) {
+			console.error(err);
+			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	useEffect(() => {
-		(async () => {
-			if (!route.params?.post?.postId) return;
-			const postRes = await commentsCollection
-				.where("postId", "==", route.params?.post?.postId)
-				.get();
-			setComments(
-				postRes.docs.map(
-					(comment) =>
-						({
-							commentId: comment.id,
-							comment: comment.get("comment"),
-							postId: comment.get("postId"),
-							username: comment.get("username"),
-							profilePic: comment.get("profilePic"),
-							postedAt: (comment.get(
-								"postedAt"
-							) as FirebaseFirestoreTypes.Timestamp)?.toDate(),
-						} as Comment)
-				)
-			);
-			if (postRes.docs.length === 0) {
-				return;
-			} else {
-			}
-		})();
-	}, [commentsCollection, route.params.post]);
+		if (route.params?.post?.postId) fetchComments();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [route.params.post]);
 
-	const {
-		username: currentUsername,
-		profilePic: currentProfilePic,
-	} = useContext(AppContext);
+	const { username: currentUsername } = useContext(AppContext);
 
 	const [commentText, setCommentText] = useState("");
 	const addComment = async () => {
-		if (commentText.length === 0) return;
+		if (
+			commentText.length === 0 ||
+			!currentUsername ||
+			!route.params.post.postId
+		)
+			return;
 		try {
-			await commentsCollection.add({
-				postId: route.params?.post?.postId,
+			const newComment = await CommentsStore.addComment({
 				comment: commentText,
-				username: currentUsername,
-				profilePic: currentProfilePic,
-				postedAt: firestore.FieldValue.serverTimestamp(),
+				postId: route.params.post.postId,
+				user: currentUsername,
 			});
+
+			const tempComments = [...comments];
+			tempComments.push(newComment);
+			setComments(tempComments);
+
 			setCommentText("");
 		} catch (err) {
 			console.error(err);
@@ -84,9 +79,9 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 		}
 	};
 
-	const [selectedComment, setSelectedComment] = useState<string | null>(null);
+	const [selectedComment, setSelectedComment] = useState<number | null>(null);
 
-	const selectComment = (username: string, commentId: string) => {
+	const selectComment = (username: string, commentId: number) => {
 		if (username === currentUsername) setSelectedComment(commentId);
 	};
 
@@ -100,8 +95,12 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 
 	const deleteComment = async () => {
 		if (selectedComment) {
-			await commentsCollection.doc(selectedComment).delete();
+			await CommentsStore.deleteComment(selectedComment);
 			setSelectedComment(null);
+			const tempComments = comments.filter(
+				(comment) => comment.id !== selectedComment
+			);
+			setComments(tempComments);
 		}
 	};
 
@@ -111,7 +110,7 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 				flex: 1,
 			}}
 		>
-			<ScrollView
+			<View
 				style={{
 					backgroundColor: colors.surface,
 					flex: 1,
@@ -133,77 +132,23 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 						<Appbar.Action icon="delete" onPress={deleteComment} />
 					)}
 				</Appbar.Header>
-				<View
-					style={{
-						display: "flex",
-						flexDirection: "row",
-						alignItems: "center",
-						margin: 16,
-					}}
-				>
-					<UserAvatar
-						profilePicture={route.params?.user?.profilePic}
-					/>
-					<View
-						style={{
-							marginHorizontal: 16,
-						}}
-					>
-						<Text
-							style={{
-								fontSize: 16,
-								fontWeight: "bold",
-							}}
-						>
-							{route.params?.user?.username}
-						</Text>
-						<Paragraph>{route.params?.post?.caption}</Paragraph>
-						<Caption>
-							{new Date(route.params?.post?.postedAt).getTime() >
-							new Date().getTime() - 1 * 24 * 60 * 60 * 1000
-								? `${formatDistanceToNow(
-										new Date(route.params?.post?.postedAt)
-								  )} ago`
-								: format(
-										new Date(route.params?.post?.postedAt),
-										"LLLL dd, yyyy"
-								  )}
-						</Caption>
-					</View>
-				</View>
-				<Divider />
 
-				{comments &&
-					comments
-						.sort(
-							(a, b) =>
-								b.postedAt.getTime() - a.postedAt.getTime()
-						)
-						.map((comment) => (
-							<TouchableHighlight
-								onLongPress={() => {
-									selectComment(
-										comment.username,
-										comment.commentId
-									);
-								}}
-								key={comment.commentId}
-							>
+				{
+					<FlatList
+						ListHeaderComponent={
+							<>
 								<View
 									style={{
 										display: "flex",
 										flexDirection: "row",
 										alignItems: "center",
-										padding: 16,
-										backgroundColor:
-											selectedComment ===
-											comment.commentId
-												? "gray"
-												: "black",
+										margin: 16,
 									}}
 								>
 									<UserAvatar
-										profilePicture={comment.profilePic}
+										profilePicture={
+											route.params?.user?.profilePic
+										}
 									/>
 									<View
 										style={{
@@ -216,17 +161,64 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 												fontWeight: "bold",
 											}}
 										>
-											{comment.username}
+											{route.params?.user?.username}
 										</Text>
-										<Paragraph>{comment.comment}</Paragraph>
+										<Paragraph>
+											{route.params?.post?.caption}
+										</Paragraph>
 										<Caption>
-											{comment.postedAt?.toLocaleString()}
+											{new Date(
+												route.params?.post?.postedAt
+											).getTime() >
+											new Date().getTime() -
+												1 * 24 * 60 * 60 * 1000
+												? `${formatDistanceToNow(
+														new Date(
+															route.params?.post?.postedAt
+														)
+												  )} ago`
+												: format(
+														new Date(
+															route.params?.post?.postedAt
+														),
+														"LLLL dd, yyyy"
+												  )}
 										</Caption>
 									</View>
 								</View>
-							</TouchableHighlight>
-						))}
-			</ScrollView>
+								<Divider />
+							</>
+						}
+						data={comments?.sort(
+							(a, b) =>
+								new Date(b.postedAt).getTime() -
+								new Date(a.postedAt).getTime()
+						)}
+						refreshControl={
+							<RefreshControl
+								refreshing={loading}
+								onRefresh={fetchComments}
+							/>
+						}
+						ItemSeparatorComponent={Divider}
+						renderItem={({ item }) => (
+							<CommentItem
+								item={item}
+								selectComment={selectComment}
+								selectedComment={selectedComment}
+							/>
+						)}
+						keyExtractor={(item) => item.id}
+						bouncesZoom
+						bounces
+						snapToAlignment={"start"}
+						showsVerticalScrollIndicator
+						style={{
+							backgroundColor: colors.background,
+						}}
+					/>
+				}
+			</View>
 			<View
 				style={{
 					display: "flex",
@@ -256,6 +248,6 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 			</View>
 		</View>
 	);
-};
+});
 
 export default Comments;

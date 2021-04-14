@@ -2,10 +2,11 @@ import React, { useEffect, useRef } from "react";
 import { Appbar, Divider, useTheme } from "react-native-paper";
 import { FlatList, StatusBar, useWindowDimensions } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams } from "../../types/navigation";
+import { ProfileStackParams, UserProfile } from "../../types/navigation";
 import { RouteProp } from "@react-navigation/native";
-import { Post as PostType } from "../../types";
 import { PostContainer } from "../../Components/PostContainer";
+import { Post as PostType } from "../../store/PostsStore";
+
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Posts">;
 	route: RouteProp<ProfileStackParams, "Posts">;
@@ -13,6 +14,13 @@ type Props = {
 
 const PostList: React.FC<Props> = ({ navigation, route }) => {
 	const listRef = useRef<FlatList>(null);
+	const goBack = () => {
+		if (route.params.goBack) {
+			route.params.goBack();
+		} else {
+			navigation.goBack();
+		}
+	};
 
 	const { colors } = useTheme();
 
@@ -47,6 +55,11 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 		};
 	};
 
+	const openProfile = (user: UserProfile) => {
+		console.log("Open");
+		route.params.rootNavigation.navigate("ProfilePage", user);
+	};
+
 	return (
 		<>
 			<StatusBar
@@ -59,7 +72,7 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 					backgroundColor: "black",
 				}}
 			>
-				<Appbar.BackAction onPress={() => navigation.goBack()} />
+				<Appbar.BackAction onPress={goBack} />
 				<Appbar.Content title="Posts" />
 			</Appbar.Header>
 			{route.params.postList && (
@@ -72,7 +85,9 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 							new Date(a.postedAt).getTime()
 					)}
 					ItemSeparatorComponent={Divider}
-					renderItem={PostContainer}
+					renderItem={({ item }) => (
+						<PostContainer item={item} openProfile={openProfile} />
+					)}
 					keyExtractor={(item) => item.postId}
 					bouncesZoom
 					bounces

@@ -22,14 +22,11 @@ import ImagePicker, {
 	Options,
 	Image as ImageResponse,
 } from "react-native-image-crop-picker";
-import { firebase } from "@react-native-firebase/storage";
-import firestore, {
-	FirebaseFirestoreTypes,
-} from "@react-native-firebase/firestore";
-import "react-native-get-random-values";
-import { nanoid } from "nanoid";
+
 import { AppContext } from "../../utils/authContext";
 import PostsStore from "../../store/PostsStore";
+import uploadToCloudinary from "../../utils/uploadToCloudinary";
+import { definitions } from "../../types/supabase";
 
 type Props = {
 	route: RouteProp<TabNavigationParams, "New">;
@@ -46,12 +43,11 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 		cropping: true,
 		width: 1024,
 		height: 1024,
+		includeBase64: true,
 	};
 
 	const handleImage = (res: ImageResponse) => {
-		if (res.path) {
-			setImagePath(res.path);
-		}
+		res.data ? setImagePath(`data:${res.mime};base64,${res.data}`) : false;
 	};
 
 	const selectFromGallery = async () => {
@@ -83,65 +79,48 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 			navigation.goBack();
 		}
 	};
+
 	const [caption, setCaption] = useState("");
 	const [uploading, setUploading] = useState(false);
-
-	const postsCollection = firestore().collection("posts");
-
-	const storageBucket = firebase
-		.app()
-		.storage("gs://instaclone-5e1b6.appspot.com/");
 
 	const uploadPost = async () => {
 		try {
 			if (!imagePath) return;
+			if (!username) return;
 			setUploading(true);
-			const imageId = nanoid();
-			const imageRef = storageBucket.ref(imageId);
-			const task = await imageRef.putFile(imagePath);
-			const imageUrl = await imageRef.getDownloadURL();
 
-			if (task && imageUrl) {
-				const newPost = await postsCollection.add({
-					postId: imageId,
+			const imageUrl = await uploadToCloudinary(imagePath);
+
+			if (imageUrl) {
+				const data: Pick<
+					definitions["posts"],
+					"caption" | "imageUrl" | "user"
+				> = {
 					caption,
 					imageUrl,
-					username,
-					postedAt: firestore.FieldValue.serverTimestamp(),
-					likes: 0,
-				});
+					user: username,
+				};
+
+				PostsStore.newPost(data);
+
 				setUploading(false);
 				ToastAndroid.show("Posted", ToastAndroid.LONG);
 				setImagePath(null);
-				const data = await newPost.get();
-
-				if (username) {
-					PostsStore.addPost({
-						caption,
-						imageUrl,
-						likes: 0,
-						postId: newPost.id,
-						postedAt: (data.get(
-							"postedAt"
-						) as FirebaseFirestoreTypes.Timestamp)
-							.toDate()
-							.toISOString(),
-						username,
-					});
-				}
 				setCaption("");
 				navigation.navigate("Home");
 			} else {
-				console.error("[Firestore] Post Creation failed");
-				ToastAndroid.show("An error occured", ToastAndroid.LONG);
+				console.error("[Supabase] Post Creation failed. No Image Url");
+				ToastAndroid.show(
+					"An error occured while uploading the image",
+					ToastAndroid.LONG
+				);
 				setUploading(false);
 				return;
 			}
 		} catch (err) {
+			setUploading(false);
 			console.error(err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
-		} finally {
-			setUploading(false);
 		}
 	};
 

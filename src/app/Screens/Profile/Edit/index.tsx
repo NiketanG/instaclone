@@ -18,12 +18,12 @@ import ImagePicker, {
 	Image as ImageResponse,
 } from "react-native-image-crop-picker";
 import { TouchableHighlight } from "react-native-gesture-handler";
-import firestore from "@react-native-firebase/firestore";
-import { firebase } from "@react-native-firebase/storage";
-import auth from "@react-native-firebase/auth";
+
 import "react-native-get-random-values";
-import { nanoid } from "nanoid";
 import UsersStore from "../../../store/UsersStore";
+import supabaseClient from "../../../utils/supabaseClient";
+import { definitions } from "../../../types/supabase";
+import uploadToCloudinary from "../../../utils/uploadToCloudinary";
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Settings">;
 };
@@ -31,12 +31,10 @@ type Props = {
 const EditProfile: React.FC<Props> = ({ navigation }) => {
 	const goBack = () => navigation.goBack();
 
-	const currentUser = auth().currentUser;
-
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [bio, setBio] = useState("");
-	const [profilePic, setProfilePic] = useState("");
+	const [imagePath, setImagePath] = useState<string | null>(null);
 	const {
 		bio: savedBio,
 		name: savedName,
@@ -46,28 +44,32 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 		setUsername: updateUsername,
 		setName: updateName,
 		setBio: updateBio,
+		email,
 	} = useContext(AppContext);
 
 	useEffect(() => {
 		setUsername(savedUsername || "");
 		setName(savedName || "");
 		setBio(savedBio || "");
-		if (savedProfilePic) setProfilePic(savedProfilePic);
+		if (savedProfilePic) setImagePath(savedProfilePic);
 	}, [savedBio, savedName, savedUsername, savedProfilePic]);
 
 	const { colors } = useTheme();
 
 	const [loading, setLoading] = useState(false);
 	const [usernameAvailable, setUsernameAvailable] = useState(true);
+
 	const imagePickerOptions: Options = {
 		mediaType: "photo",
 		cropping: true,
 		width: 1024,
 		height: 1024,
+		includeBase64: true,
 	};
 
-	const handleImage = (res: ImageResponse) =>
-		res.path ? setProfilePic(res.path) : false;
+	const handleImage = (res: ImageResponse) => {
+		res.data ? setImagePath(`data:${res.mime};base64,${res.data}`) : false;
+	};
 
 	const selectFromGallery = async () => {
 		try {
@@ -78,53 +80,38 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 		}
 	};
 
-	const storageBucket = firebase
-		.app()
-		.storage("gs://instaclone-5e1b6.appspot.com/");
-
-	const usersCollection = firestore().collection("users");
-
 	const updateProfile = async () => {
 		try {
 			if (username.length < 3) return;
-			if (!currentUser) return;
+			if (!email) return;
 			setLoading(true);
 
-			const userRes = await usersCollection
-				.where("email", "==", currentUser.email)
-				.get();
-
-			if (!(userRes.docs.length > 0)) {
-				return;
+			const userExists = await supabaseClient
+				.from<definitions["users"]>("users")
+				.select("*")
+				.eq("username", username.toLowerCase());
+			if (userExists?.error) {
+				console.error(userExists.error);
+				ToastAndroid.show("An error occured", ToastAndroid.LONG);
 			}
-			const user = userRes.docs[0];
-
-			if (user.data().username !== username) {
-				const usernameExists = await usersCollection
-					.where("username", "==", username.toLowerCase())
-					.get();
-
-				if (usernameExists.docs.length > 0) {
-					setUsernameAvailable(false);
-					return;
-				} else {
-					setUsernameAvailable(true);
-				}
+			if (userExists && userExists.data && userExists.data.length > 0) {
+				setLoading(false);
+				setUsernameAvailable(false);
+				return;
+			} else {
+				setUsernameAvailable(true);
 			}
 
 			let userImagePath;
-			if (profilePic) {
-				const imageId = nanoid();
-				const imageRef = storageBucket.ref(imageId);
-				if (profilePic.startsWith("http")) {
-					userImagePath = profilePic;
+			if (imagePath) {
+				if (imagePath.startsWith("http")) {
+					userImagePath = imagePath;
 				} else {
-					await imageRef.putFile(profilePic);
-					userImagePath = await imageRef.getDownloadURL();
+					userImagePath = await uploadToCloudinary(imagePath);
 				}
 			}
 
-			await UsersStore.editUser(user.id, username.toLowerCase(), {
+			await UsersStore.editUser(username.toLowerCase(), {
 				username: username.toLowerCase(),
 				name,
 				bio,
@@ -189,7 +176,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 						alignItems: "center",
 					}}
 				>
-					{profilePic ? (
+					{imagePath ? (
 						<TouchableHighlight
 							onPress={selectFromGallery}
 							style={{
@@ -198,7 +185,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 						>
 							<Image
 								source={{
-									uri: profilePic,
+									uri: imagePath,
 								}}
 								width={96}
 								height={96}

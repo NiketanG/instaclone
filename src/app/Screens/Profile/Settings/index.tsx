@@ -1,9 +1,9 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
+import React, { useContext } from "react";
 import { Appbar, List, useTheme } from "react-native-paper";
 import { ProfileStackParams } from "../../../types/navigation";
-import auth from "@react-native-firebase/auth";
 import { StatusBar, View } from "react-native";
+import { AppContext } from "../../../utils/authContext";
 
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Settings">;
@@ -11,7 +11,8 @@ type Props = {
 const Settings: React.FC<Props> = ({ navigation }) => {
 	const goBack = () => navigation.goBack();
 	const { colors } = useTheme();
-	const signOut = () => auth().signOut();
+	const { signout } = useContext(AppContext);
+	const signOut = () => signout();
 
 	return (
 		<>

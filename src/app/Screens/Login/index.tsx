@@ -1,12 +1,12 @@
 import React, { useContext, useState } from "react";
 import { ToastAndroid, View } from "react-native";
 import { GoogleSignin } from "@react-native-community/google-signin";
-import auth from "@react-native-firebase/auth";
 import { Button, useTheme } from "react-native-paper";
-import firestore from "@react-native-firebase/firestore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SignInNavigationParams } from "../../types/navigation";
 import { AppContext } from "../../utils/authContext";
+import supabaseClient from "../../utils/supabaseClient";
+import { definitions } from "../../types/supabase";
 
 GoogleSignin.configure({
 	webClientId:
@@ -17,41 +17,54 @@ type Props = {
 	navigation: StackNavigationProp<SignInNavigationParams, "Login">;
 };
 
-const Login: React.FC<Props> = () => {
-	const usersCollection = firestore().collection("users");
-	const { setSignupDone, setUsername, setName, setProfilePic } = useContext(
-		AppContext
-	);
+const Login: React.FC<Props> = ({ navigation }) => {
+	const {
+		setSignupDone,
+		setUsername,
+		setName,
+		setProfilePic,
+		setEmail,
+	} = useContext(AppContext);
 
 	const [loading, setLoading] = useState(false);
 
 	const signIn = async () => {
 		try {
 			setLoading(true);
-			const { idToken } = await GoogleSignin.signIn();
-			const googleCredential = auth.GoogleAuthProvider.credential(
-				idToken
-			);
-			const res = await auth().signInWithCredential(googleCredential);
+
+			const res = await GoogleSignin.signIn();
+
 			if (res.user.email) {
-				const userExists = await usersCollection
-					.where("email", "==", res.user.email.toLowerCase())
-					.get();
+				const userExists = await supabaseClient
+					.from<definitions["users"]>("users")
+					.select("*")
+					.eq("email", res.user.email);
+
 				if (
-					userExists.docs.length > 0 &&
-					userExists.docs[0].get("username")?.toString() !== "" &&
-					userExists.docs[0].get("name")?.toString() !== ""
+					userExists &&
+					userExists.data &&
+					userExists.data.length > 0
 				) {
-					setUsername(userExists.docs[0].get("username"));
-					setName(userExists.docs[0].get("name"));
-					setProfilePic(userExists.docs[0].get("profilePic"));
+					setEmail(userExists.data[0].email);
+					setUsername(userExists.data[0].username);
+					setName(userExists.data[0].name);
+					if (userExists.data[0].profilePic)
+						setProfilePic(userExists.data[0].profilePic);
 					setLoading(false);
 					setSignupDone(true);
+					ToastAndroid.show("Logged in", ToastAndroid.LONG);
 				} else {
 					setLoading(false);
 					setSignupDone(false);
-					navigation.navigate("Signup");
+					navigation.navigate("Signup", {
+						name: res.user.name,
+						email: res.user.email,
+						profilePic: res.user.photo,
+					});
 				}
+			} else {
+				console.log("[GoogleAuth] No Email Returned");
+				ToastAndroid.show("An error occured", ToastAndroid.LONG);
 			}
 		} catch (err) {
 			console.error(err);

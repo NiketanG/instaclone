@@ -1,19 +1,27 @@
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree";
+import { definitions } from "../types/supabase";
 import {
 	deletePostFromDb,
 	fetchPostsByUserFromDb,
-} from "../utils/firebaseUtils";
-import { uniquePosts, updatePostList } from "../utils/utils";
+	newPostInDb,
+} from "../utils/supabaseUtils";
+import { fetchFeedPosts, uniquePosts } from "../utils/utils";
 import FollowersStore, { Follower } from "./FollowersStore";
+import UsersStore from "./UsersStore";
 
-export const PostModel = types.model("Post", {
-	caption: types.string,
-	imageUrl: types.string,
-	likes: types.number,
-	postId: types.identifier,
-	postedAt: types.string,
-	username: types.string,
-});
+export const PostModel = types
+	.model("Post", {
+		postId: types.identifierNumber,
+		caption: types.maybe(types.string),
+		imageUrl: types.string,
+		postedAt: types.string,
+		user: types.string,
+	})
+	.views((self) => ({
+		get userData() {
+			return UsersStore.getUser(self.user);
+		},
+	}));
 
 const PostsStore = types
 	.model("Posts", {
@@ -27,7 +35,17 @@ const PostsStore = types
 			self.posts.push(post);
 		};
 
-		const deletePost = flow(function* (postId: string) {
+		const newPost = flow(function* (
+			postData: Pick<
+				definitions["posts"],
+				"caption" | "imageUrl" | "user"
+			>
+		) {
+			const postRes = yield newPostInDb(postData);
+			self.posts.push(postRes);
+		});
+
+		const deletePost = flow(function* (postId: number) {
 			const postToDelete = self.posts.find(
 				(post) => post.postId === postId
 			);
@@ -42,7 +60,7 @@ const PostsStore = types
 			}
 		});
 
-		const editPost = (postId: string, newData: Post) => {
+		const editPost = (postId: number, newData: Post) => {
 			const postToEdit = self.posts.findIndex(
 				(post) => post.postId === postId
 			);
@@ -51,7 +69,7 @@ const PostsStore = types
 
 		const fetchPostsByUser = flow(function* (username: string) {
 			let postsByUser: Post[] =
-				self.posts.filter((post) => post.username === username) || [];
+				self.posts.filter((post) => post.user === username) || [];
 			try {
 				const fetchedPosts = yield fetchPostsByUserFromDb(username);
 				if (fetchedPosts) {
@@ -72,20 +90,16 @@ const PostsStore = types
 		const getFeedPosts = flow(function* (currentUsername: string) {
 			if (!currentUsername || currentUsername.length === 0) return;
 
-			let feedPosts: Post[] | null = null;
 			const followingList: Follower[] = yield FollowersStore.getFollowing(
 				currentUsername
 			);
 
-			followingList.forEach(async (user) => {
-				const posts = await fetchPostsByUser(user.following);
-				updatePostList(posts);
-				feedPosts = posts;
-			});
+			const feedPosts: Post[] = yield fetchFeedPosts(followingList);
 			return feedPosts;
 		});
 
 		return {
+			newPost,
 			setPosts,
 			addPost,
 			deletePost,
@@ -96,9 +110,7 @@ const PostsStore = types
 	})
 	.views((self) => ({
 		postsByUser(username: string): Post[] {
-			return (
-				self.posts.filter((post) => post.username === username) || []
-			);
+			return self.posts.filter((post) => post.user === username) || [];
 		},
 	}))
 	.create({

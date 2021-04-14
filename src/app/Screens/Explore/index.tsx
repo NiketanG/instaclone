@@ -8,7 +8,6 @@ import {
 	TouchableHighlight,
 	RefreshControl,
 } from "react-native";
-import firestore from "@react-native-firebase/firestore";
 import {
 	Caption,
 	IconButton,
@@ -17,11 +16,14 @@ import {
 	useTheme,
 } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
-import mapPosts from "../../utils/mapPosts";
+
 import { ExploreStackNavigationParams } from "../../types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { User } from "../../store/UsersStore";
+import UsersStore from "../../store/UsersStore";
 import { Post } from "../../store/PostsStore";
+import supabaseClient from "../../utils/supabaseClient";
+import { definitions } from "../../types/supabase";
+import mapPosts from "../../utils/utils";
 
 type Props = {
 	navigation: StackNavigationProp<ExploreStackNavigationParams, "Explore">;
@@ -35,18 +37,21 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const usersCollection = firestore().collection("users");
-	const postsCollection = firestore().collection("posts");
-
-	const [searchResults, setSearchResults] = useState<null | User>(null);
+	const [searchResults, setSearchResults] = useState<null | Array<
+		definitions["users"]
+	>>(null);
 	const [postList, setPostList] = useState<Array<Post> | null>(null);
 
 	const fetchPosts = async () => {
 		setLoading(true);
 		try {
-			const postRes = await postsCollection.orderBy("postedAt").get();
-			if (postRes.docs.length > 0) {
-				setPostList(mapPosts(postRes));
+			const postRes = await supabaseClient
+				.from<definitions["posts"]>("posts")
+				.select("*")
+				.order("postedAt");
+			if (postRes.error) return;
+			if (postRes.data.length > 0) {
+				setPostList(mapPosts(postRes.data));
 				return;
 			}
 		} catch (err) {
@@ -57,44 +62,26 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 	};
 	useEffect(() => {
 		fetchPosts();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	useEffect(() => {
-		(async () => {
-			const userRes = await usersCollection
-				.where("username", "==", "nikketan")
-				.get();
-			if (userRes.docs.length > 0) {
-				const userNikketan = userRes.docs[0];
-				setSearchResults({
-					bio: userNikketan.get("bio"),
-					name: userNikketan.get("name"),
-					username: "nikketan",
-					profilePic: userNikketan.get("profilePic") as string | null,
-				});
-				return;
-			}
-		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const searchUser = async (username: string) => {
 		setSearchTerm(username);
 		if (username.length < 2) return;
 
-		const userExists = await usersCollection
-			.where("username", "==", username.toLowerCase())
-			.get();
+		const userRes = await supabaseClient
+			.from<definitions["users"]>("users")
+			.select("*")
+			// .ilike("name", `%${username.toLowerCase()}%`);
+			// .ilike("username", `%${username.toLowerCase()}%`);
+			.or(
+				`name.ilike.%${username.toLowerCase()}%,username.ilike.%${username.toLowerCase()}%`
+			);
 
-		if (userExists.docs.length > 0) {
-			const user = userExists.docs[0];
-			setSearchResults({
-				bio: user.get("bio"),
-				name: user.get("name"),
-				username: user.get("username"),
-				profilePic: user.get("profilePic") as string | null,
-			});
+		if (userRes.error) return;
+
+		if (userRes.data.length > 0) {
+			setSearchResults(userRes.data);
+			UsersStore.addUsers(userRes.data);
 			return;
 		} else {
 			setSearchResults(null);
@@ -103,6 +90,13 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 
 	const [searchFocused, setSearchFocused] = useState(false);
 	const [loading, setLoading] = useState(false);
+
+	const goBack = () => navigation.goBack();
+
+	const closeSearch = () => {
+		setSearchFocused(false);
+		setSearchTerm("");
+	};
 
 	return (
 		<ScrollView
@@ -122,7 +116,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 				{searchFocused && (
 					<IconButton
 						icon="arrow-left"
-						onPress={() => setSearchFocused(false)}
+						onPress={closeSearch}
 						size={20}
 						style={{ marginTop: 12, marginRight: 8 }}
 					/>
@@ -153,47 +147,59 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 						borderBottomStartRadius: 8,
 					}}
 				>
-					<Caption>Please enter the complete username</Caption>
-
-					{searchResults && (
-						<TouchableHighlight
-							onPress={() => {
-								setSearchTerm("");
-								navigation.navigate("ProfilePage", {
-									username: searchResults.username,
-									profilePic: searchResults.profilePic,
-								});
+					{!searchResults && searchTerm.length >= 2 && (
+						<Text
+							style={{
+								textAlign: "center",
+								marginTop: 12,
 							}}
 						>
-							<View
-								style={{
-									display: "flex",
-									flexDirection: "row",
-									alignItems: "center",
-									margin: 16,
+							No Users
+						</Text>
+					)}
+					{searchResults &&
+						searchResults.length > 0 &&
+						searchResults?.map((user) => (
+							<TouchableHighlight
+								key={user.username}
+								onPress={() => {
+									setSearchTerm("");
+									navigation.navigate("ProfilePage", {
+										username: user.username,
+										profilePic: user.profilePic,
+										goBack,
+									});
 								}}
 							>
-								<UserAvatar
-									profilePicture={searchResults.profilePic}
-								/>
 								<View
 									style={{
-										marginHorizontal: 16,
+										display: "flex",
+										flexDirection: "row",
+										alignItems: "center",
+										margin: 16,
 									}}
 								>
-									<Text
+									<UserAvatar
+										profilePicture={user.profilePic}
+									/>
+									<View
 										style={{
-											fontSize: 14,
-											fontWeight: "bold",
+											marginHorizontal: 16,
 										}}
 									>
-										{searchResults.username}
-									</Text>
-									<Caption>{searchResults.name}</Caption>
+										<Text
+											style={{
+												fontSize: 14,
+												fontWeight: "bold",
+											}}
+										>
+											{user.username}
+										</Text>
+										<Caption>{user.name}</Caption>
+									</View>
 								</View>
-							</View>
-						</TouchableHighlight>
-					)}
+							</TouchableHighlight>
+						))}
 				</View>
 			) : (
 				<ScrollView
@@ -218,7 +224,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 									navigation.navigate("PostDetail", {
 										post,
 										user: {
-											username: post.username,
+											username: post.user,
 											profilePic: null,
 										},
 									});

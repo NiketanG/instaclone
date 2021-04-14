@@ -4,7 +4,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { ExploreStackNavigationParams } from "../types/navigation";
 import Explore from "../Screens/Explore";
 import PostDetail from "../Screens/Post";
-import Profile from "../Screens/Profile";
+import ProfilePageStack from "./ProfileStack";
+import Comments from "../Screens/Comments";
 
 const Stack = createStackNavigator<ExploreStackNavigationParams>();
 
@@ -14,7 +15,12 @@ const ExplorePageStack = () => {
 			<Stack.Navigator headerMode="none" initialRouteName="Explore">
 				<Stack.Screen name="Explore" component={Explore} />
 				<Stack.Screen name="PostDetail" component={PostDetail} />
-				<Stack.Screen name="ProfilePage" component={Profile} />
+				<Stack.Screen name="Comments" component={Comments} />
+				<Stack.Screen
+					name="Profile"
+					component={ProfilePageStack}
+					initialParams={{ isCurrentUser: false }}
+				/>
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

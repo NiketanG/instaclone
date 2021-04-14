@@ -1,9 +1,9 @@
-import "react-native-gesture-handler";
-import React, { useContext, useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NavigationContainer } from "@react-navigation/native";
-import { DarkTheme, Provider as PaperProvider } from "react-native-paper";
-import auth from "@react-native-firebase/auth";
-import { Platform, Text, View } from "react-native";
+import React, { useContext } from "react";
+import { Platform } from "react-native";
+import "react-native-gesture-handler";
+import { DarkTheme, Provider as PaperProvider, Text } from "react-native-paper";
 import { TabNavigation } from "./Routes/Navigation";
 import SignInNavigation from "./Routes/SignInNavigation";
 import AppContextProvider, { AppContext } from "./utils/authContext";
@@ -21,29 +21,10 @@ const theme: ReactNativePaper.Theme = {
 };
 
 const Main = () => {
-	const [initializing, setInitializing] = useState(true);
-	const [user, setUser] = useState(null);
 	const { signupDone } = useContext(AppContext);
 
-	const onAuthStateChanged = (newUser: any) => {
-		setUser(newUser);
-		if (initializing) setInitializing(false);
-	};
-
-	useEffect(() => {
-		const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-		return subscriber;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	if (initializing)
-		return (
-			<View>
-				<Text>Loading</Text>
-			</View>
-		);
-
-	return !user || !signupDone ? <SignInNavigation /> : <TabNavigation />;
+	if (signupDone) return <TabNavigation />;
+	return <SignInNavigation />;
 };
 
 const App = () => (

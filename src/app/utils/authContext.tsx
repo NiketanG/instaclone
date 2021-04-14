@@ -9,6 +9,9 @@ type ContextType = {
 	username: string | null;
 	setUsername: (newUsername: string) => void;
 
+	email: string | null;
+	setEmail: (newEmail: string) => void;
+
 	name: string | null;
 	setName: (newName: string) => void;
 
@@ -20,6 +23,8 @@ type ContextType = {
 
 	theme: Theme;
 	setTheme: (newTheme: Theme) => void;
+
+	signout: () => void;
 };
 
 export const AppContext = createContext<ContextType>({
@@ -28,6 +33,9 @@ export const AppContext = createContext<ContextType>({
 
 	username: null,
 	setUsername: () => {},
+
+	email: null,
+	setEmail: () => {},
 
 	name: null,
 	setName: () => {},
@@ -40,6 +48,8 @@ export const AppContext = createContext<ContextType>({
 
 	profilePic: null,
 	setProfilePic: () => {},
+
+	signout: () => {},
 });
 
 type Props = {
@@ -51,6 +61,7 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 	const [name, setName] = useState<string | null>(null);
 	const [profilePic, setProfilePic] = useState<string | null>(null);
 	const [bio, setBio] = useState<string | null>(null);
+	const [email, setEmail] = useState<string | null>(null);
 
 	const updateBio = (newBio: string) => {
 		setBio(newBio);
@@ -65,6 +76,11 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 	const updateUsername = (newUsername: string) => {
 		setUsername(newUsername);
 		AsyncStorage.setItem("username", newUsername);
+	};
+
+	const updateEmail = (newEmail: string) => {
+		setEmail(newEmail);
+		AsyncStorage.setItem("email", newEmail);
 	};
 
 	const updateName = (newName: string) => {
@@ -88,10 +104,26 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 			setSignupDone(res === "true")
 		);
 		AsyncStorage.getItem("username").then((res) => setUsername(res));
+		AsyncStorage.getItem("email").then((res) => setEmail(res));
 		AsyncStorage.getItem("bio").then((res) => setBio(res));
 		AsyncStorage.getItem("name").then((res) => setName(res));
 		AsyncStorage.getItem("profilePic").then((res) => setProfilePic(res));
 	}, []);
+
+	const signout = async () => {
+		await AsyncStorage.removeItem("signupDone");
+		await AsyncStorage.removeItem("username");
+		await AsyncStorage.removeItem("bio");
+		await AsyncStorage.removeItem("email");
+		await AsyncStorage.removeItem("name");
+		await AsyncStorage.removeItem("profilePic");
+		setSignupDone(false);
+		setProfilePic(null);
+		setUsername(null);
+		setName(null);
+		setEmail(null);
+		setBio(null);
+	};
 
 	return (
 		<AppContext.Provider
@@ -108,11 +140,16 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 				name,
 				setName: updateName,
 
+				email,
+				setEmail,
+
 				bio,
 				setBio: updateBio,
 
 				theme,
 				setTheme: updateTheme,
+
+				signout,
 			}}
 		>
 			{children}

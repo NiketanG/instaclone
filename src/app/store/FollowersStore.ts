@@ -1,8 +1,11 @@
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree";
 import {
+	checkFollowingInDb,
 	fetchFollowersFromDb,
 	fetchFollowingFromDb,
-} from "../utils/firebaseUtils";
+	followUserInDb,
+	unfollowUserInDb,
+} from "../utils/supabaseUtils";
 
 export const FollowerModel = types.model("Follower", {
 	follower: types.string,
@@ -17,20 +20,41 @@ const FollowersStore = types
 		const setFollowers = (followers: Array<Follower>) => {
 			self.followers.replace(followers);
 		};
-		const followUser = (username: string, currentUsername: string) => {
-			self.followers.push({
-				follower: currentUsername,
-				following: username,
-			});
-		};
+		const followUser = flow(function* (
+			username: string,
+			currentUsername: string
+		) {
+			const isFollowing = self.followers.find(
+				(e) =>
+					e.follower === currentUsername && e.following === username
+			);
+			if (!isFollowing) {
+				self.followers.push({
+					follower: currentUsername,
+					following: username,
+				});
+			}
 
-		const unfollowUser = (username: string) => {
+			yield followUserInDb(username);
+		});
+
+		const unfollowUser = flow(function* (
+			username: string,
+			currentUsername: string
+		) {
 			self.followers.replace(
 				self.followers.filter(
-					(follower) => follower.following !== username
+					(follower) =>
+						follower.following !== username &&
+						follower.follower !== currentUsername
 				)
 			);
-		};
+			yield unfollowUserInDb(username);
+		});
+
+		const checkFollowing = flow(function* (username: string) {
+			return yield checkFollowingInDb(username);
+		});
 
 		const getFollowers = flow(function* (username: string) {
 			if (!username || username.length === 0) return null;
@@ -65,6 +89,7 @@ const FollowersStore = types
 				self.followers.filter(
 					(follower) => follower.follower === username
 				) || [];
+
 			try {
 				const fetchedFollowing:
 					| Follower[]
@@ -85,6 +110,7 @@ const FollowersStore = types
 		});
 
 		return {
+			checkFollowing,
 			setFollowers,
 			followUser,
 			unfollowUser,
