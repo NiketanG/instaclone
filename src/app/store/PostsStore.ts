@@ -50,13 +50,11 @@ const PostsStore = types
 				(post) => post.postId === postId
 			);
 			if (postToDelete) {
-				console.log(postToDelete);
 				// destroy(postToDelete);
 				yield deletePostFromDb(postId);
 				self.posts.replace(
 					self.posts.filter((post) => post.postId !== postId)
 				);
-				console.log(self.posts);
 			}
 		});
 

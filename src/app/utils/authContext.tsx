@@ -141,7 +141,7 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 				setName: updateName,
 
 				email,
-				setEmail,
+				setEmail: updateEmail,
 
 				bio,
 				setBio: updateBio,

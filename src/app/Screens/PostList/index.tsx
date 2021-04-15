@@ -55,10 +55,8 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 		};
 	};
 
-	const openProfile = (user: UserProfile) => {
-		console.log("Open");
+	const openProfile = (user: UserProfile) =>
 		route.params.rootNavigation.navigate("ProfilePage", user);
-	};
 
 	return (
 		<>

@@ -164,7 +164,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 								key={user.username}
 								onPress={() => {
 									setSearchTerm("");
-									navigation.navigate("ProfilePage", {
+									navigation.navigate("Profile", {
 										username: user.username,
 										profilePic: user.profilePic,
 										goBack,

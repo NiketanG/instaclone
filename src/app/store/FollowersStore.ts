@@ -77,7 +77,7 @@ const FollowersStore = types
 					];
 				}
 			} catch (err) {
-				console.log(err);
+				console.error(err);
 			}
 			return followers;
 		});
@@ -104,7 +104,7 @@ const FollowersStore = types
 					];
 				}
 			} catch (err) {
-				console.log(err);
+				console.error(err);
 			}
 			return following;
 		});

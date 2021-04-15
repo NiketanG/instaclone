@@ -5,7 +5,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 type AvatarProps = {
 	profilePicture?: string | null;
 	size?: number;
-	onPress: () => void;
+	onPress?: () => void;
 };
 export const UserAvatar: React.FC<AvatarProps> = ({
 	profilePicture,

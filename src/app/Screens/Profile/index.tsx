@@ -37,7 +37,7 @@ import UsersStore from "../../store/UsersStore";
 import FollowersStore, { Follower } from "../../store/FollowersStore";
 
 type Props = {
-	route: RouteProp<ExploreStackNavigationParams, "ProfilePage">;
+	route: RouteProp<ExploreStackNavigationParams, "Profile">;
 	navigation: StackNavigationProp<ProfileStackParams, "ProfilePage">;
 };
 

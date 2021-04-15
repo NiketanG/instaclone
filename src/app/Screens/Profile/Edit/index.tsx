@@ -24,35 +24,39 @@ import UsersStore from "../../../store/UsersStore";
 import supabaseClient from "../../../utils/supabaseClient";
 import { definitions } from "../../../types/supabase";
 import uploadToCloudinary from "../../../utils/uploadToCloudinary";
+import useCurrentUser from "../../../utils/useCurrentUser";
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Settings">;
 };
 
 const EditProfile: React.FC<Props> = ({ navigation }) => {
+	const currentUser = useCurrentUser();
+
 	const goBack = () => navigation.goBack();
 
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [bio, setBio] = useState("");
 	const [imagePath, setImagePath] = useState<string | null>(null);
+
 	const {
-		bio: savedBio,
-		name: savedName,
-		username: savedUsername,
-		profilePic: savedProfilePic,
 		setProfilePic: updateProfilePic,
 		setUsername: updateUsername,
 		setName: updateName,
 		setBio: updateBio,
-		email,
 	} = useContext(AppContext);
 
 	useEffect(() => {
-		setUsername(savedUsername || "");
-		setName(savedName || "");
-		setBio(savedBio || "");
-		if (savedProfilePic) setImagePath(savedProfilePic);
-	}, [savedBio, savedName, savedUsername, savedProfilePic]);
+		if (currentUser) {
+			setUsername(currentUser.username);
+			setName(currentUser.name || "");
+			setBio(currentUser.bio || "");
+			if (currentUser.profilePic) setImagePath(currentUser.profilePic);
+			setLoading(false);
+		} else {
+			setLoading(true);
+		}
+	}, [currentUser]);
 
 	const { colors } = useTheme();
 
@@ -83,25 +87,36 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 	const updateProfile = async () => {
 		try {
 			if (username.length < 3) return;
-			if (!email) return;
+			if (!currentUser?.email) {
+				console.error("No email");
+				return;
+			}
 			setLoading(true);
 
-			const userExists = await supabaseClient
-				.from<definitions["users"]>("users")
-				.select("*")
-				.eq("username", username.toLowerCase());
-			if (userExists?.error) {
-				console.error(userExists.error);
-				ToastAndroid.show("An error occured", ToastAndroid.LONG);
-			}
-			if (userExists && userExists.data && userExists.data.length > 0) {
-				setLoading(false);
-				setUsernameAvailable(false);
-				return;
+			if (username !== currentUser.username) {
+				const userExists = await supabaseClient
+					.from<definitions["users"]>("users")
+					.select("*")
+					.eq("username", username.toLowerCase());
+
+				if (userExists?.error) {
+					console.error(userExists.error);
+					ToastAndroid.show("An error occured", ToastAndroid.LONG);
+				}
+				if (
+					userExists &&
+					userExists.data &&
+					userExists.data.length > 0
+				) {
+					setLoading(false);
+					setUsernameAvailable(false);
+					return;
+				} else {
+					setUsernameAvailable(true);
+				}
 			} else {
 				setUsernameAvailable(true);
 			}
-
 			let userImagePath;
 			if (imagePath) {
 				if (imagePath.startsWith("http")) {
@@ -111,7 +126,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 				}
 			}
 
-			await UsersStore.editUser(username.toLowerCase(), {
+			await UsersStore.editUser(currentUser.username, {
 				username: username.toLowerCase(),
 				name,
 				bio,

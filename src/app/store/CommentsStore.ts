@@ -50,13 +50,11 @@ const CommentsStore = types
 				(comment) => comment.id === commentId
 			);
 			if (commentToDelete) {
-				console.log(commentToDelete);
 				// destroy(postToDelete);
 				yield deleteCommentFromDb(commentId);
 				self.comments.replace(
 					self.comments.filter((comment) => comment.id !== commentId)
 				);
-				console.log(self.comments);
 			}
 		});
 

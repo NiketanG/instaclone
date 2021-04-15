@@ -261,7 +261,7 @@ export const newPostInDb = async (
 			.insert(postData);
 
 		if (newPost.error || newPost.data.length === 0) {
-			console.log(newPost.error);
+			console.error(newPost.error);
 			return null;
 		}
 

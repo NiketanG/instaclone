@@ -63,7 +63,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 					});
 				}
 			} else {
-				console.log("[GoogleAuth] No Email Returned");
+				console.error("[GoogleAuth] No Email Returned");
 				ToastAndroid.show("An error occured", ToastAndroid.LONG);
 			}
 		} catch (err) {
