@@ -33,19 +33,15 @@ const UsersStore = types
 		};
 
 		const editUser = flow(function* (username: string, newData: User) {
-			console.log("username", username);
 			let userToEdit = self.users.find(
 				(user) => user.username === username
 			);
-			console.log("userToEdit", userToEdit);
 			if (userToEdit) {
 				userToEdit = {
 					...userToEdit,
 					...newData,
 				};
 			}
-			console.log("username2", username);
-			console.log("editedUser", userToEdit);
 			yield editUserInDb(username, newData);
 		});
 

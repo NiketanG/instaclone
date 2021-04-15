@@ -1,5 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
-
+import { RouteProp } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import React, { useContext, useEffect, useState } from "react";
 import {
 	Image,
 	RefreshControl,
@@ -7,7 +8,6 @@ import {
 	StatusBar,
 	StyleSheet,
 	Text,
-	ToastAndroid,
 	useWindowDimensions,
 	View,
 } from "react-native";
@@ -22,19 +22,15 @@ import {
 	Title,
 	useTheme,
 } from "react-native-paper";
-import { RouteProp } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import Icon from "react-native-vector-icons/Ionicons";
+import { UserAvatar } from "../../Components/UserAvatar";
+import FollowersStore from "../../store/FollowersStore";
 import {
 	ExploreStackNavigationParams,
 	ProfileStackParams,
 } from "../../types/navigation";
 import { AppContext } from "../../utils/authContext";
-
-import Icon from "react-native-vector-icons/Ionicons";
-import { UserAvatar } from "../../Components/UserAvatar";
-import PostsStore, { Post } from "../../store/PostsStore";
-import UsersStore from "../../store/UsersStore";
-import FollowersStore, { Follower } from "../../store/FollowersStore";
+import useUser from "../../utils/useUser";
 
 type Props = {
 	route: RouteProp<ExploreStackNavigationParams, "Profile">;
@@ -44,31 +40,20 @@ type Props = {
 const Profile: React.FC<Props> = ({ navigation, route }) => {
 	const { width, height } = useWindowDimensions();
 
-	const [username, setUsername] = useState("");
-	const [name, setName] = useState("");
-	const [bio, setBio] = useState<string | undefined>("");
-
 	const imageMargin = 2;
 	const imageWidth = (width - 0) / 3 - imageMargin * 2;
 
 	const { colors, dark } = useTheme();
 
 	const [isCurrentUser, setIsCurrentUser] = useState(false);
-	const [profilePic, setProfilePic] = useState<string | undefined>();
-
-	const [posts, setPosts] = useState<Array<Post> | null>(null);
-
-	const [followers, setFollowers] = useState<Follower[]>([]);
-	const [followersCount, setFollowersCount] = useState(0);
-
-	const [following, setFollowing] = useState<Follower[]>([]);
-	const [followingCount, setFollowingCount] = useState(0);
-
-	const [loading, setLoading] = useState(true);
 
 	const { username: savedUsername } = useContext(AppContext);
 
 	const [followingUser, setFollowingUser] = useState(false);
+
+	const { user, posts, loading, followers, following } = useUser(
+		route.params.username || savedUsername
+	);
 
 	const goBack = () => {
 		if (route.params.goBack) {
@@ -80,10 +65,8 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 
 	const followUser = async () => {
 		if (!route.params.username || isCurrentUser || !savedUsername) return;
-
 		setFollowingUser(true);
-		setFollowersCount(followersCount + 1);
-
+		//setFollowersCount(followersCount + 1);
 		FollowersStore.followUser(route.params.username, savedUsername);
 	};
 
@@ -91,62 +74,19 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 		if (isCurrentUser || !route.params.username || !savedUsername) return;
 
 		setFollowingUser(false);
-		setFollowersCount(followersCount - 1);
+		// setFollowersCount(followersCount - 1);
 
 		FollowersStore.unfollowUser(route.params.username, savedUsername);
 	};
 
 	const fetchDetails = async () => {
-		if (
-			savedUsername &&
-			(route.params.isCurrentUser ||
-				route.params.username === savedUsername)
-		) {
-			fetchUser(savedUsername);
-		}
 		if (route.params.username) {
-			fetchUser(route.params.username);
 			const isFollowing = await FollowersStore.checkFollowing(
 				route.params.username
 			);
 			setFollowingUser(isFollowing);
 		}
-		fetchPosts();
 	};
-
-	const fetchUser = useCallback(
-		async (userToSearch: string) => {
-			if (!userToSearch) return;
-			const user = await UsersStore.getUser(userToSearch);
-			if (!user) {
-				ToastAndroid.show("User not found", ToastAndroid.LONG);
-				navigation.goBack();
-				return;
-			} else {
-				setBio(user.bio);
-				setProfilePic(user.profilePic);
-				setName(user.name);
-			}
-
-			const followersList = await FollowersStore.getFollowers(
-				userToSearch
-			);
-			if (followersList) {
-				setFollowers(followersList);
-				setFollowersCount(followersList.length);
-			}
-
-			const followingList = await FollowersStore.getFollowing(
-				userToSearch
-			);
-
-			if (followingList) {
-				setFollowing(followingList);
-				setFollowingCount(followingList.length);
-			}
-		},
-		[navigation]
-	);
 
 	useEffect(() => {
 		if (
@@ -154,41 +94,16 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 			(route.params.isCurrentUser ||
 				route.params.username === savedUsername)
 		) {
-			setUsername(savedUsername);
 			setIsCurrentUser(true);
-			fetchUser(savedUsername);
 		}
 		if (route.params.username) {
-			setUsername(route.params.username);
-			fetchUser(route.params.username);
 			FollowersStore.checkFollowing(route.params.username).then(
 				(isFollowing) => {
 					setFollowingUser(isFollowing);
 				}
 			);
 		}
-		if (route.params.profilePic) setProfilePic(route.params.profilePic);
-	}, [savedUsername, route.params, fetchUser]);
-
-	const fetchPosts = useCallback(async () => {
-		if (!username || username.length === 0) return;
-
-		try {
-			setPosts(await PostsStore.fetchPostsByUser(username));
-		} catch (err) {
-			console.error(err);
-			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
-		} finally {
-			setLoading(false);
-		}
-	}, [username]);
-
-	useEffect(() => {
-		if (username && username.length > 0) {
-			fetchPosts();
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [PostsStore.posts, fetchPosts, username]);
+	}, [savedUsername, route.params]);
 
 	return (
 		<View
@@ -235,7 +150,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 							color: colors.text,
 						}}
 					>
-						{username}
+						{user?.username}
 					</Title>
 				</View>
 				{!route.params.username && (
@@ -267,7 +182,10 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 			>
 				<View style={styles.container}>
 					<View style={styles.userContainer}>
-						<UserAvatar size={96} profilePicture={profilePic} />
+						<UserAvatar
+							size={96}
+							profilePicture={user?.profilePic}
+						/>
 						<View style={styles.statsContainer}>
 							<View style={styles.textContainer}>
 								<Headline style={styles.statNumber}>
@@ -281,15 +199,15 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 								onPress={() => {
 									navigation.navigate("Followers", {
 										isCurrentUser,
-										username,
+										username: user?.username,
 										profilePic: undefined,
-										followers,
+										followers: followers || [],
 									});
 								}}
 							>
 								<View style={styles.textContainer}>
 									<Headline style={styles.statNumber}>
-										{followersCount}
+										{followers?.length}
 									</Headline>
 									<Subheading style={styles.statTitle}>
 										Followers
@@ -300,15 +218,15 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 								onPress={() => {
 									navigation.navigate("Following", {
 										isCurrentUser,
-										username,
+										username: user?.username,
 										profilePic: undefined,
-										following,
+										following: following || [],
 									});
 								}}
 							>
 								<View style={styles.textContainer}>
 									<Headline style={styles.statNumber}>
-										{followingCount}
+										{following?.length}
 									</Headline>
 									<Subheading style={styles.statTitle}>
 										Following
@@ -318,7 +236,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 						</View>
 					</View>
 					<View style={styles.userInfo}>
-						<Subheading style={{}}>{name}</Subheading>
+						<Subheading style={{}}>{user?.name}</Subheading>
 						<Text
 							style={{
 								fontSize: 14,
@@ -326,7 +244,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 								color: "rgba(255,255,255,0.6)",
 							}}
 						>
-							{bio}
+							{user?.bio}
 						</Text>
 					</View>
 
@@ -468,8 +386,9 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 											navigation.navigate("Posts", {
 												goBack: navigation.goBack,
 												user: {
-													username,
-													profilePic,
+													username: user?.username,
+													profilePic:
+														user?.profilePic,
 												},
 												postId: post.postId,
 												postList: posts,
