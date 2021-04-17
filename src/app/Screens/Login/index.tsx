@@ -67,7 +67,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 				ToastAndroid.show("An error occured", ToastAndroid.LONG);
 			}
 		} catch (err) {
-			console.error(err);
+			console.error("[signIn]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};

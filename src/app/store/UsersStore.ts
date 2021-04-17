@@ -56,7 +56,7 @@ const UsersStore = types
 					self.users.push(fetchedUser);
 				}
 			} catch (err) {
-				console.error(err);
+				console.error("[getUser]", err);
 			}
 			return user;
 		});

@@ -5,7 +5,7 @@ import {
 	fetchCommentsFromDb,
 	newCommentInDb,
 } from "../utils/supabaseUtils";
-import { uniqueComments } from "../utils/utils";
+import { uniqueList } from "../utils/utils";
 import PostsStore from "./PostsStore";
 import UsersStore from "./UsersStore";
 
@@ -67,17 +67,22 @@ const CommentsStore = types
 			try {
 				const fetchedComments = yield fetchCommentsFromDb(postId);
 				if (fetchedComments) {
-					commentsOnPost = uniqueComments(
+					commentsOnPost = uniqueList<Comment>(
 						commentsOnPost,
-						fetchedComments
+						fetchedComments,
+						"id"
 					);
 
 					self.comments.replace(
-						uniqueComments(self.comments, fetchedComments)
+						uniqueList<Comment>(
+							self.comments,
+							fetchedComments,
+							"id"
+						)
 					);
 				}
 			} catch (err) {
-				console.error(err);
+				console.error("[getComments]", err);
 			}
 			return commentsOnPost;
 		});

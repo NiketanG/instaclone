@@ -18,14 +18,14 @@ export const checkFollowingInDb = async (username: string) => {
 			.eq("follower", currentUser.toLowerCase())
 			.eq("following", username.toLowerCase());
 		if (followingRes.error) {
-			console.error(followingRes.error);
+			console.error("[checkFollowingInDb_Response]", followingRes.error);
 			return false;
 		} else {
 			if (followingRes.data.length > 0) return true;
 			return false;
 		}
 	} catch (err) {
-		console.error(err);
+		console.error("[checkFollowingInDb]", err);
 		return false;
 	}
 };
@@ -45,7 +45,7 @@ export const unfollowUserInDb = async (username: string) => {
 			});
 
 		if (followingRes.error) {
-			console.error(followingRes.error);
+			console.error("[unfollowUserInDb_Response]", followingRes.error);
 			return false;
 		} else {
 			return true;
@@ -69,7 +69,7 @@ export const followUserInDb = async (username: string) => {
 			});
 
 		if (followingRes.error) {
-			console.error(followingRes.error);
+			console.error("[followUserInDb_Response]", followingRes.error);
 			return false;
 		} else {
 			return true;
@@ -86,7 +86,7 @@ export const fetchFollowingFromDb = async (
 		.select("*")
 		.eq("follower", username.toLowerCase());
 	if (followingRes.error) {
-		console.error(followingRes.error);
+		console.error("[fetchFollowingFromDb_Response]", followingRes.error);
 		return null;
 	} else {
 		return followingRes.data.map(
@@ -107,7 +107,7 @@ export const fetchFollowersFromDb = async (
 		.select("*")
 		.eq("following", username.toLowerCase());
 	if (followingRes.error) {
-		console.error(followingRes.error);
+		console.error("[fetchFollowersFromDb_Response]", followingRes.error);
 		return null;
 	} else {
 		return followingRes.data.map(
@@ -128,7 +128,7 @@ export const fetchUserFromDb = async (
 		.select("*")
 		.eq("username", username.toLowerCase());
 	if (userExists.error) {
-		console.error(userExists.error);
+		console.error("[fetchUserFromDb_useExists_Response]", userExists.error);
 		return null;
 	}
 	const user = userExists.data[0];
@@ -163,12 +163,12 @@ export const editUserInDb = async (username: string, newData: User) => {
 				username,
 			});
 		if (res.error || res.data.length === 0) {
-			console.error(res.error);
+			console.error("[editUserInDb_Response]", res.error);
 			return false;
 		}
 		return res.data[0];
 	} catch (err) {
-		console.error(err);
+		console.error("[editUserInDb]", err);
 		return null;
 	}
 };
@@ -188,7 +188,7 @@ export const fetchCommentsFromDb = async (postId: number) => {
 		.eq("postId", postId);
 
 	if (allComments.error) {
-		console.error(allComments.error);
+		console.error("[fetchCommentsFromDb_Response]", allComments.error);
 		return null;
 	}
 	return allComments.data;
@@ -210,7 +210,7 @@ export const newCommentInDb = async (
 			)`);
 
 		if (newComment.error || newComment.data.length === 0) {
-			console.error(newComment.error);
+			console.error("[newCommentInDb_Response]", newComment.error);
 			return null;
 		}
 		UsersStore.addUser({
@@ -227,7 +227,7 @@ export const newCommentInDb = async (
 			user: newComment.data[0].user,
 		};
 	} catch (err) {
-		console.error(err);
+		console.error("[newCommentInDb]", err);
 		return null;
 	}
 };
@@ -242,12 +242,12 @@ export const deleteCommentFromDb = async (commentId: number) => {
 				id: commentId,
 			});
 		if (res.error) {
-			console.error(res.error);
+			console.error("[deleteCommentFromDb_Response]", res.error);
 			return false;
 		}
 		return true;
 	} catch (err) {
-		console.error(err);
+		console.error("[deleteCommentFromDb]", err);
 		return false;
 	}
 };
@@ -261,13 +261,13 @@ export const newPostInDb = async (
 			.insert(postData);
 
 		if (newPost.error || newPost.data.length === 0) {
-			console.error(newPost.error);
+			console.error("[newPostInDb_Response]", newPost.error);
 			return null;
 		}
 
 		return newPost.data[0];
 	} catch (err) {
-		console.error(err);
+		console.error("[newPostInDb]", err);
 		return null;
 	}
 };
@@ -281,11 +281,10 @@ export const fetchPostsByUserFromDb = async (
 		.select("*")
 		.eq("user", username.toLowerCase());
 	if (allPosts.error) {
-		console.error(allPosts.error);
+		console.error("[fetchPostsByUserFromDb_Response]", allPosts.error);
 		return null;
 	}
-	const mappedPosts: Post[] = mapPosts(allPosts.data);
-	return mappedPosts;
+	return mapPosts(allPosts.data);
 };
 
 export const deletePostFromDb = async (postId: number) => {
@@ -298,12 +297,12 @@ export const deletePostFromDb = async (postId: number) => {
 				postId: postId,
 			});
 		if (res.error) {
-			console.error(res.error);
+			console.error("[deletePostFromDb_Response]", res.error);
 			return false;
 		}
 		return true;
 	} catch (err) {
-		console.error(err);
+		console.error("[deletePostFromDb]", err);
 		return false;
 	}
 };

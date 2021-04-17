@@ -55,7 +55,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 				return;
 			}
 		} catch (err) {
-			console.error(err);
+			console.error("[fetchPosts]", err);
 		} finally {
 			setLoading(false);
 		}

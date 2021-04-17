@@ -1,5 +1,6 @@
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { observer } from "mobx-react-lite";
 import React, { useContext, useEffect, useState } from "react";
 import {
 	Image,
@@ -37,7 +38,7 @@ type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "ProfilePage">;
 };
 
-const Profile: React.FC<Props> = ({ navigation, route }) => {
+const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 	const { width, height } = useWindowDimensions();
 
 	const imageMargin = 2;
@@ -49,11 +50,16 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 
 	const { username: savedUsername } = useContext(AppContext);
 
-	const [followingUser, setFollowingUser] = useState(false);
-
-	const { user, posts, loading, followers, following } = useUser(
-		route.params.username || savedUsername
-	);
+	const {
+		user,
+		posts,
+		loading,
+		followers,
+		following,
+		isFollowing,
+		fetchUser,
+	} = useUser(route.params.username || savedUsername);
+	const [followingUser, setFollowingUser] = useState(() => isFollowing);
 
 	const goBack = () => {
 		if (route.params.goBack) {
@@ -79,15 +85,6 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 		FollowersStore.unfollowUser(route.params.username, savedUsername);
 	};
 
-	const fetchDetails = async () => {
-		if (route.params.username) {
-			const isFollowing = await FollowersStore.checkFollowing(
-				route.params.username
-			);
-			setFollowingUser(isFollowing);
-		}
-	};
-
 	useEffect(() => {
 		if (
 			savedUsername &&
@@ -95,13 +92,6 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 				route.params.username === savedUsername)
 		) {
 			setIsCurrentUser(true);
-		}
-		if (route.params.username) {
-			FollowersStore.checkFollowing(route.params.username).then(
-				(isFollowing) => {
-					setFollowingUser(isFollowing);
-				}
-			);
 		}
 	}, [savedUsername, route.params]);
 
@@ -145,13 +135,15 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 							onPress={goBack}
 						/>
 					)}
-					<Title
-						style={{
-							color: colors.text,
-						}}
-					>
-						{user?.username}
-					</Title>
+					{user?.username && (
+						<Title
+							style={{
+								color: colors.text,
+							}}
+						>
+							{user.username}
+						</Title>
+					)}
 				</View>
 				{!route.params.username && (
 					<IconButton
@@ -169,10 +161,12 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 				removeClippedSubviews
 				snapToAlignment={"start"}
 				refreshControl={
-					<RefreshControl
-						refreshing={loading}
-						onRefresh={fetchDetails}
-					/>
+					user ? (
+						<RefreshControl
+							refreshing={loading}
+							onRefresh={() => fetchUser(user.username)}
+						/>
+					) : undefined
 				}
 				contentContainerStyle={{
 					display: "flex",
@@ -383,17 +377,19 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 									<TouchableHighlight
 										key={post.postId}
 										onPress={() => {
-											navigation.navigate("Posts", {
-												goBack: navigation.goBack,
-												user: {
-													username: user?.username,
-													profilePic:
-														user?.profilePic,
-												},
-												postId: post.postId,
-												postList: posts,
-												rootNavigation: navigation,
-											});
+											if (user)
+												navigation.navigate("Posts", {
+													goBack: navigation.goBack,
+													user: {
+														username:
+															user?.username,
+														profilePic:
+															user?.profilePic,
+													},
+													postId: post.postId,
+													postList: posts,
+													rootNavigation: navigation,
+												});
 										}}
 									>
 										<Image
@@ -416,7 +412,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 			</ScrollView>
 		</View>
 	);
-};
+});
 
 const styles = StyleSheet.create({
 	container: {

@@ -5,7 +5,7 @@ import {
 	fetchPostsByUserFromDb,
 	newPostInDb,
 } from "../utils/supabaseUtils";
-import { fetchFeedPosts, uniquePosts } from "../utils/utils";
+import { fetchFeedPosts, uniqueList } from "../utils/utils";
 import FollowersStore, { Follower } from "./FollowersStore";
 import UsersStore from "./UsersStore";
 
@@ -77,10 +77,12 @@ const PostsStore = types
 							tempArray.map((item) => [item.postId, item])
 						).values(),
 					];
-					self.posts.replace(uniquePosts(self.posts, fetchedPosts));
+					self.posts.replace(
+						uniqueList<Post>(self.posts, fetchedPosts, "postId")
+					);
 				}
 			} catch (err) {
-				console.error(err);
+				console.error("[fetchPostsByUser]", err);
 			}
 			return postsByUser;
 		});

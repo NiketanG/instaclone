@@ -2,6 +2,7 @@ import { Post } from "../store/PostsStore";
 import { Follower } from "../store/FollowersStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "../store/UsersStore";
+import { definitions } from "./supabase";
 export type SignInNavigationParams = {
 	Login: undefined;
 	Signup: {
@@ -63,7 +64,7 @@ export type PostListParams = {
 		profilePic: string | undefined;
 	};
 	postId: number;
-	postList: Array<Post>;
+	postList: Array<definitions["posts"]>;
 	rootNavigation: StackNavigationProp<ProfileStackParams, "ProfilePage">;
 };
 export type PostStackNavigationParams = {

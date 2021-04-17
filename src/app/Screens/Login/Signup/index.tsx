@@ -78,7 +78,7 @@ const Signup: React.FC<Props> = ({ route }) => {
 			const res = await ImagePicker.openPicker(imagePickerOptions);
 			if (res) handleImage(res);
 		} catch (err) {
-			console.error(err);
+			console.error("[selectFromGallery]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};
@@ -143,7 +143,7 @@ const Signup: React.FC<Props> = ({ route }) => {
 			ToastAndroid.show("Signed up", ToastAndroid.LONG);
 		} catch (err) {
 			setLoading(false);
-			console.error(err);
+			console.error("[signUp]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};

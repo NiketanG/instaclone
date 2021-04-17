@@ -39,7 +39,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 					[]
 			);
 		} catch (err) {
-			console.error(err);
+			console.error("[fetchComments]", err);
 			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
 		} finally {
 			setLoading(false);
@@ -74,7 +74,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 
 			setCommentText("");
 		} catch (err) {
-			console.error(err);
+			console.error("[addComment]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};

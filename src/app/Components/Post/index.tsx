@@ -43,7 +43,7 @@ const PostModal: React.FC<ModalProps> = ({
 			closeModal();
 			navigation.goBack();
 		} catch (err) {
-			console.error(err);
+			console.error("[deletePost]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};
@@ -183,7 +183,7 @@ const Post: React.FC<Props> = ({
 	// 			});
 	// 		}
 	// 	} catch (err) {
-	// 		console.error(err);
+	// 		console.error("[likePost]", err);
 	// 	}
 	// };
 
@@ -204,7 +204,7 @@ const Post: React.FC<Props> = ({
 	// 			await likesCollection.doc(post.id).delete();
 	// 		}
 	// 	} catch (err) {
-	// 		console.error(err);
+	// 		console.error("[unlikePost]", err);
 	// 	}
 	// };
 

@@ -55,20 +55,10 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 			const res = await ImagePicker.openPicker(imagePickerOptions);
 			if (res) handleImage(res);
 		} catch (err) {
-			console.error(err);
+			console.error("[selectFromGallery]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};
-
-	// const openCamera = async () => {
-	// 	try {
-	// 		const res = await ImagePicker.openCamera(imagePickerOptions);
-	// 		if (res) handleImage(res);
-	// 	} catch (err) {
-	// 		console.error(err);
-	// 		ToastAndroid.show("An error occured", ToastAndroid.LONG);
-	// 	}
-	// };
 
 	const { width } = useWindowDimensions();
 
@@ -119,7 +109,7 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 			}
 		} catch (err) {
 			setUploading(false);
-			console.error(err);
+			console.error("[uploadPost]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};

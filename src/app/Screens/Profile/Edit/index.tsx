@@ -80,7 +80,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 			const res = await ImagePicker.openPicker(imagePickerOptions);
 			if (res) handleImage(res);
 		} catch (err) {
-			console.error(err);
+			console.error("[selectFromGallery]", err);
 		}
 	};
 
@@ -141,7 +141,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 			ToastAndroid.show("Profile updated", ToastAndroid.LONG);
 			navigation.goBack();
 		} catch (err) {
-			console.error(err);
+			console.error("[updateProfile]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		} finally {
 			setLoading(false);
