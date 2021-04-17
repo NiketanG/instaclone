@@ -32,6 +32,9 @@ const useUser = (username?: string | null) => {
 			const followerList = await fetchFollowersFromDb(usernameToFetch);
 			const followingList = await fetchFollowingFromDb(usernameToFetch);
 			const isFollowingUser = await checkFollowingInDb(usernameToFetch);
+			if (followerList) FollowersStore.setFollowers(followerList);
+			if (followingList) FollowersStore.setFollowers(followingList);
+
 			return {
 				user: userData,
 				posts: postsByUser,
@@ -87,9 +90,7 @@ const useUser = (username?: string | null) => {
 				setIsFollowing(false);
 			}
 			setFollowers(followerList);
-			FollowersStore.setFollowers(followerList);
 			setFollowing(followingList);
-			FollowersStore.setFollowers(followingList);
 
 			setLoading(false);
 		}
