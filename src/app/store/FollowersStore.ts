@@ -18,7 +18,16 @@ const FollowersStore = types
 	})
 	.actions((self) => {
 		const setFollowers = (followers: Array<Follower>) => {
-			self.followers.replace(followers);
+			followers.forEach((follower) => {
+				const isFollowing = self.followers.find(
+					(e) =>
+						e.follower === follower.follower &&
+						e.following === follower.following
+				);
+				if (!isFollowing) {
+					self.followers.push(follower);
+				}
+			});
 		};
 		const followUser = flow(function* (
 			username: string,
@@ -52,70 +61,10 @@ const FollowersStore = types
 			yield unfollowUserInDb(username);
 		});
 
-		const checkFollowing = flow(function* (username: string) {
-			return yield checkFollowingInDb(username);
-		});
-
-		const getFollowers = flow(function* (username: string) {
-			if (!username || username.length === 0) return null;
-
-			let followers: Follower[] =
-				self.followers.filter(
-					(follower) => follower.following === username
-				) || [];
-			try {
-				const fetchedFollowers:
-					| Follower[]
-					| null = yield fetchFollowersFromDb(username);
-				if (fetchedFollowers) {
-					const tempArray = [...followers, ...fetchedFollowers];
-
-					followers = [
-						...new Map(
-							tempArray.map((item) => [item.follower, item])
-						).values(),
-					];
-				}
-			} catch (err) {
-				console.error("[getFollowers]", err);
-			}
-			return followers;
-		});
-
-		const getFollowing = flow(function* (username: string) {
-			if (!username || username.length === 0) return null;
-
-			let following: Follower[] =
-				self.followers.filter(
-					(follower) => follower.follower === username
-				) || [];
-
-			try {
-				const fetchedFollowing:
-					| Follower[]
-					| null = yield fetchFollowingFromDb(username);
-				if (fetchedFollowing) {
-					const tempArray = [...following, ...fetchedFollowing];
-
-					following = [
-						...new Map(
-							tempArray.map((item) => [item.following, item])
-						).values(),
-					];
-				}
-			} catch (err) {
-				console.error("[getFollowing]", err);
-			}
-			return following;
-		});
-
 		return {
-			checkFollowing,
 			setFollowers,
 			followUser,
 			unfollowUser,
-			getFollowers,
-			getFollowing,
 		};
 	})
 

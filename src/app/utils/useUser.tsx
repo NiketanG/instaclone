@@ -87,7 +87,10 @@ const useUser = (username?: string | null) => {
 				setIsFollowing(false);
 			}
 			setFollowers(followerList);
+			FollowersStore.setFollowers(followerList);
 			setFollowing(followingList);
+			FollowersStore.setFollowers(followingList);
+
 			setLoading(false);
 		}
 	}, [currentUser, username]);
@@ -120,6 +123,37 @@ const useUser = (username?: string | null) => {
 		});
 	};
 
+	const followUser = async () => {
+		if (!(currentUser && username)) return;
+		setIsFollowing(true);
+		const isFollowingInStore = followers.find(
+			(e) => e.follower === currentUser && e.following === username
+		);
+		const tempFollowers = followers;
+		if (!isFollowingInStore) {
+			tempFollowers.push({
+				follower: currentUser,
+				following: username,
+			});
+		}
+		setFollowers(tempFollowers);
+
+		FollowersStore.followUser(username, currentUser);
+	};
+
+	const unfollowUser = async () => {
+		if (!(currentUser && username)) return;
+		setIsFollowing(false);
+		const tempFollowers = followers.filter(
+			(follower) =>
+				follower.following !== username &&
+				follower.follower !== currentUser
+		);
+		setFollowers(tempFollowers);
+
+		FollowersStore.unfollowUser(username, currentUser);
+	};
+
 	useEffect(() => {
 		if (username) fetchUser(username);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,6 +168,8 @@ const useUser = (username?: string | null) => {
 			loading: false,
 			isFollowing: false,
 			fetchUser,
+			followUser,
+			unfollowUser,
 		};
 	}
 
@@ -145,6 +181,8 @@ const useUser = (username?: string | null) => {
 		loading,
 		isFollowing,
 		fetchUser,
+		followUser,
+		unfollowUser,
 	};
 };
 

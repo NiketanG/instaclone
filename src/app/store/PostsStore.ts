@@ -5,8 +5,7 @@ import {
 	fetchPostsByUserFromDb,
 	newPostInDb,
 } from "../utils/supabaseUtils";
-import { fetchFeedPosts, uniqueList } from "../utils/utils";
-import FollowersStore, { Follower } from "./FollowersStore";
+import { uniqueList } from "../utils/utils";
 import UsersStore from "./UsersStore";
 
 export const PostModel = types
@@ -87,17 +86,6 @@ const PostsStore = types
 			return postsByUser;
 		});
 
-		const getFeedPosts = flow(function* (currentUsername: string) {
-			if (!currentUsername || currentUsername.length === 0) return;
-
-			const followingList: Follower[] = yield FollowersStore.getFollowing(
-				currentUsername
-			);
-
-			const feedPosts: Post[] = yield fetchFeedPosts(followingList);
-			return feedPosts;
-		});
-
 		return {
 			newPost,
 			setPosts,
@@ -105,7 +93,6 @@ const PostsStore = types
 			deletePost,
 			editPost,
 			fetchPostsByUser,
-			getFeedPosts,
 		};
 	})
 	.views((self) => ({

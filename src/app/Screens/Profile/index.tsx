@@ -58,8 +58,9 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 		following,
 		isFollowing,
 		fetchUser,
+		followUser,
+		unfollowUser,
 	} = useUser(route.params.username || savedUsername);
-	const [followingUser, setFollowingUser] = useState(() => isFollowing);
 
 	const goBack = () => {
 		if (route.params.goBack) {
@@ -67,22 +68,6 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 		} else {
 			navigation.goBack();
 		}
-	};
-
-	const followUser = async () => {
-		if (!route.params.username || isCurrentUser || !savedUsername) return;
-		setFollowingUser(true);
-		//setFollowersCount(followersCount + 1);
-		FollowersStore.followUser(route.params.username, savedUsername);
-	};
-
-	const unfollowUser = async () => {
-		if (isCurrentUser || !route.params.username || !savedUsername) return;
-
-		setFollowingUser(false);
-		// setFollowersCount(followersCount - 1);
-
-		FollowersStore.unfollowUser(route.params.username, savedUsername);
 	};
 
 	useEffect(() => {
@@ -262,7 +247,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 								justifyContent: "space-between",
 							}}
 						>
-							{!followingUser ? (
+							{!isFollowing ? (
 								<Button
 									mode="contained"
 									color={colors.primary}
