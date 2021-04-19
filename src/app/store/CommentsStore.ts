@@ -1,30 +1,28 @@
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree";
-import { definitions } from "../types/supabase";
 import {
 	deleteCommentFromDb,
 	fetchCommentsFromDb,
-	newCommentInDb,
 } from "../utils/supabaseUtils";
 import { uniqueList } from "../utils/utils";
-import PostsStore from "./PostsStore";
-import UsersStore from "./UsersStore";
+// import { definitions } from "../types/supabase";
+// import PostsStore from "./PostsStore";
+// import UsersStore from "./UsersStore";
 
-export const CommentModel = types
-	.model("Comment", {
-		id: types.identifierNumber,
-		postId: types.number,
-		user: types.string,
-		postedAt: types.string,
-		comment: types.string,
-	})
-	.views((self) => ({
-		get post() {
-			return PostsStore.posts.find((post) => post.postId === self.postId);
-		},
-		get userData() {
-			return UsersStore.getUser(self.user);
-		},
-	}));
+export const CommentModel = types.model("Comment", {
+	id: types.identifierNumber,
+	postId: types.number,
+	user: types.string,
+	postedAt: types.string,
+	comment: types.string,
+});
+// .views((self) => ({
+// 	get post() {
+// 		return PostsStore.posts.find((post) => post.postId === self.postId);
+// 	},
+// 	get userData() {
+// 		return UsersStore.getUser(self.user);
+// 	},
+// }));
 
 const CommentsStore = types
 	.model("Comments", {
@@ -34,15 +32,8 @@ const CommentsStore = types
 		const setComments = (comments: Array<Comment>) => {
 			self.comments.replace(comments);
 		};
-		const addComment = flow(function* (
-			comment: Pick<
-				definitions["comments"],
-				"comment" | "postId" | "user"
-			>
-		) {
-			const newComment = yield newCommentInDb(comment);
-			self.comments.push(newComment);
-			return newComment;
+		const addComment = flow(function* (comment: Comment) {
+			self.comments.push(comment);
 		});
 
 		const deleteComment = flow(function* (commentId: number) {

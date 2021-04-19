@@ -1,11 +1,5 @@
 import { Instance, SnapshotOut, types, flow } from "mobx-state-tree";
-import {
-	checkFollowingInDb,
-	fetchFollowersFromDb,
-	fetchFollowingFromDb,
-	followUserInDb,
-	unfollowUserInDb,
-} from "../utils/supabaseUtils";
+import { followUserInDb, unfollowUserInDb } from "../utils/supabaseUtils";
 
 export const FollowerModel = types.model("Follower", {
 	follower: types.string,

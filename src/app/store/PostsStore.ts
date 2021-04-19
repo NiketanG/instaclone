@@ -30,8 +30,9 @@ const PostsStore = types
 		const setPosts = (posts: Array<Post>) => {
 			self.posts.replace(posts);
 		};
-		const addPost = (post: Post) => {
-			self.posts.push(post);
+		const addPost = (newPost: Post) => {
+			if (!self.posts.find((post) => post.postId === newPost.postId))
+				self.posts.push(newPost);
 		};
 
 		const newPost = flow(function* (

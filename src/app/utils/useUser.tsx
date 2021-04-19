@@ -160,7 +160,7 @@ const useUser = (username?: string | null) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [username]);
 
-	if (!username) {
+	if (!username)
 		return {
 			user: null,
 			posts: null,
@@ -172,7 +172,6 @@ const useUser = (username?: string | null) => {
 			followUser,
 			unfollowUser,
 		};
-	}
 
 	return {
 		user,

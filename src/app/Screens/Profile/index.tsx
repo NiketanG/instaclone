@@ -25,7 +25,6 @@ import {
 } from "react-native-paper";
 import Icon from "react-native-vector-icons/Ionicons";
 import { UserAvatar } from "../../Components/UserAvatar";
-import FollowersStore from "../../store/FollowersStore";
 import {
 	ExploreStackNavigationParams,
 	ProfileStackParams,

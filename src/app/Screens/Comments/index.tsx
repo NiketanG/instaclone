@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { RefreshControl, StatusBar, ToastAndroid, View } from "react-native";
 import {
 	Appbar,
@@ -18,9 +18,9 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { PostStackNavigationParams } from "../../types/navigation";
 import { FlatList } from "react-native-gesture-handler";
 import { UserAvatar } from "../../Components/UserAvatar";
-import CommentsStore, { Comment } from "../../store/CommentsStore";
 import { observer } from "mobx-react-lite";
 import { CommentItem } from "./CommentItem";
+import usePost from "../../utils/usePost";
 
 type Props = {
 	route: RouteProp<PostStackNavigationParams, "Comments">;
@@ -29,49 +29,27 @@ type Props = {
 
 const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 	const { colors } = useTheme();
-	const [comments, setComments] = useState<Array<Comment>>([]);
-	const [loading, setLoading] = useState(true);
-
-	const fetchComments = async () => {
-		try {
-			setComments(
-				(await CommentsStore.getComments(route.params.post.postId)) ||
-					[]
-			);
-		} catch (err) {
-			console.error("[fetchComments]", err);
-			ToastAndroid.show("Error retrieving posts", ToastAndroid.LONG);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		if (route.params?.post?.postId) fetchComments();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [route.params.post]);
-
 	const { username: currentUsername } = useContext(AppContext);
 
 	const [commentText, setCommentText] = useState("");
-	const addComment = async () => {
+
+	const { comments, addComment, deleteComment, loading } = usePost(
+		route.params.post.postId
+	);
+
+	const newComment = () => {
 		if (
 			commentText.length === 0 ||
-			!currentUsername ||
-			!route.params.post.postId
+			!route.params.post.postId ||
+			!currentUsername
 		)
 			return;
 		try {
-			const newComment = await CommentsStore.addComment({
+			addComment({
 				comment: commentText,
 				postId: route.params.post.postId,
 				user: currentUsername,
 			});
-
-			const tempComments = [...comments];
-			tempComments.push(newComment);
-			setComments(tempComments);
-
 			setCommentText("");
 		} catch (err) {
 			console.error("[addComment]", err);
@@ -93,15 +71,9 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 		}
 	};
 
-	const deleteComment = async () => {
-		if (selectedComment) {
-			await CommentsStore.deleteComment(selectedComment);
-			setSelectedComment(null);
-			const tempComments = comments.filter(
-				(comment) => comment.id !== selectedComment
-			);
-			setComments(tempComments);
-		}
+	const removeComment = () => {
+		setSelectedComment(null);
+		if (selectedComment) deleteComment(selectedComment);
 	};
 
 	return (
@@ -129,7 +101,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 					<Appbar.BackAction onPress={goBack} />
 					<Appbar.Content title="Comments" />
 					{selectedComment && (
-						<Appbar.Action icon="delete" onPress={deleteComment} />
+						<Appbar.Action icon="delete" onPress={removeComment} />
 					)}
 				</Appbar.Header>
 
@@ -197,7 +169,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 						refreshControl={
 							<RefreshControl
 								refreshing={loading}
-								onRefresh={fetchComments}
+								onRefresh={newComment}
 							/>
 						}
 						ItemSeparatorComponent={Divider}
@@ -231,7 +203,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 					value={commentText}
 					onChangeText={(text) => setCommentText(text)}
 					placeholder="Add a comment"
-					onSubmitEditing={addComment}
+					onSubmitEditing={newComment}
 					style={{
 						flexGrow: 1,
 						backgroundColor: "#2f2f2f",
@@ -239,7 +211,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 					}}
 				/>
 				<IconButton
-					onPress={addComment}
+					onPress={newComment}
 					icon="send"
 					style={{
 						backgroundColor: "transparent",

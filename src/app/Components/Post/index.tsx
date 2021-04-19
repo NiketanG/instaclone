@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
 	Image,
 	Text,
@@ -22,6 +22,9 @@ import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
 import { UserAvatar } from "../UserAvatar";
 import PostsStore, { Post as PostType } from "../../store/PostsStore";
+import usePost from "../../utils/usePost";
+import supabaseClient from "../../utils/supabaseClient";
+import { definitions } from "../../types/supabase";
 
 type ModalProps = {
 	closeModal: () => void;
@@ -108,15 +111,6 @@ const Post: React.FC<Props> = ({
 }) => {
 	const navigation = useNavigation();
 
-	const [liked, setLiked] = useState(false);
-	const toggleLike = () => {
-		if (liked) {
-			// unlikePost();
-		} else {
-			// likePost();
-		}
-	};
-
 	const { colors } = useTheme();
 	const { width } = useWindowDimensions();
 
@@ -125,106 +119,50 @@ const Post: React.FC<Props> = ({
 
 	const { username: currentUsername } = useContext(AppContext);
 
-	// useEffect(() => {
-	// 	(async () => {
-	// 		if (!postId) return;
-	// 		if (!currentUsername) return;
-	// 		const postRes = await likesCollection
-	// 			.where("postId", "==", postId)
-	// 			.where("username", "==", currentUsername)
-	// 			.get();
-	// 		if (postRes.docs.length === 0) {
-	// 			setLiked(false);
-	// 			return;
-	// 		} else {
-	// 			setLiked(true);
-	// 		}
-	// 	})();
-	// }, [currentUsername, likesCollection, postId]);
+	const { liked, likes, toggleLike } = usePost(postId);
 
 	const [userProfilePic, setUserProfilePic] = useState<string | null>(null);
-	// useEffect(() => {
-	// 	(async () => {
-	// 		if (!username) return;
-	// 		if (profilePic) {
-	// 			setUserProfilePic(profilePic);
-	// 			return;
-	// 		} else {
-	// 			const userRes = await usersCollection
-	// 				.where("username", "==", username)
-	// 				.get();
-	// 			if (userRes.docs.length === 0) {
-	// 				setUserProfilePic(null);
-	// 				return;
-	// 			} else {
-	// 				setUserProfilePic(
-	// 					userRes.docs[0].get("profilePic") as string
-	// 				);
-	// 			}
-	// 		}
-	// 	})();
-	// }, [currentUsername, usersCollection, username, profilePic]);
+	useEffect(() => {
+		(async () => {
+			if (!username) return;
+			if (profilePic) {
+				setUserProfilePic(profilePic);
+				return;
+			} else {
+				const userRes = await supabaseClient
+					.from<definitions["users"]>("users")
+					.select("*")
+					.eq("username", username);
 
-	// const likePost = async () => {
-	// 	try {
-	// 		setLiked(true);
-	// 		if (!postId) return;
-	// 		if (!currentUsername) return;
-
-	// 		const postRes = await likesCollection
-	// 			.where("postId", "==", postId)
-	// 			.where("username", "==", currentUsername)
-	// 			.get();
-	// 		if (postRes.docs.length === 0) {
-	// 			await likesCollection.add({
-	// 				postId,
-	// 				username: currentUsername,
-	// 				likedAt: firestore.FieldValue.serverTimestamp(),
-	// 			});
-	// 		}
-	// 	} catch (err) {
-	// 		console.error("[likePost]", err);
-	// 	}
-	// };
-
-	// const unlikePost = async () => {
-	// 	try {
-	// 		setLiked(false);
-	// 		if (!postId) return;
-	// 		if (!currentUsername) return;
-	// 		const postRes = await likesCollection
-	// 			.where("postId", "==", postId)
-	// 			.where("username", "==", currentUsername)
-	// 			.get();
-
-	// 		if (postRes.docs.length === 0) {
-	// 			setLiked(false);
-	// 		} else {
-	// 			const post = postRes.docs[0];
-	// 			await likesCollection.doc(post.id).delete();
-	// 		}
-	// 	} catch (err) {
-	// 		console.error("[unlikePost]", err);
-	// 	}
-	// };
+				if (userRes.error || userRes.data.length === 0) {
+					console.error(
+						"[fetchUserProfilePic_Response]",
+						userRes.error
+					);
+					setUserProfilePic(null);
+					return;
+				} else {
+					if (userRes.data[0].profilePic)
+						setUserProfilePic(userRes.data[0].profilePic);
+				}
+			}
+		})();
+	}, [username, profilePic]);
 
 	const [showModal, setShowModal] = useState(false);
 
-	const openModal = () => {
-		setShowModal(true);
-	};
+	const openModal = () => setShowModal(true);
 
 	const closeModal = () => setShowModal(false);
 
 	const goBack = () => navigation.goBack();
 
-	const viewProfile = () => {
+	const viewProfile = () =>
 		navigation.navigate("Profile", {
 			username: username,
 			isCurrentUser: false,
 			goBack: goBack,
 		});
-	};
 
 	return (
 		<>
@@ -329,9 +267,17 @@ const Post: React.FC<Props> = ({
 					/>
 				</Card.Actions>
 				<Card.Content>
-					{/* {likes > 0 && (
-						<Text>{likes > 1 ? `${likes} likes` : `1 like`} </Text>
-					)} */}
+					{likes.length > 0 && (
+						<Text
+							style={{
+								color: colors.placeholder,
+							}}
+						>
+							{likes.length > 1
+								? `${likes.length} likes`
+								: `1 like`}
+						</Text>
+					)}
 					<Title>{username}</Title>
 					{caption ? (
 						<>
