@@ -13,7 +13,24 @@ npm install
 ```
 
 Setup Supabase Project and configure [`supabaseClient.ts`](src/app/utils/supabaseClient.ts)
-Set up Google Cloud Project and add Oauth Clients for Google Auth. Add the same in Supabase Auth Settings for Google Auth Provider
+
+> Use the Database structure from [db_dump.sql](db_dump.sql) in Supabase.
+
+Configure Cloudinary for Image Uploads.
+
+> Enable Unsigned Uploads.
+
+Set up Google Cloud Project and add Oauth Clients for Google Auth.
+
+Set Environment Variables.
+
+```
+SUPABASE_KEY
+SUPABASE_URL
+CLOUDINARY_UPLOAD_PRESET
+CLOUDINARY_CLOUD_NAME
+GOOGLE_CLIENT_ID
+```
 
 Start metro bundler
 
@@ -23,7 +40,7 @@ or
 npm run start
 ```
 
-Build Android Application.
+Build Application.
 
 > Make sure a physical device is connected & detected in `adb` OR emulator is installed & running.
 
@@ -43,7 +60,9 @@ npm run android
 -   [ ] Video Posts
 -   [ ] Activity Tab
 -   [ ] Animations
+-   [ ] React Native Web support
+-   [ ] Testing on iOS
 
 ### Note
 
-This is not a 1:1 Replica of Instagram. The aim of this project was to try and test out [Supabase](https://supabase.io/).
+This is not a 1:1 Replica of Instagram and will never be. The aim of this project was to try and test out [Supabase](https://supabase.io/) and Mobx-State-Tree with React Native.

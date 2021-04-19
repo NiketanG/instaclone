@@ -666,7 +666,6 @@ COPY auth.schema_migrations (version) FROM stdin;
 --
 
 COPY auth.users (instance_id, id, aud, role, email, encrypted_password, confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at) FROM stdin;
-00000000-0000-0000-0000-000000000000	de80c610-094b-495f-9547-e82ae86c656c	authenticated	authenticated	nikegulekar@gmail.com	$2a$10$uT1hfud.q2JkFBuy5iyMDO1VBnEKspw...L7xBEKEdHqZFh7h76Q2	\N	\N	wBObAqq1nA1gCOs-xKyNdQ	2021-04-03 17:22:23.13645+00		\N			\N	\N	{"provider": "email"}	null	f	2021-04-03 17:22:23.128123+00	2021-04-03 17:22:23.128127+00
 \.
 
 
@@ -675,10 +674,6 @@ COPY auth.users (instance_id, id, aud, role, email, encrypted_password, confirme
 --
 
 COPY public.comments (id, "postId", "user", "postedAt", comment) FROM stdin;
-13	3	niketan	2021-04-14 16:38:52.711837+00	Test
-15	3	niketan	2021-04-14 16:56:06.774732+00	Aa
-21	3	niketan2	2021-04-14 17:40:38.369274+00	Great
-22	4	niketan2	2021-04-14 21:55:20.328548+00	Test Comment
 \.
 
 
@@ -687,9 +682,6 @@ COPY public.comments (id, "postId", "user", "postedAt", comment) FROM stdin;
 --
 
 COPY public.followers (id, follower, following) FROM stdin;
-2	niketan	test
-3	niketan2	test
-20	niketan2	niketan
 \.
 
 
@@ -706,9 +698,6 @@ COPY public.likes (id, "postId", "user") FROM stdin;
 --
 
 COPY public.posts ("postId", "imageUrl", "user", caption, "postedAt") FROM stdin;
-1	https://res.cloudinary.com/nikketan/image/upload/v1617552191/InstaClone/afkseri4e2mib55rs1kr.jpg	niketan	Test	2021-04-04 16:03:12.664999+00
-3	https://res.cloudinary.com/nikketan/image/upload/v1617555921/InstaClone/ujomvxyou0ebxuedditl.jpg	niketan	Clouds	2021-04-04 17:05:22.071702+00
-4	https://res.cloudinary.com/nikketan/image/upload/v1618437279/InstaClone/hiwrvktuys27ucznbprr.jpg	niketan2	Skyline	2021-04-14 21:54:40.318184+00
 \.
 
 
@@ -717,9 +706,6 @@ COPY public.posts ("postId", "imageUrl", "user", caption, "postedAt") FROM stdin
 --
 
 COPY public.users (username, name, bio, "profilePic", email) FROM stdin;
-niketan	Niketan Gulekar		https://res.cloudinary.com/nikketan/image/upload/v1617476527/InstaClone/mnn3pmhmvdahgrbvqbar.jpg	nikegulekar@gmail.com
-test	Test User	\N	\N	test@gmail.com
-niketan2	Niketan Gulekar		https://res.cloudinary.com/nikketan/image/upload/v1618421987/InstaClone/dp0eltpq18bqzz5bqub2.jpg	gulekarnike@gmail.com
 \.
 
 
@@ -728,8 +714,6 @@ niketan2	Niketan Gulekar		https://res.cloudinary.com/nikketan/image/upload/v1618
 --
 
 COPY storage.buckets (id, name, owner, created_at, updated_at) FROM stdin;
-posts	posts	\N	2021-04-02 16:58:38.122217+00	2021-04-02 16:58:38.122217+00
-profilePictures	profilePictures	\N	2021-04-02 16:58:44.310877+00	2021-04-02 16:58:44.310877+00
 \.
 
 

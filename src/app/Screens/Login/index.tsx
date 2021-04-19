@@ -7,10 +7,13 @@ import { SignInNavigationParams } from "../../types/navigation";
 import { AppContext } from "../../utils/authContext";
 import supabaseClient from "../../utils/supabaseClient";
 import { definitions } from "../../types/supabase";
+import Config from "react-native-config";
 
+if (!Config.GOOGLE_CLIENT_ID) {
+	console.error("[Login] GOOGLE_CLIENT_ID Not found");
+}
 GoogleSignin.configure({
-	webClientId:
-		"281495387223-budng5an5ustskq9am3u48hac42m4jcv.apps.googleusercontent.com",
+	webClientId: Config.GOOGLE_CLIENT_ID,
 });
 
 type Props = {
