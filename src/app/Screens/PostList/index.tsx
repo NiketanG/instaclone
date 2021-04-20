@@ -2,10 +2,10 @@ import React, { useEffect, useRef } from "react";
 import { Appbar, Divider, useTheme } from "react-native-paper";
 import { FlatList, StatusBar, useWindowDimensions } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams, UserProfile } from "../../types/navigation";
+import { ProfileStackParams } from "../../types/navigation";
 import { RouteProp } from "@react-navigation/native";
 import { PostContainer } from "../../Components/PostContainer";
-import { Post as PostType } from "../../store/PostsStore";
+import { definitions } from "../../types/supabase";
 
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Posts">;
@@ -26,7 +26,6 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 
 	useEffect(() => {
 		if (route.params?.postId && route.params?.postList) {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const postIndex = route.params.postList.findIndex(
 				(post) => post.postId === route.params.postId
 			);
@@ -40,7 +39,7 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 	const { width } = useWindowDimensions();
 
 	const getItemLayout = (
-		data: PostType[] | null | undefined,
+		data: Array<definitions["posts"]> | null | undefined,
 		index: number
 	): {
 		length: number;
@@ -54,9 +53,6 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 			offset: postItemHeight * index,
 		};
 	};
-
-	const openProfile = (user: UserProfile) =>
-		route.params.rootNavigation.navigate("ProfilePage", user);
 
 	return (
 		<>
@@ -83,10 +79,8 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 							new Date(a.postedAt).getTime()
 					)}
 					ItemSeparatorComponent={Divider}
-					renderItem={({ item }) => (
-						<PostContainer item={item} openProfile={openProfile} />
-					)}
-					keyExtractor={(item) => item.postId}
+					renderItem={({ item }) => <PostContainer item={item} />}
+					keyExtractor={(item) => item.postId.toString()}
 					bouncesZoom
 					bounces
 					snapToAlignment={"start"}

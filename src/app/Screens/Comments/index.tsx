@@ -12,7 +12,7 @@ import {
 } from "react-native-paper";
 import { format, formatDistanceToNow } from "date-fns";
 
-import { AppContext } from "../../utils/authContext";
+import { AppContext } from "../../utils/appContext";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { PostStackNavigationParams } from "../../types/navigation";

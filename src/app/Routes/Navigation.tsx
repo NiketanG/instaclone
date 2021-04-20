@@ -4,7 +4,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { TabNavigationParams } from "../types/navigation";
 import Icon from "react-native-vector-icons/Ionicons";
 
-import SignedOutStack from "./SignedOutNavigation";
 import ProfilePageStack from "./ProfileStack";
 import NewPost from "../Screens/NewPost";
 import { useTheme } from "react-native-paper";
@@ -105,5 +104,3 @@ export const TabNavigation = () => {
 		</NavigationContainer>
 	);
 };
-
-export default SignedOutStack;

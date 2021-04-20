@@ -3,7 +3,7 @@ import FollowersStore, { Follower } from "../store/FollowersStore";
 import PostsStore, { Post } from "../store/PostsStore";
 import UsersStore from "../store/UsersStore";
 import { definitions } from "../types/supabase";
-import { AppContext } from "./authContext";
+import { AppContext } from "./appContext";
 import {
 	checkFollowingInDb,
 	fetchFollowersFromDb,

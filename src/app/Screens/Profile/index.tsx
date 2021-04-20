@@ -29,7 +29,7 @@ import {
 	ExploreStackNavigationParams,
 	ProfileStackParams,
 } from "../../types/navigation";
-import { AppContext } from "../../utils/authContext";
+import { AppContext } from "../../utils/appContext";
 import useUser from "../../utils/useUser";
 
 type Props = {

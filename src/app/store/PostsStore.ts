@@ -8,19 +8,18 @@ import {
 import { uniqueList } from "../utils/utils";
 import UsersStore from "./UsersStore";
 
-export const PostModel = types
-	.model("Post", {
-		postId: types.identifierNumber,
-		caption: types.maybe(types.string),
-		imageUrl: types.string,
-		postedAt: types.string,
-		user: types.string,
-	})
-	.views((self) => ({
-		get userData() {
-			return UsersStore.getUser(self.user);
-		},
-	}));
+export const PostModel = types.model("Post", {
+	postId: types.identifierNumber,
+	caption: types.maybe(types.string),
+	imageUrl: types.string,
+	postedAt: types.string,
+	user: types.string,
+});
+// .views((self) => ({
+// 	get userData() {
+// 		return UsersStore.getUser(self.user);
+// 	},
+// }));
 
 const PostsStore = types
 	.model("Posts", {

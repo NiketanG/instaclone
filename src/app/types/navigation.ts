@@ -3,6 +3,13 @@ import { Follower } from "../store/FollowersStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "../store/UsersStore";
 import { definitions } from "./supabase";
+
+export type MessageStackNavigationParams = {
+	MessageList: undefined;
+	Messages: {
+		username: string;
+	};
+};
 export type SignInNavigationParams = {
 	Login: undefined;
 	Signup: {
@@ -15,6 +22,11 @@ export type SignInNavigationParams = {
 export type CommentsPageParams = {
 	post: Post;
 	user: User;
+};
+
+export type SwipeTabNavigationParams = {
+	Tabs: undefined;
+	Messages: undefined;
 };
 export type HomeStackNavigationParams = {
 	Home: undefined;
@@ -79,4 +91,9 @@ export type TabNavigationParams = {
 	// Activity: undefined;
 	New: undefined;
 	Profile: undefined;
+};
+
+export type SignedOutStackParams = {
+	Login: undefined;
+	SwipeTabs: undefined;
 };

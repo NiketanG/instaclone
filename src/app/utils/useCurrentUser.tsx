@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { definitions } from "../types/supabase";
-import { AppContext } from "./authContext";
+import { AppContext } from "./appContext";
 import supabaseClient from "./supabaseClient";
 
 type CurrentUser = {

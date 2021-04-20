@@ -4,7 +4,7 @@ import { GoogleSignin } from "@react-native-community/google-signin";
 import { Button, useTheme } from "react-native-paper";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SignInNavigationParams } from "../../types/navigation";
-import { AppContext } from "../../utils/authContext";
+import { AppContext } from "../../utils/appContext";
 import supabaseClient from "../../utils/supabaseClient";
 import { definitions } from "../../types/supabase";
 import Config from "react-native-config";

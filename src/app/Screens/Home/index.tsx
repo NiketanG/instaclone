@@ -6,12 +6,26 @@ import {
 	View,
 	useWindowDimensions,
 } from "react-native";
-import { ActivityIndicator, Divider, Text, useTheme } from "react-native-paper";
+import {
+	ActivityIndicator,
+	Appbar,
+	Divider,
+	Text,
+	useTheme,
+} from "react-native-paper";
 import { PostContainer } from "../../Components/PostContainer";
 import { observer } from "mobx-react-lite";
 import useFeed from "../../utils/useFeed";
+import { HomeStackNavigationParams } from "../../types/navigation";
+import { RouteProp } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
-const Home = observer(() => {
+type Props = {
+	route: RouteProp<HomeStackNavigationParams, "Home">;
+	navigation: StackNavigationProp<HomeStackNavigationParams, "Home">;
+};
+
+const Home: React.FC<Props> = observer(({ route }) => {
 	const { colors, dark } = useTheme();
 
 	const { fetchFeed, loading, posts: feedPosts } = useFeed();
@@ -30,6 +44,15 @@ const Home = observer(() => {
 				barStyle={dark ? "light-content" : "dark-content"}
 				animated
 			/>
+			<Appbar.Header
+				style={{
+					backgroundColor: colors.background,
+				}}
+			>
+				<Appbar.Content title="Instaclone" />
+
+				<Appbar.Action icon="send-outline" />
+			</Appbar.Header>
 
 			{loading && (
 				<View

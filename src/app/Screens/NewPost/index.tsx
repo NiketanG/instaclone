@@ -23,7 +23,7 @@ import ImagePicker, {
 	Image as ImageResponse,
 } from "react-native-image-crop-picker";
 
-import { AppContext } from "../../utils/authContext";
+import { AppContext } from "../../utils/appContext";
 import PostsStore from "../../store/PostsStore";
 import uploadToCloudinary from "../../utils/uploadToCloudinary";
 import { definitions } from "../../types/supabase";

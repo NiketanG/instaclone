@@ -297,6 +297,117 @@ export interface paths {
       };
     };
   };
+  "/messages": {
+    get: {
+      parameters: {
+        query: {
+          messageId?: parameters["rowFilter.messages.messageId"];
+          /** TEXT or IMAGE or POST */
+          message_type?: parameters["rowFilter.messages.message_type"];
+          text?: parameters["rowFilter.messages.text"];
+          postId?: parameters["rowFilter.messages.postId"];
+          imageUrl?: parameters["rowFilter.messages.imageUrl"];
+          sender?: parameters["rowFilter.messages.sender"];
+          receiver?: parameters["rowFilter.messages.receiver"];
+          received_at?: parameters["rowFilter.messages.received_at"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["messages"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** messages */
+          messages?: definitions["messages"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          messageId?: parameters["rowFilter.messages.messageId"];
+          /** TEXT or IMAGE or POST */
+          message_type?: parameters["rowFilter.messages.message_type"];
+          text?: parameters["rowFilter.messages.text"];
+          postId?: parameters["rowFilter.messages.postId"];
+          imageUrl?: parameters["rowFilter.messages.imageUrl"];
+          sender?: parameters["rowFilter.messages.sender"];
+          receiver?: parameters["rowFilter.messages.receiver"];
+          received_at?: parameters["rowFilter.messages.received_at"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          messageId?: parameters["rowFilter.messages.messageId"];
+          /** TEXT or IMAGE or POST */
+          message_type?: parameters["rowFilter.messages.message_type"];
+          text?: parameters["rowFilter.messages.text"];
+          postId?: parameters["rowFilter.messages.postId"];
+          imageUrl?: parameters["rowFilter.messages.imageUrl"];
+          sender?: parameters["rowFilter.messages.sender"];
+          receiver?: parameters["rowFilter.messages.receiver"];
+          received_at?: parameters["rowFilter.messages.received_at"];
+        };
+        body: {
+          /** messages */
+          messages?: definitions["messages"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
   "/posts": {
     get: {
       parameters: {
@@ -560,6 +671,33 @@ export interface definitions {
      */
     user: string;
   };
+  messages: {
+    /**
+     * Note:
+     * This is a Primary Key.<pk/>
+     */
+    messageId: number;
+    /** TEXT or IMAGE or POST */
+    message_type: string;
+    text?: string;
+    /**
+     * Note:
+     * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
+     */
+    postId?: number;
+    imageUrl?: string;
+    /**
+     * Note:
+     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+     */
+    sender: string;
+    /**
+     * Note:
+     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+     */
+    receiver: string;
+    received_at: string;
+  };
   posts: {
     /**
      * Note:
@@ -630,6 +768,17 @@ export interface parameters {
   "rowFilter.likes.id": string;
   "rowFilter.likes.postId": string;
   "rowFilter.likes.user": string;
+  /** messages */
+  "body.messages": definitions["messages"];
+  "rowFilter.messages.messageId": string;
+  /** TEXT or IMAGE or POST */
+  "rowFilter.messages.message_type": string;
+  "rowFilter.messages.text": string;
+  "rowFilter.messages.postId": string;
+  "rowFilter.messages.imageUrl": string;
+  "rowFilter.messages.sender": string;
+  "rowFilter.messages.receiver": string;
+  "rowFilter.messages.received_at": string;
   /** posts */
   "body.posts": definitions["posts"];
   "rowFilter.posts.postId": string;

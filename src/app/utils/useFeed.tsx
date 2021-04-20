@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import FollowersStore from "../store/FollowersStore";
 import PostsStore, { Post } from "../store/PostsStore";
 import { definitions } from "../types/supabase";
-import { AppContext } from "./authContext";
+import { AppContext } from "./appContext";
 import supabaseClient from "./supabaseClient";
 import { fetchFollowingFromDb } from "./supabaseUtils";
 import mapPosts, { uniqueList } from "./utils";
@@ -48,9 +48,8 @@ const useFeed = (): FeedPosts => {
 					.eq("user", currentUser);
 
 				let mappedOwnPosts: Post[] = [];
-				if (ownPosts.error) {
+				if (ownPosts.error)
 					console.error("[fetchOwnPostsFromDb]", ownPosts.error);
-				}
 				if (ownPosts.data) mappedOwnPosts = mapPosts(ownPosts.data);
 				tempPosts = [...tempPosts, ...mappedOwnPosts];
 

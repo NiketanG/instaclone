@@ -14,7 +14,7 @@ import ImagePicker, {
 } from "react-native-image-crop-picker";
 import Icon from "react-native-vector-icons/Ionicons";
 
-import { AppContext } from "../../../utils/authContext";
+import { AppContext } from "../../../utils/appContext";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SignInNavigationParams } from "../../../types/navigation";
 import { RouteProp } from "@react-navigation/core";

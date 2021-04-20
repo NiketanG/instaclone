@@ -1,12 +1,103 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Follower } from "../store/FollowersStore";
 import { Like } from "../store/LikesStore";
+import { Message } from "../store/MessagesStore";
 import { Post } from "../store/PostsStore";
 import UsersStore, { User } from "../store/UsersStore";
 import { definitions } from "../types/supabase";
 
 import supabaseClient from "./supabaseClient";
 import mapPosts from "./utils";
+
+export const newMessageInDb = async (
+	newMessage: Pick<Message, "receiver" | "text">
+): Promise<Message | null> => {
+	const currentUser = await AsyncStorage.getItem("username");
+	if (!currentUser) {
+		console.error("[getMessageListFromDb] No Current User");
+		return null;
+	}
+	const newMessageData = await supabaseClient
+		.from<definitions["messages"]>("messages")
+		.insert({
+			text: newMessage.text,
+			receiver: newMessage.receiver,
+			sender: currentUser,
+		});
+
+	if (
+		(newMessageData.data && newMessageData.data.length > 0) ||
+		!newMessageData.error
+	) {
+		return {
+			...newMessageData.data[0],
+			text: newMessageData.data[0].text || undefined,
+			imageUrl: newMessageData.data[0].imageUrl || undefined,
+			postId: newMessageData.data[0].postId || undefined,
+		};
+	} else {
+		console.error(
+			`[newMessageInDb_Response]
+				${newMessageData.error || "No Data"}`
+		);
+		return null;
+	}
+};
+
+export const getMessageListFromDb = async (): Promise<Message[] | null> => {
+	const currentUser = await AsyncStorage.getItem("username");
+	if (!currentUser) {
+		console.error("[getMessageListFromDb] No Current User");
+		return null;
+	}
+
+	const messagesData = await supabaseClient
+		.from<definitions["messages"]>("messages")
+		.select("*")
+		.or(`sender.eq.${currentUser},receiver.eq.${currentUser}`);
+
+	if (!messagesData || messagesData.error || !messagesData.data)
+		console.error("[getMessagesFromDb]", messagesData.error);
+
+	return (
+		messagesData.data?.map((msg) => ({
+			...msg,
+			imageUrl: msg.imageUrl,
+			text: msg.text,
+			postId: msg.postId,
+		})) || []
+	);
+};
+
+export const getMessagesFromDb = async (
+	username: string
+): Promise<Message[] | null> => {
+	if (!username) return null;
+	const currentUser = await AsyncStorage.getItem("username");
+	if (!currentUser) {
+		console.error("[getMessageListFromDb] No Current User");
+		return null;
+	}
+
+	const messagesData = await supabaseClient
+		.from<definitions["messages"]>("messages")
+		.select("*")
+		.or(
+			`sender.in.(${username}, ${currentUser}),receiver.in.(${username}, ${currentUser})`
+		);
+
+	if (!messagesData || messagesData.error || !messagesData.data)
+		console.error("[getMessagesFromDb]", messagesData.error);
+
+	return (
+		messagesData.data?.map((msg) => ({
+			...msg,
+			imageUrl: msg.imageUrl,
+			text: msg.text,
+			postId: msg.postId,
+		})) || []
+	);
+};
 
 export const getLikesFromDb = async (postId: number): Promise<Like[]> => {
 	const likesData = await supabaseClient

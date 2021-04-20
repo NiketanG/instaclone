@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import { Appbar, List, useTheme } from "react-native-paper";
 import { ProfileStackParams } from "../../../types/navigation";
 import { StatusBar, View } from "react-native";
-import { AppContext } from "../../../utils/authContext";
+import { AppContext } from "../../../utils/appContext";
 
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Settings">;

@@ -11,7 +11,7 @@ import {
 } from "react-native-paper";
 import { ProfileStackParams } from "../../../types/navigation";
 import { Image, StatusBar, ToastAndroid, View } from "react-native";
-import { AppContext } from "../../../utils/authContext";
+import { AppContext } from "../../../utils/appContext";
 import Icon from "react-native-vector-icons/Ionicons";
 import ImagePicker, {
 	Options,

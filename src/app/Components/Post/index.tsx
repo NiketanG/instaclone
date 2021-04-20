@@ -17,7 +17,7 @@ import {
 } from "react-native-paper";
 import { format, formatDistanceToNow } from "date-fns";
 import Icon from "react-native-vector-icons/Ionicons";
-import { AppContext } from "../../utils/authContext";
+import { AppContext } from "../../utils/appContext";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
 import { UserAvatar } from "../UserAvatar";
@@ -25,18 +25,21 @@ import PostsStore, { Post as PostType } from "../../store/PostsStore";
 import usePost from "../../utils/usePost";
 import supabaseClient from "../../utils/supabaseClient";
 import { definitions } from "../../types/supabase";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { HomeStackNavigationParams } from "../../types/navigation";
 
 type ModalProps = {
 	closeModal: () => void;
 	ownPost: boolean;
 	postId: number;
 	username: string;
+	viewProfile: () => void;
 };
 const PostModal: React.FC<ModalProps> = ({
 	postId,
 	closeModal,
 	ownPost,
-	username,
+	viewProfile,
 }) => {
 	const { width } = useWindowDimensions();
 	const navigation = useNavigation();
@@ -51,15 +54,9 @@ const PostModal: React.FC<ModalProps> = ({
 		}
 	};
 
-	const goBack = () => navigation.goBack();
-
-	const viewProfile = () => {
+	const openProfile = () => {
 		closeModal();
-		navigation.navigate("Profile", {
-			username: username,
-			isCurrentUser: false,
-			goBack: goBack,
-		});
+		viewProfile();
 	};
 	return (
 		<View
@@ -84,7 +81,7 @@ const PostModal: React.FC<ModalProps> = ({
 
 			<List.Item
 				title="View Profile"
-				onPress={viewProfile}
+				onPress={openProfile}
 				style={{
 					paddingHorizontal: 16,
 				}}
@@ -159,9 +156,9 @@ const Post: React.FC<Props> = ({
 
 	const viewProfile = () =>
 		navigation.navigate("Profile", {
-			username: username,
+			username,
 			isCurrentUser: false,
-			goBack: goBack,
+			goBack,
 		});
 
 	return (
@@ -178,6 +175,7 @@ const Post: React.FC<Props> = ({
 				}}
 			>
 				<PostModal
+					viewProfile={viewProfile}
 					username={username}
 					postId={postId}
 					ownPost={currentUsername === username}

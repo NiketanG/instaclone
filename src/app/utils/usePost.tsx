@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import CommentsStore, { Comment } from "../store/CommentsStore";
 import LikesStore, { Like } from "../store/LikesStore";
-import { AppContext } from "./authContext";
+import { AppContext } from "./appContext";
 import {
 	deleteCommentFromDb,
 	fetchCommentsFromDb,
