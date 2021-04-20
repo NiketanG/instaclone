@@ -25,8 +25,7 @@ import PostsStore, { Post as PostType } from "../../store/PostsStore";
 import usePost from "../../utils/usePost";
 import supabaseClient from "../../utils/supabaseClient";
 import { definitions } from "../../types/supabase";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { HomeStackNavigationParams } from "../../types/navigation";
+import { getTimeDistance } from "../../utils/utils";
 
 type ModalProps = {
 	closeModal: () => void;
@@ -298,12 +297,7 @@ const Post: React.FC<Props> = ({
 							)}
 						</>
 					) : null}
-					<Caption>
-						{new Date(postedAt).getTime() >
-						new Date().getTime() - 1 * 24 * 60 * 60 * 1000
-							? `${formatDistanceToNow(new Date(postedAt))} ago`
-							: format(new Date(postedAt), "LLLL dd, yyyy")}
-					</Caption>
+					<Caption>{getTimeDistance(postedAt)}</Caption>
 				</Card.Content>
 			</Card>
 		</>

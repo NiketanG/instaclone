@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/core";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useContext, useState } from "react";
@@ -10,10 +9,11 @@ import {
 	useWindowDimensions,
 	View,
 } from "react-native";
+import { TouchableHighlight } from "react-native-gesture-handler";
 import { Appbar, Text, useTheme, IconButton } from "react-native-paper";
-import { UserAvatar } from "../../Components/UserAvatar";
 import { MessageStackNavigationParams } from "../../types/navigation";
 import { AppContext } from "../../utils/appContext";
+import { MessageList } from "../../utils/useMessageList";
 import useMessages from "../../utils/useMessages";
 
 type Props = {
@@ -24,19 +24,37 @@ type Props = {
 const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
 	const { width } = useWindowDimensions();
-	const { messages, fetchMessages, loading, newMessage } = useMessages(
+	const { messages, loading, newMessage, deleteMessage } = useMessages(
 		route.params.username
 	);
 	const [messageText, setMessageText] = useState("");
 	const { username: currentUser } = useContext(AppContext);
-	const goBack = () => navigation.goBack();
+	const goBack = () => {
+		if (selectedMessage) {
+			setSelectedMessage(null);
+		} else {
+			navigation.goBack();
+		}
+	};
+
+	const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
+
+	const selectMessage = (username: string, messsageId: number) => {
+		if (username === currentUser) setSelectedMessage(messsageId);
+	};
 
 	const sendMessage = () => {
+		if (messageText.length === 0) return;
 		setMessageText("");
 		newMessage({
 			receiver: route.params.username,
 			text: messageText,
 		});
+	};
+
+	const removeMessage = () => {
+		if (selectedMessage) deleteMessage(selectedMessage);
+		setSelectedMessage(null);
 	};
 
 	return (
@@ -54,11 +72,16 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 			/>
 			<Appbar.Header
 				style={{
-					backgroundColor: colors.background,
+					backgroundColor: selectedMessage
+						? "#009688"
+						: colors.background,
 				}}
 			>
 				<Appbar.BackAction onPress={goBack} />
 				<Appbar.Content title={route.params.username} />
+				{selectedMessage && (
+					<Appbar.Action icon="delete" onPress={removeMessage} />
+				)}
 			</Appbar.Header>
 
 			<View
@@ -86,33 +109,41 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 							}}
 						>
 							{messages.map((message) => (
-								<View
+								<TouchableHighlight
+									onLongPress={() =>
+										selectMessage(
+											message.sender,
+											message.messageId
+										)
+									}
 									key={message.messageId}
-									style={{
-										display: "flex",
-										flexDirection: "row",
-										justifyContent:
-											message.sender === currentUser
-												? "flex-end"
-												: "flex-start",
-									}}
 								>
-									<Text
+									<View
 										style={{
-											minHeight: 48,
-
-											maxWidth: width / 2 - 16,
-											textAlignVertical: "center",
-											paddingHorizontal: 16,
-											backgroundColor: "#3a3a3a",
-											marginHorizontal: 8,
-											marginVertical: 4,
-											borderRadius: 24,
+											display: "flex",
+											flexDirection: "row",
+											justifyContent:
+												message.sender === currentUser
+													? "flex-end"
+													: "flex-start",
 										}}
 									>
-										{message.text}
-									</Text>
-								</View>
+										<Text
+											style={{
+												minHeight: 48,
+												maxWidth: width / 2 - 16,
+												textAlignVertical: "center",
+												paddingHorizontal: 16,
+												backgroundColor: "#3a3a3a",
+												marginHorizontal: 8,
+												marginVertical: 4,
+												borderRadius: 24,
+											}}
+										>
+											{message.text}
+										</Text>
+									</View>
+								</TouchableHighlight>
 							))}
 						</ScrollView>
 						<View

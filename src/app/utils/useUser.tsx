@@ -32,6 +32,8 @@ const useUser = (username?: string | null) => {
 			const followerList = await fetchFollowersFromDb(usernameToFetch);
 			const followingList = await fetchFollowingFromDb(usernameToFetch);
 			const isFollowingUser = await checkFollowingInDb(usernameToFetch);
+			if (postsByUser) PostsStore.addPosts(postsByUser);
+			if (userData) UsersStore.addUser(userData);
 			if (followerList) FollowersStore.setFollowers(followerList);
 			if (followingList) FollowersStore.setFollowers(followingList);
 

@@ -1,18 +1,22 @@
-import { RouteProp, useNavigation } from "@react-navigation/core";
+import { RouteProp } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
 	ActivityIndicator,
+	FlatList,
+	RefreshControl,
 	ScrollView,
 	StatusBar,
 	TextInput,
+	useWindowDimensions,
 	View,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { Appbar, Divider, Text, useTheme } from "react-native-paper";
+import { Appbar, Caption, Divider, Text, useTheme } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
 import { MessageStackNavigationParams } from "../../types/navigation";
-import useMessageList from "../../utils/useMessageList";
+import useMessageList, { MessageList } from "../../utils/useMessageList";
+import { getTimeDistance } from "../../utils/utils";
 
 type Props = {
 	route: RouteProp<MessageStackNavigationParams, "MessageList">;
@@ -21,8 +25,55 @@ type Props = {
 		"MessageList"
 	>;
 };
+
+type UserItemProps = {
+	item: MessageList;
+	openMessage: (username: string) => void;
+};
+
+const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
+	return (
+		<TouchableOpacity
+			key={item.username}
+			style={{
+				display: "flex",
+				flexDirection: "row",
+				alignItems: "center",
+				margin: 16,
+			}}
+			onPress={() => openMessage(item.username)}
+		>
+			<UserAvatar size={32} />
+			<View
+				style={{
+					marginLeft: 16,
+				}}
+			>
+				<Text
+					style={{
+						fontSize: 18,
+					}}
+				>
+					{item.username}
+				</Text>
+				<Caption>
+					{item.text
+						? item.text
+						: item.messageType === "POST"
+						? "Sent a post"
+						: item.messageType === "IMAGE"
+						? "Sent an image"
+						: "Unsupported Message"}{" "}
+					- {getTimeDistance(item.lastMessageAt)}
+				</Caption>
+			</View>
+		</TouchableOpacity>
+	);
+};
+
 const MessagesList: React.FC<Props> = ({ navigation }) => {
 	const { colors, dark } = useTheme();
+	const { width, height } = useWindowDimensions();
 	const { messageList, loading, fetchMessageList } = useMessageList();
 	const [searchTerm, setSearchTerm] = useState("");
 
@@ -71,50 +122,65 @@ const MessagesList: React.FC<Props> = ({ navigation }) => {
 					<ActivityIndicator color={colors.text} />
 				</View>
 			)}
-			<ScrollView
-				style={{
-					flex: 1,
-				}}
-			>
-				<TextInput
-					placeholder="Search"
-					placeholderTextColor={"gray"}
-					onChangeText={(text) => setSearchTerm(text)}
-					style={{
-						flex: 1,
-						marginHorizontal: 16,
-						marginVertical: 16,
-						height: 40,
-						backgroundColor: "#3a3a3a",
-						borderRadius: 6,
-						paddingHorizontal: 16,
-						color: colors.text,
-					}}
-				/>
-				<Divider />
 
-				{messageList.map((messageListItem) => (
-					<TouchableOpacity
+			<FlatList
+				ListHeaderComponent={
+					<>
+						<TextInput
+							placeholder="Search"
+							placeholderTextColor={"gray"}
+							onChangeText={(text) => setSearchTerm(text)}
+							style={{
+								flex: 1,
+								marginHorizontal: 16,
+								marginVertical: 16,
+								height: 40,
+								backgroundColor: "#3a3a3a",
+								borderRadius: 6,
+								paddingHorizontal: 16,
+								color: colors.text,
+							}}
+						/>
+						<Divider />
+					</>
+				}
+				ListEmptyComponent={
+					<View
 						style={{
 							display: "flex",
-							flexDirection: "row",
+							flexDirection: "column",
+							height: height - (StatusBar.currentHeight || 0),
 							alignItems: "center",
-							margin: 16,
+							justifyContent: "center",
 						}}
-						onPress={() => openMessage("niketan")}
 					>
-						<UserAvatar size={32} />
-						<Text
-							style={{
-								marginLeft: 16,
-								fontSize: 18,
-							}}
-						>
-							Niketan Gulekar
-						</Text>
-					</TouchableOpacity>
-				))}
-			</ScrollView>
+						<Text>Nothing to see here, yet.</Text>
+					</View>
+				}
+				data={messageList
+					.slice()
+					.sort(
+						(a, b) =>
+							new Date(b.lastMessageAt).getTime() -
+							new Date(a.lastMessageAt).getTime()
+					)}
+				ItemSeparatorComponent={Divider}
+				renderItem={({ item }) => (
+					<UserListItem item={item} openMessage={openMessage} />
+				)}
+				keyExtractor={(item) => item.username}
+				bouncesZoom
+				bounces
+				style={{
+					backgroundColor: colors.background,
+				}}
+				refreshControl={
+					<RefreshControl
+						refreshing={loading}
+						onRefresh={fetchMessageList}
+					/>
+				}
+			/>
 		</View>
 	);
 };

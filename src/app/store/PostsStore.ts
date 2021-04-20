@@ -33,6 +33,9 @@ const PostsStore = types
 			if (!self.posts.find((post) => post.postId === newPost.postId))
 				self.posts.push(newPost);
 		};
+		const addPosts = (posts: Array<Post>) => {
+			self.posts.replace(uniqueList<Post>(self.posts, posts, "postId"));
+		};
 
 		const newPost = flow(function* (
 			postData: Pick<
@@ -88,6 +91,7 @@ const PostsStore = types
 
 		return {
 			newPost,
+			addPosts,
 			setPosts,
 			addPost,
 			deletePost,

@@ -24,6 +24,12 @@ const MessagesStore = types
 			self.messages.replace(messages);
 		};
 
+		const addMessages = (messages: Array<Message>) => {
+			self.messages.replace(
+				uniqueList<Message>(self.messages, messages, "messageId")
+			);
+		};
+
 		const addMessage = (newMessage: Message) => {
 			if (
 				!self.messages.find(
@@ -78,6 +84,7 @@ const MessagesStore = types
 			addMessage,
 			deleteMessage,
 			getMessages,
+			addMessages,
 		};
 	})
 	.create({

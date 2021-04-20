@@ -1,3 +1,4 @@
+import { format, formatDistanceToNow } from "date-fns";
 import { Post } from "../store/PostsStore";
 import { definitions } from "../types/supabase";
 
@@ -7,18 +8,19 @@ export function uniqueList<Model>(
 	key: keyof Model
 ) {
 	const temp = [...oldList, ...newList];
-	return [
-		...new Map(temp.map((item) => [(item as any)[key], item])).values(),
-	];
+	return [...new Map(temp.map((item) => [item[key], item])).values()];
 }
 
-const mapPosts = (allPosts: definitions["posts"][]) => {
-	return allPosts.map(
+export const mapPosts = (allPosts: definitions["posts"][]) =>
+	allPosts.map(
 		(post) =>
 			({
 				...post,
 				postedAt: new Date(post.postedAt).toISOString(),
 			} as Post)
 	);
-};
-export default mapPosts;
+
+export const getTimeDistance = (time: string) =>
+	new Date(time).getTime() > new Date().getTime() - 1 * 24 * 60 * 60 * 1000
+		? `${formatDistanceToNow(new Date(time))} ago`
+		: format(new Date(time), "LLLL dd, yyyy");

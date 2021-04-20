@@ -23,7 +23,7 @@ import UsersStore from "../../store/UsersStore";
 import { Post } from "../../store/PostsStore";
 import supabaseClient from "../../utils/supabaseClient";
 import { definitions } from "../../types/supabase";
-import mapPosts from "../../utils/utils";
+import { mapPosts } from "../../utils/utils";
 
 type Props = {
 	navigation: StackNavigationProp<ExploreStackNavigationParams, "Explore">;

@@ -5,7 +5,7 @@ import { definitions } from "../types/supabase";
 import { AppContext } from "./appContext";
 import supabaseClient from "./supabaseClient";
 import { fetchFollowingFromDb } from "./supabaseUtils";
-import mapPosts, { uniqueList } from "./utils";
+import { mapPosts, uniqueList } from "./utils";
 
 type FeedPosts = {
 	loading: boolean;

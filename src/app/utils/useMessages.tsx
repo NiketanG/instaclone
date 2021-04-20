@@ -1,16 +1,21 @@
 import { SupabaseRealtimePayload } from "@supabase/supabase-js";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import MessagesStore, { Message } from "../store/MessagesStore";
 import { definitions } from "../types/supabase";
 import { AppContext } from "./appContext";
 import supabaseClient from "./supabaseClient";
-import { getMessagesFromDb, newMessageInDb } from "./supabaseUtils";
+import {
+	deleteMessageFromDb,
+	getMessagesFromDb,
+	newMessageInDb,
+} from "./supabaseUtils";
 
 type ReturnType = {
 	messages: Message[];
 	loading: boolean;
 	fetchMessages: () => void;
 	newMessage: (newMessage: Pick<Message, "receiver" | "text">) => void;
+	deleteMessage: (messageId: number) => void;
 };
 const useMessages = (username: string): ReturnType => {
 	const [messages, setMessages] = useState<Array<Message>>([]);
@@ -33,37 +38,58 @@ const useMessages = (username: string): ReturnType => {
 		}
 	};
 
+	const messagesRef = useRef(messages);
+
+	useEffect(() => {
+		messagesRef.current = messages;
+	});
+
 	const newMessageReceived = (
 		payload: SupabaseRealtimePayload<definitions["messages"]>
 	) => {
-		console.log("newMessage", payload.new.text);
-		setMessages([
-			...messages,
-			{
-				messageId: payload.new.messageId,
-				message_type: payload.new.message_type,
-				postId: payload.new.postId,
-				received_at: payload.new.received_at,
-				receiver: payload.new.receiver,
-				sender: payload.new.sender,
-				text: payload.new.text,
-				imageUrl: payload.new.imageUrl || undefined,
-			},
-		]);
-	};
-	useEffect(() => {
-		const messagesSubscription = supabaseClient
-			.from<definitions["messages"]>(
-				`messages:sender=eq.${username},receiver=eq.${currentUser}`
-			)
-			.on("INSERT", newMessageReceived)
-			.subscribe();
-
-		return () => {
-			supabaseClient.removeSubscription(messagesSubscription);
+		const receivedMessage = {
+			messageId: payload.new.messageId,
+			message_type: payload.new.message_type,
+			postId: payload.new.postId || undefined,
+			received_at: payload.new.received_at,
+			receiver: payload.new.receiver,
+			sender: payload.new.sender,
+			text: payload.new.text || undefined,
+			imageUrl: payload.new.imageUrl || undefined,
 		};
+
+		MessagesStore.addMessage(receivedMessage);
+		if (payload.new.sender === username) {
+			setMessages([...messagesRef.current, receivedMessage]);
+		}
+	};
+
+	useEffect(() => {
+		if (!currentUser) {
+			return;
+		} else {
+			const messagesSubscription = supabaseClient
+				.from<definitions["messages"]>(
+					`messages:receiver=eq.${currentUser}`
+				)
+				.on("INSERT", newMessageReceived)
+				.subscribe();
+
+			return () => {
+				supabaseClient.removeSubscription(messagesSubscription);
+			};
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [username, currentUser]);
+	}, [currentUser, messagesRef.current]);
+
+	const deleteMessage = async (messageId: number) => {
+		const tempMessages = messages.filter(
+			(message) => message.messageId !== messageId
+		);
+		setMessages(tempMessages);
+		await deleteMessageFromDb(messageId);
+		MessagesStore.deleteMessage(messageId);
+	};
 
 	const fetchMessages = async () => {
 		try {
@@ -114,8 +140,9 @@ const useMessages = (username: string): ReturnType => {
 			loading: false,
 			fetchMessages,
 			newMessage,
+			deleteMessage,
 		};
-	return { messages, loading, fetchMessages, newMessage };
+	return { messages, loading, fetchMessages, newMessage, deleteMessage };
 };
 
 export default useMessages;

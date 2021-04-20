@@ -7,7 +7,7 @@ import UsersStore, { User } from "../store/UsersStore";
 import { definitions } from "../types/supabase";
 
 import supabaseClient from "./supabaseClient";
-import mapPosts from "./utils";
+import { mapPosts } from "./utils";
 
 export const newMessageInDb = async (
 	newMessage: Pick<Message, "receiver" | "text">
@@ -41,6 +41,26 @@ export const newMessageInDb = async (
 				${newMessageData.error || "No Data"}`
 		);
 		return null;
+	}
+};
+
+export const deleteMessageFromDb = async (messageId: number) => {
+	if (!messageId) return false;
+	try {
+		const res = await supabaseClient
+			.from<definitions["messages"]>("messages")
+			.delete()
+			.match({
+				messageId: messageId,
+			});
+		if (res.error) {
+			console.error("[deleteMessageFromDb_Response]", res.error);
+			return false;
+		}
+		return true;
+	} catch (err) {
+		console.error("[deleteMessageFromDb]", err);
+		return false;
 	}
 };
 

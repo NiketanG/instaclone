@@ -72,8 +72,8 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 	};
 
 	const removeComment = () => {
-		setSelectedComment(null);
 		if (selectedComment) deleteComment(selectedComment);
+		setSelectedComment(null);
 	};
 
 	return (
