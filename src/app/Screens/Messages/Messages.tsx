@@ -3,12 +3,20 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
+	Image,
 	ScrollView,
 	StatusBar,
 	TextInput,
+	useWindowDimensions,
 	View,
 } from "react-native";
-import { Appbar, useTheme, IconButton } from "react-native-paper";
+
+import {
+	Appbar,
+	useTheme,
+	IconButton,
+	TouchableRipple,
+} from "react-native-paper";
 import ImageMessage from "../../Components/Messages/ImageMessage";
 import PostMessage from "../../Components/Messages/PostMessage";
 import TextMessage from "../../Components/Messages/TextMessage";
@@ -90,6 +98,17 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 		if (scrollViewRef && !loading) scrollViewRef.current?.scrollToEnd();
 	}, [scrollViewRef, loading]);
 
+	const [expanded, setExpanded] = useState(false);
+	const [expandedImageUrl, setExpandedImageUrl] = useState<string | null>(
+		null
+	);
+
+	const { width, height } = useWindowDimensions();
+	const toggleImageExpand = (imageUrl?: string) => {
+		setExpanded(!expanded);
+		setExpandedImageUrl(imageUrl || null);
+	};
+
 	return (
 		<View
 			style={{
@@ -120,6 +139,40 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 				)}
 			</Appbar.Header>
 
+			{expanded && expandedImageUrl && (
+				<TouchableRipple
+					onPress={() => {
+						toggleImageExpand();
+					}}
+					rippleColor={"black"}
+					style={{
+						width,
+						alignItems: "center",
+						justifyContent: "center",
+						elevation: 10,
+						zIndex: 10,
+						height,
+						display: "flex",
+						position: "absolute",
+						backgroundColor: "rgba(0,0,0,0.75)",
+					}}
+				>
+					<Image
+						source={{
+							uri: expandedImageUrl,
+						}}
+						style={{
+							height: width - 48,
+							width: width - 48,
+							backgroundColor: "#3a3a3a",
+							marginHorizontal: 8,
+							marginVertical: 4,
+							borderRadius: 8,
+						}}
+					/>
+				</TouchableRipple>
+			)}
+
 			<View
 				style={{
 					flex: 1,
@@ -149,6 +202,11 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 								if (message.message_type === "IMAGE")
 									return (
 										<ImageMessage
+											toggleImageExpand={() => {
+												toggleImageExpand(
+													message.imageUrl
+												);
+											}}
 											key={message.messageId}
 											message={message}
 											selectMessage={selectMessage}

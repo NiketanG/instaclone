@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
 	TouchableHighlight,
 	View,
@@ -11,15 +11,20 @@ import { AppContext } from "../../utils/appContext";
 type Props = {
 	message: Message;
 	selectMessage: (username: string, messageId: number) => void;
+	toggleImageExpand: () => void;
 };
-const ImageMessage: React.FC<Props> = ({ message, selectMessage }) => {
+const ImageMessage: React.FC<Props> = ({
+	message,
+	selectMessage,
+	toggleImageExpand,
+}) => {
 	const { username: currentUser } = useContext(AppContext);
 	const { width } = useWindowDimensions();
 
 	return (
 		<TouchableHighlight
+			onPress={toggleImageExpand}
 			onLongPress={() => selectMessage(message.sender, message.messageId)}
-			key={message.messageId}
 		>
 			<View
 				style={{
