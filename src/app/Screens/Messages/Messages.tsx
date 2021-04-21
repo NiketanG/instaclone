@@ -1,17 +1,17 @@
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
-	Image,
 	ScrollView,
 	StatusBar,
 	TextInput,
-	useWindowDimensions,
 	View,
 } from "react-native";
-import { TouchableHighlight } from "react-native-gesture-handler";
-import { Appbar, Text, useTheme, IconButton } from "react-native-paper";
+import { Appbar, useTheme, IconButton } from "react-native-paper";
+import ImageMessage from "../../Components/Messages/ImageMessage";
+import PostMessage from "../../Components/Messages/PostMessage";
+import TextMessage from "../../Components/Messages/TextMessage";
 import { MessageStackNavigationParams } from "../../types/navigation";
 import { AppContext } from "../../utils/appContext";
 import useImageUpload from "../../utils/useImageUpload";
@@ -24,7 +24,6 @@ type Props = {
 
 const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
-	const { width } = useWindowDimensions();
 	const { messages, loading, newMessage, deleteMessage } = useMessages(
 		route.params.username
 	);
@@ -71,12 +70,25 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 			message_type: "TEXT",
 			postId: undefined,
 		});
+		scrollViewRef.current?.scrollToEnd();
 	};
 
 	const removeMessage = () => {
 		if (selectedMessage) deleteMessage(selectedMessage);
 		setSelectedMessage(null);
 	};
+
+	const openProfile = () => {
+		navigation.navigate("Profile", {
+			username: route.params.username,
+			goBack: () => navigation.goBack(),
+		});
+	};
+	const scrollViewRef = useRef<ScrollView>(null);
+
+	useEffect(() => {
+		if (scrollViewRef && !loading) scrollViewRef.current?.scrollToEnd();
+	}, [scrollViewRef, loading]);
 
 	return (
 		<View
@@ -99,7 +111,10 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 				}}
 			>
 				<Appbar.BackAction onPress={goBack} />
-				<Appbar.Content title={route.params.username} />
+				<Appbar.Content
+					title={route.params.username}
+					onPress={openProfile}
+				/>
 				{selectedMessage && (
 					<Appbar.Action icon="delete" onPress={removeMessage} />
 				)}
@@ -128,91 +143,35 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 								flex: 1,
 								flexGrow: 1,
 							}}
+							ref={scrollViewRef}
 						>
 							{messages.map((message) => {
-								if (message.message_type === "IMAGE") {
+								if (message.message_type === "IMAGE")
 									return (
-										<TouchableHighlight
-											onLongPress={() =>
-												selectMessage(
-													message.sender,
-													message.messageId
-												)
-											}
+										<ImageMessage
 											key={message.messageId}
-										>
-											<View
-												style={{
-													display: "flex",
-													flexDirection: "row",
-													justifyContent:
-														message.sender ===
-														currentUser
-															? "flex-end"
-															: "flex-start",
-												}}
-											>
-												<Image
-													source={{
-														uri: message.imageUrl,
-													}}
-													style={{
-														height: width / 2,
-														width: width / 2,
-														backgroundColor:
-															"#3a3a3a",
-														marginHorizontal: 8,
-														marginVertical: 4,
-														borderRadius: 8,
-													}}
-												/>
-											</View>
-										</TouchableHighlight>
+											message={message}
+											selectMessage={selectMessage}
+										/>
 									);
-								}
-								if (message.message_type === "TEXT") {
+
+								if (message.message_type === "POST")
 									return (
-										<TouchableHighlight
-											onLongPress={() =>
-												selectMessage(
-													message.sender,
-													message.messageId
-												)
-											}
+										<PostMessage
 											key={message.messageId}
-										>
-											<View
-												style={{
-													display: "flex",
-													flexDirection: "row",
-													justifyContent:
-														message.sender ===
-														currentUser
-															? "flex-end"
-															: "flex-start",
-												}}
-											>
-												<Text
-													style={{
-														minHeight: 48,
-														maxWidth:
-															width / 2 - 16,
-														textAlignVertical:
-															"center",
-														paddingHorizontal: 16,
-														backgroundColor:
-															"#3a3a3a",
-														marginHorizontal: 8,
-														marginVertical: 4,
-														borderRadius: 24,
-													}}
-												>
-													{message.text}
-												</Text>
-											</View>
-										</TouchableHighlight>
+											message={message}
+											selectMessage={selectMessage}
+										/>
 									);
-								}
+
+								if (message.message_type === "TEXT")
+									return (
+										<TextMessage
+											key={message.messageId}
+											message={message}
+											selectMessage={selectMessage}
+										/>
+									);
 							})}
 						</ScrollView>
 						<View

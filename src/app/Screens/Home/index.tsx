@@ -31,6 +31,10 @@ const Home: React.FC<Props> = observer(({ route }) => {
 	const { fetchFeed, loading, posts: feedPosts } = useFeed();
 
 	const { height } = useWindowDimensions();
+
+	const openMessages = () =>
+		route.params.rootNavigation?.navigate("Messages");
+
 	return (
 		<View
 			style={{
@@ -51,7 +55,7 @@ const Home: React.FC<Props> = observer(({ route }) => {
 			>
 				<Appbar.Content title="Instaclone" />
 
-				<Appbar.Action icon="send-outline" />
+				<Appbar.Action icon="send-outline" onPress={openMessages} />
 			</Appbar.Header>
 
 			{loading && (

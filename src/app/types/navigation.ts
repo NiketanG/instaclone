@@ -3,11 +3,25 @@ import { Follower } from "../store/FollowersStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "../store/UsersStore";
 import { definitions } from "./supabase";
+import { MaterialTopTabNavigationProp } from "@react-navigation/material-top-tabs";
 
 export type MessageStackNavigationParams = {
-	MessageList: undefined;
+	MessageList: {
+		rootNavigation: MaterialTopTabNavigationProp<
+			SwipeTabNavigationParams,
+			"Messages"
+		>;
+	};
 	Messages: {
 		username: string;
+	};
+	Comments: CommentsPageParams;
+	Profile: ProfilePageProps & {
+		goBack: () => void;
+	};
+	Post: {
+		post: Pick<Post, "caption" | "postedAt" | "postId" | "imageUrl">;
+		user: Pick<User, "username" | "profilePic">;
 	};
 };
 export type SignInNavigationParams = {
@@ -29,7 +43,12 @@ export type SwipeTabNavigationParams = {
 	Messages: undefined;
 };
 export type HomeStackNavigationParams = {
-	Home: undefined;
+	Home: {
+		rootNavigation: MaterialTopTabNavigationProp<
+			SwipeTabNavigationParams,
+			"Tabs"
+		>;
+	};
 	Comments: CommentsPageParams;
 	Profile: StackNavigationProp<ProfileStackParams, "ProfilePage">;
 };
@@ -59,10 +78,7 @@ export type ExploreStackNavigationParams = {
 	Explore: undefined;
 	PostDetail: {
 		post: Pick<Post, "caption" | "postedAt" | "postId" | "imageUrl">;
-		user: {
-			username: string;
-			profilePic: string | null;
-		};
+		user: Pick<User, "username" | "profilePic">;
 	};
 	Comments: CommentsPageParams;
 	Profile: ProfilePageProps & {
@@ -86,7 +102,12 @@ export type PostStackNavigationParams = {
 };
 
 export type TabNavigationParams = {
-	Home: undefined;
+	Home: {
+		rootNavigation: MaterialTopTabNavigationProp<
+			SwipeTabNavigationParams,
+			"Tabs"
+		>;
+	};
 	Explore: undefined;
 	// Activity: undefined;
 	New: undefined;

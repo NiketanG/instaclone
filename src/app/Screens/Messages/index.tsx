@@ -5,7 +5,6 @@ import {
 	ActivityIndicator,
 	FlatList,
 	RefreshControl,
-	ScrollView,
 	StatusBar,
 	TextInput,
 	useWindowDimensions,
@@ -71,16 +70,19 @@ const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
 	);
 };
 
-const MessagesList: React.FC<Props> = ({ navigation }) => {
+const MessagesList: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
-	const { width, height } = useWindowDimensions();
+	const { height } = useWindowDimensions();
 	const { messageList, loading, fetchMessageList } = useMessageList();
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const newMessage = () => {
 		console.log("new");
 	};
-	const goBack = () => navigation.goBack();
+	const goBack = () =>
+		route.params.rootNavigation
+			? route.params.rootNavigation.goBack()
+			: null;
 
 	const openMessage = (username: string) => {
 		navigation.navigate("Messages", {

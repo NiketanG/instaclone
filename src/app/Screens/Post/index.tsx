@@ -28,13 +28,13 @@ const PostDetail: React.FC<Props> = ({ route, navigation }) => {
 				<Appbar.BackAction onPress={() => navigation.goBack()} />
 				<Appbar.Content title="Post" />
 			</Appbar.Header>
+
 			<Post
 				caption={route.params.post.caption}
 				imageUrl={route.params.post.imageUrl}
 				postId={route.params.post.postId}
 				postedAt={route.params.post.postedAt}
 				user={route.params.user}
-				likes={0}
 			/>
 		</View>
 	);

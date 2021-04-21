@@ -1,7 +1,10 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, RouteProp } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { TabNavigationParams } from "../types/navigation";
+import {
+	SwipeTabNavigationParams,
+	TabNavigationParams,
+} from "../types/navigation";
 import Icon from "react-native-vector-icons/Ionicons";
 
 import ProfilePageStack from "./ProfileStack";
@@ -9,6 +12,7 @@ import NewPost from "../Screens/NewPost";
 import { useTheme } from "react-native-paper";
 import HomePageStack from "./HomeStack";
 import ExplorePageStack from "./ExploreStack";
+import { MaterialTopTabNavigationProp } from "@react-navigation/material-top-tabs";
 
 const Tab = createBottomTabNavigator<TabNavigationParams>();
 
@@ -21,7 +25,12 @@ const TabBarIcon = ({ name, color }: { name: string; color: string }) => (
 	/>
 );
 
-export const TabNavigation = () => {
+type Props = {
+	route: RouteProp<SwipeTabNavigationParams, "Tabs">;
+	navigation: MaterialTopTabNavigationProp<SwipeTabNavigationParams, "Tabs">;
+};
+
+export const TabNavigation: React.FC<Props> = ({ navigation }) => {
 	const { colors, dark } = useTheme();
 	return (
 		<NavigationContainer
@@ -50,6 +59,9 @@ export const TabNavigation = () => {
 				<Tab.Screen
 					name="Home"
 					component={HomePageStack}
+					initialParams={{
+						rootNavigation: navigation,
+					}}
 					options={{
 						tabBarIcon: ({ color, focused }) => (
 							<TabBarIcon
