@@ -4,7 +4,9 @@ if (!Config.CLOUDINARY_CLOUD_NAME || !Config.CLOUDINARY_UPLOAD_PRESET) {
 	console.error("[Supabase] URL and Key not found in environment variables.");
 }
 
-const uploadToCloudinary = async (base64String: string) => {
+const uploadToCloudinary = async (
+	base64String: string
+): Promise<string | null> => {
 	const formData = new FormData();
 	formData.append("file", base64String);
 	formData.append("upload_preset", Config.CLOUDINARY_UPLOAD_PRESET);

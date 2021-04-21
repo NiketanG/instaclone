@@ -10,7 +10,10 @@ import supabaseClient from "./supabaseClient";
 import { mapPosts } from "./utils";
 
 export const newMessageInDb = async (
-	newMessage: Pick<Message, "receiver" | "text">
+	newMessage: Pick<
+		Message,
+		"receiver" | "text" | "imageUrl" | "message_type" | "postId"
+	>
 ): Promise<Message | null> => {
 	const currentUser = await AsyncStorage.getItem("username");
 	if (!currentUser) {
@@ -20,6 +23,9 @@ export const newMessageInDb = async (
 	const newMessageData = await supabaseClient
 		.from<definitions["messages"]>("messages")
 		.insert({
+			imageUrl: newMessage.imageUrl,
+			postId: newMessage.postId,
+			message_type: newMessage.message_type || "TEXT",
 			text: newMessage.text,
 			receiver: newMessage.receiver,
 			sender: currentUser,

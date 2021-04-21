@@ -14,7 +14,12 @@ type ReturnType = {
 	messages: Message[];
 	loading: boolean;
 	fetchMessages: () => void;
-	newMessage: (newMessage: Pick<Message, "receiver" | "text">) => void;
+	newMessage: (
+		newMessage: Pick<
+			Message,
+			"receiver" | "text" | "imageUrl" | "message_type" | "postId"
+		>
+	) => void;
 	deleteMessage: (messageId: number) => void;
 };
 const useMessages = (username: string): ReturnType => {
@@ -104,7 +109,10 @@ const useMessages = (username: string): ReturnType => {
 	};
 
 	const newMessage = async (
-		messageToSend: Pick<Message, "receiver" | "text">
+		messageToSend: Pick<
+			Message,
+			"receiver" | "text" | "imageUrl" | "message_type" | "postId"
+		>
 	) => {
 		const newMessageData = await newMessageInDb(messageToSend);
 		if (newMessageData) {
@@ -112,6 +120,7 @@ const useMessages = (username: string): ReturnType => {
 			MessagesStore.addMessage(newMessageData);
 		}
 	};
+
 	useEffect(() => {
 		if (username && currentUser) {
 			const fetchedMessages = MessagesStore.messages
