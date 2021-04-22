@@ -1540,34 +1540,6 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@gorhom/animated-tabbar@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@gorhom/animated-tabbar/-/animated-tabbar-2.1.1.tgz#2f804646403b9838e9d24af1e994b706262f9515"
-  integrity sha512-KN+fsmqen3g+w0sDPJSnlUrNUtKno+t/4M39+V0rg78v2tM9q7TVlp23SunsY3CmssT+IRVfGX3iMNkzgOzIdQ==
-  dependencies:
-    lodash.isequal "^4.5.0"
-    react-native-redash "15.7.3"
-
-"@gorhom/bottom-sheet@^3":
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/@gorhom/bottom-sheet/-/bottom-sheet-3.6.3.tgz#461c8e419920f39f65a9ffa467f4406a890faee0"
-  integrity sha512-bFs7q29OyECsrT1GJUMgwBwGgT4OzH5640QWur5ZzJ73u3nQKxAVzGtbtc0JyGCbUPq66iXeQDyAwT3xNkG/iQ==
-  dependencies:
-    "@gorhom/portal" "^1.0.4"
-    invariant "^2.2.4"
-    lodash.isequal "^4.5.0"
-    nanoid "^3.1.20"
-    react-native-redash "^16.0.8"
-
-"@gorhom/portal@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@gorhom/portal/-/portal-1.0.4.tgz#643c7baaffee223819cdd99dad748c3d9dc6bd73"
-  integrity sha512-KalM9E6Op1TCzi00YKhczBz86EV0yYpWuRuTt5J4VS09O2gGbGAEEJwUKb/Rvr3XadtinpLjePj0tZ6lFVPp+g==
-  dependencies:
-    immer "^8.0.1"
-    lodash.isequal "^4.5.0"
-    nanoid "^3.1.20"
-
 "@hapi/address@2.x.x":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-2.1.4.tgz#5d67ed43f3fd41a69d4b9ff7b56e7c0d1d0a81e5"
@@ -2948,11 +2920,6 @@ abort-controller@^3.0.0:
   integrity sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==
   dependencies:
     event-target-shim "^5.0.0"
-
-abs-svg-path@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/abs-svg-path/-/abs-svg-path-0.1.1.tgz#df601c8e8d2ba10d4a76d625e236a9a39c2723bf"
-  integrity sha1-32Acjo0roQ1KdtYl4japo5wnI78=
 
 absolute-path@^0.0.0:
   version "0.0.0"
@@ -6133,11 +6100,6 @@ extsprintf@^1.2.0:
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
 
-fast-base64-decode@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/fast-base64-decode/-/fast-base64-decode-1.0.0.tgz#b434a0dd7d92b12b43f26819300d2dafb83ee418"
-  integrity sha512-qwaScUgUGBYeDNRnbc/KyllVU88Jk1pRHPStuF/lO7B0/RTRLj7U0lkdTAutlBblY08rwZDff6tNU9cjv6j//Q==
-
 fast-deep-equal@^3.1.1:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
@@ -7059,11 +7021,6 @@ immer@8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/immer/-/immer-8.0.1.tgz#9c73db683e2b3975c424fb0572af5889877ae656"
   integrity sha512-aqXhGP7//Gui2+UrEtvxZxSquQVXTpZ7KDxfCcKAF3Vysvw0CViVaW9RZ1j1xlIYqaaaipBoqdqeibkc18PNvA==
-
-immer@^8.0.1:
-  version "8.0.4"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-8.0.4.tgz#3a21605a4e2dded852fb2afd208ad50969737b7a"
-  integrity sha512-jMfL18P+/6P6epANRvRk6q8t+3gGhqsJ9EuJ25AXE+9bNTYtssvzeYbEd0mXRYWCmmXSIbnlpz6vd6iJlmGGGQ==
 
 import-cwd@^2.0.0:
   version "2.1.0"
@@ -9261,7 +9218,7 @@ nanoid@^3.1.15:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.20.tgz#badc263c6b1dcf14b71efaa85f6ab4c1d6cfc788"
   integrity sha512-a1cQNyczgKbLX9jwbS/+d7W8fX/RfgYR7lVWwWOGIPNgK2m0MWvrGF6/m4kk6U3QcFMnZf3RIhL0v2Jgh/0Uxw==
 
-nanoid@^3.1.20, nanoid@^3.1.22:
+nanoid@^3.1.20:
   version "3.1.22"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.22.tgz#b35f8fb7d151990a8aebd5aa5015c03cf726f844"
   integrity sha512-/2ZUaJX2ANuLtTvqTlgqBQNJoQO398KyJgZloL0PZkC0dpysjncRUPsFe3DUPzz/y3h+u7C46np8RMuvF3jsSQ==
@@ -9442,13 +9399,6 @@ normalize-range@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/normalize-range/-/normalize-range-0.1.2.tgz#2d10c06bdfd312ea9777695a4d28439456b75942"
   integrity sha1-LRDAa9/TEuqXd2laTShDlFa3WUI=
-
-normalize-svg-path@^1.0.1:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/normalize-svg-path/-/normalize-svg-path-1.1.0.tgz#0e614eca23c39f0cffe821d6be6cd17e569a766c"
-  integrity sha512-r9KHKG2UUeB5LoTouwDzBy2VxXlHsiM6fyLQvnJa0S5hrhzqElH/CH7TUGhT1fVvIYBIKf3OpY4YJ4CK+iaqHg==
-  dependencies:
-    svg-arc-to-cubic-bezier "^3.0.0"
 
 normalize-url@1.9.1:
   version "1.9.1"
@@ -9877,11 +9827,6 @@ parse-json@^5.0.0:
     error-ex "^1.3.1"
     json-parse-even-better-errors "^2.3.0"
     lines-and-columns "^1.1.6"
-
-parse-svg-path@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/parse-svg-path/-/parse-svg-path-0.1.2.tgz#7a7ec0d1eb06fa5325c7d3e009b859a09b5d49eb"
-  integrity sha1-en7A0esG+lMlx9PgCbhZoJtdSes=
 
 parse5@6.0.1:
   version "6.0.1"
@@ -10846,7 +10791,7 @@ prompts@2.4.0, prompts@^2.0.1, prompts@^2.4.0:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.6.0, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -10999,11 +10944,6 @@ raf@^3.4.1:
   dependencies:
     performance-now "^2.1.0"
 
-ramda@^0.25.0:
-  version "0.25.0"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.25.0.tgz#8fdf68231cffa90bc2f9460390a0cb74a29b29a9"
-  integrity sha512-GXpfrYVPwx3K7RQ6aYT8KPS8XViSXUVJT1ONhoKPE9VAleW42YE+U+8VEyGWt41EnEQW7gwecYJriTI0pKoecQ==
-
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/randombytes/-/randombytes-2.1.0.tgz#df6f84372f0270dc65cdf6291349ab7a473d4f2a"
@@ -11126,13 +11066,6 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz#5b3531bd76a645a4c9fb6e693ed36419e3301339"
   integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
 
-react-native-animatable@1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/react-native-animatable/-/react-native-animatable-1.3.3.tgz#a13a4af8258e3bb14d0a9d839917e9bb9274ec8a"
-  integrity sha512-2ckIxZQAsvWn25Ho+DK3d1mXIgj7tITkrS4pYDvx96WyOttSvzzFeQnM2od0+FUMzILbdHDsDEqZvnz1DYNQ1w==
-  dependencies:
-    prop-types "^15.7.2"
-
 react-native-codegen@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/react-native-codegen/-/react-native-codegen-0.0.6.tgz#b3173faa879cf71bfade8d030f9c4698388f6909"
@@ -11163,13 +11096,6 @@ react-native-gesture-handler@^1.10.3:
     invariant "^2.2.4"
     prop-types "^15.7.2"
 
-react-native-get-random-values@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/react-native-get-random-values/-/react-native-get-random-values-1.6.0.tgz#9035636b2dc2a6d574f2803205381fe1a7b5c864"
-  integrity sha512-sPTRTJk4bpuZeTBf6d7DldQGAOCi0GZh5NxzNI3eHXzxwHbNkV13Q22TehiSb3bsaVqwLC4UAa6QvYIucyyc+A==
-  dependencies:
-    fast-base64-decode "^1.0.0"
-
 react-native-image-crop-picker@^0.36.0:
   version "0.36.0"
   resolved "https://registry.yarnpkg.com/react-native-image-crop-picker/-/react-native-image-crop-picker-0.36.0.tgz#adf5a5677c3ae0e0bdaa18c73d880db2190e3023"
@@ -11179,14 +11105,6 @@ react-native-iphone-x-helper@^1.3.0, react-native-iphone-x-helper@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.3.1.tgz#20c603e9a0e765fd6f97396638bdeb0e5a60b010"
   integrity sha512-HOf0jzRnq2/aFUcdCJ9w9JGzN3gdEg0zFE4FyYlp4jtidqU03D5X7ZegGKfT1EWteR0gPBGp9ye5T5FvSWi9Yg==
-
-react-native-modal@^11.7.0:
-  version "11.7.0"
-  resolved "https://registry.yarnpkg.com/react-native-modal/-/react-native-modal-11.7.0.tgz#6637d757eeac6eda85f7017a9dfdee0c0fe3a34c"
-  integrity sha512-0AeAugUrn12DaJK+k2XGmt8ZIUyWgl1nRdipfwHZDnzFSM8g1oqpf7rHxjOqhimHtmzSj4xJ//ZOn1DWe9aC5Q==
-  dependencies:
-    prop-types "^15.6.2"
-    react-native-animatable "1.3.3"
 
 react-native-paper@^4.7.2:
   version "4.7.2"
@@ -11206,24 +11124,6 @@ react-native-reanimated@^2.1.0:
     fbjs "^3.0.0"
     mockdate "^3.0.2"
     string-hash-64 "^1.0.3"
-
-react-native-redash@15.7.3:
-  version "15.7.3"
-  resolved "https://registry.yarnpkg.com/react-native-redash/-/react-native-redash-15.7.3.tgz#40524976857aa7edbed9225985df8f8958505821"
-  integrity sha512-L/Ku5mUtOhobQAVt5fMHlvV1tcB2n3Aqg6JxrZBGOuNHYEovocxXiHSY5ZgHpmYwfMpTTgPWIBOWbXRJ/XymWQ==
-  dependencies:
-    abs-svg-path "^0.1.1"
-    normalize-svg-path "^1.0.1"
-    parse-svg-path "^0.1.2"
-
-react-native-redash@^16.0.8:
-  version "16.0.11"
-  resolved "https://registry.yarnpkg.com/react-native-redash/-/react-native-redash-16.0.11.tgz#973c3050a0645e3b9873790a8e68694770a32f27"
-  integrity sha512-9yTpeabkAoWASzmhEkynNh1wDTrLVtbE+x9dOV1DI23vRa7k1HI+Y1jOUNOPyRG2ddgHampNq9iHtsLnkK4mtw==
-  dependencies:
-    abs-svg-path "^0.1.1"
-    normalize-svg-path "^1.0.1"
-    parse-svg-path "^0.1.2"
 
 react-native-safe-area-context@^3.2.0:
   version "3.2.0"
@@ -11415,13 +11315,6 @@ reactotron-core-client@2.8.10:
   version "2.8.10"
   resolved "https://registry.yarnpkg.com/reactotron-core-client/-/reactotron-core-client-2.8.10.tgz#798f2a7aa9fd7e18e7a510531a613e8ae3008eb0"
   integrity sha512-SYRO4OCutJzfWMnaULUGVyETZnMDCU5ECNflXyM3Z5Gnfxp/wV6d7jYonhfxHdpU/aGb4Eg15C22myOCXSu6HQ==
-
-reactotron-mst@^3.1.3:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/reactotron-mst/-/reactotron-mst-3.1.3.tgz#110401af04be4e1d8d9185e73f1c9e54e393f204"
-  integrity sha512-mYdg7Ajp0immBrUHifhrFV2bwFEcGu/8mOGOhlbYJ2jDCFB5ZmZ3jY8LuZUnvwpL3zmLZUVfJFeousEZP1XJ5g==
-  dependencies:
-    ramda "^0.25.0"
 
 reactotron-react-native@^5.0.0:
   version "5.0.0"
@@ -12797,11 +12690,6 @@ supports-hyperlinks@^2.0.0:
   dependencies:
     has-flag "^4.0.0"
     supports-color "^7.0.0"
-
-svg-arc-to-cubic-bezier@^3.0.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/svg-arc-to-cubic-bezier/-/svg-arc-to-cubic-bezier-3.2.0.tgz#390c450035ae1c4a0104d90650304c3bc814abe6"
-  integrity sha512-djbJ/vZKZO+gPoSDThGNpKDO+o+bAeA4XQKovvkNCqnIS2t+S4qnLAGQhyyrulhCFRl1WWzAp0wUDV8PpTVU3g==
 
 svg-parser@^2.0.2:
   version "2.0.4"
