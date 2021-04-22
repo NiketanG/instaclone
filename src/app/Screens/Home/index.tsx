@@ -33,8 +33,7 @@ const Home: React.FC<Props> = observer(({ route }) => {
 
 	const { height } = useWindowDimensions();
 
-	const openMessages = () =>
-		route.params.rootNavigation?.navigate("Messages");
+	const openMessages = () => {};
 
 	const [openedModalData, setOpenedModalData] = useState<{
 		modalType: "MENU" | "SHARE";

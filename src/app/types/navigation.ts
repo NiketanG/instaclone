@@ -44,12 +44,7 @@ export type SwipeTabNavigationParams = {
 	Messages: undefined;
 };
 export type HomeStackNavigationParams = {
-	Home: {
-		rootNavigation: MaterialTopTabNavigationProp<
-			SwipeTabNavigationParams,
-			"Tabs"
-		>;
-	};
+	Home: undefined;
 	Comments: CommentsPageParams;
 	Profile: ProfilePageProps & {
 		goBack: () => void;
@@ -57,7 +52,12 @@ export type HomeStackNavigationParams = {
 };
 
 export type ProfileStackParams = {
-	ProfilePage: ProfilePageProps;
+	Messages: {
+		username: string;
+	};
+	ProfilePage: ProfilePageProps & {
+		goBack?: () => void;
+	};
 	Followers: ProfilePageProps & {
 		followers: Follower[];
 	};
@@ -96,8 +96,8 @@ export type PostListParams = {
 	};
 	postId: number;
 	postList: Array<definitions["posts"]>;
-	rootNavigation: StackNavigationProp<ProfileStackParams, "ProfilePage">;
 };
+
 export type PostStackNavigationParams = {
 	PostList: PostListParams;
 	Comments: CommentsPageParams;
@@ -105,12 +105,7 @@ export type PostStackNavigationParams = {
 };
 
 export type TabNavigationParams = {
-	Home: {
-		rootNavigation: MaterialTopTabNavigationProp<
-			SwipeTabNavigationParams,
-			"Tabs"
-		>;
-	};
+	Home: undefined;
 	Explore: undefined;
 	// Activity: undefined;
 	New: undefined;

@@ -29,7 +29,6 @@ type Props = {
 	route: RouteProp<SwipeTabNavigationParams, "Tabs">;
 	navigation: MaterialTopTabNavigationProp<SwipeTabNavigationParams, "Tabs">;
 };
-
 export const TabNavigation: React.FC<Props> = ({ navigation }) => {
 	const { colors, dark } = useTheme();
 	return (
@@ -59,9 +58,6 @@ export const TabNavigation: React.FC<Props> = ({ navigation }) => {
 				<Tab.Screen
 					name="Home"
 					component={HomePageStack}
-					initialParams={{
-						rootNavigation: navigation,
-					}}
 					options={{
 						tabBarIcon: ({ color, focused }) => (
 							<TabBarIcon

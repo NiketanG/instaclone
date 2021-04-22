@@ -2,6 +2,7 @@
 	"name": "instaclone",
 	"version": "0.0.1",
 	"private": true,
+	"author": "NiketanG",
 	"scripts": {
 		"android": "react-native run-android",
 		"android:release": "cd android && ./gradlew assembleRelease && cd ../ && mv android/app/build/outputs/apk/release/app-release.apk build/app-release.apk && adb install build/app-release.apk ",

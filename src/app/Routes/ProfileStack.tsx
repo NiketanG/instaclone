@@ -11,6 +11,7 @@ import EditProfile from "../Screens/Profile/Edit";
 import Followers from "../Screens/Profile/Followers";
 import Following from "../Screens/Profile/Following";
 import PostStack from "./PostStack";
+import Messages from "../Screens/Messages/Messages";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "ProfilePage">;
@@ -19,7 +20,7 @@ type Props = {
 
 const Stack = createStackNavigator<ProfileStackParams>();
 
-const ProfilePageStack = (props: Props) => {
+const ProfilePageStack: React.FC<Props> = ({ route }) => {
 	return (
 		<NavigationContainer independent>
 			<Stack.Navigator headerMode="none" initialRouteName="ProfilePage">
@@ -28,7 +29,7 @@ const ProfilePageStack = (props: Props) => {
 					component={Profile}
 					initialParams={{
 						isCurrentUser: true,
-						...props.route.params,
+						...route.params,
 					}}
 				/>
 				<Stack.Screen
@@ -36,7 +37,7 @@ const ProfilePageStack = (props: Props) => {
 					component={Followers}
 					initialParams={{
 						isCurrentUser: true,
-						...props.route.params,
+						...route.params,
 					}}
 				/>
 				<Stack.Screen
@@ -44,12 +45,13 @@ const ProfilePageStack = (props: Props) => {
 					component={Following}
 					initialParams={{
 						isCurrentUser: true,
-						...props.route.params,
+						...route.params,
 					}}
 				/>
 				<Stack.Screen name="Posts" component={PostStack} />
 				<Stack.Screen name="EditProfile" component={EditProfile} />
 				<Stack.Screen name="Settings" component={Settings} />
+				<Stack.Screen name="Messages" component={Messages} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

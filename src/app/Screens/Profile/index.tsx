@@ -25,15 +25,12 @@ import {
 } from "react-native-paper";
 import Icon from "react-native-vector-icons/Ionicons";
 import { UserAvatar } from "../../Components/UserAvatar";
-import {
-	ExploreStackNavigationParams,
-	ProfileStackParams,
-} from "../../types/navigation";
+import { ProfileStackParams } from "../../types/navigation";
 import { AppContext } from "../../utils/appContext";
 import useUser from "../../utils/useUser";
 
 type Props = {
-	route: RouteProp<ExploreStackNavigationParams, "Profile">;
+	route: RouteProp<ProfileStackParams, "ProfilePage">;
 	navigation: StackNavigationProp<ProfileStackParams, "ProfilePage">;
 };
 
@@ -48,6 +45,13 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 	const [isCurrentUser, setIsCurrentUser] = useState(false);
 
 	const { username: savedUsername } = useContext(AppContext);
+
+	const openMessage = () => {
+		if (route.params.username)
+			navigation.navigate("Messages", {
+				username: route.params.username,
+			});
+	};
 
 	const {
 		user,
@@ -288,9 +292,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 											borderColor: colors.text,
 											marginTop: 16,
 										}}
-										onPress={() =>
-											navigation.navigate("EditProfile")
-										}
+										onPress={openMessage}
 									>
 										Message
 									</Button>
@@ -372,7 +374,6 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 													},
 													postId: post.postId,
 													postList: posts,
-													rootNavigation: navigation,
 												});
 										}}
 									>
