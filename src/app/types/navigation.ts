@@ -6,12 +6,13 @@ import { definitions } from "./supabase";
 import { MaterialTopTabNavigationProp } from "@react-navigation/material-top-tabs";
 
 export type MessageStackNavigationParams = {
-	MessageList: {
+	ChatList: {
 		rootNavigation: MaterialTopTabNavigationProp<
 			SwipeTabNavigationParams,
 			"Messages"
 		>;
 	};
+	NewChat: undefined;
 	Messages: {
 		username: string;
 	};
@@ -50,7 +51,9 @@ export type HomeStackNavigationParams = {
 		>;
 	};
 	Comments: CommentsPageParams;
-	Profile: StackNavigationProp<ProfileStackParams, "ProfilePage">;
+	Profile: ProfilePageProps & {
+		goBack: () => void;
+	};
 };
 
 export type ProfileStackParams = {

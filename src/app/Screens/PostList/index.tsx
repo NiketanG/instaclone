@@ -1,11 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Appbar, Divider, useTheme } from "react-native-paper";
 import { FlatList, StatusBar, useWindowDimensions } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ProfileStackParams } from "../../types/navigation";
 import { RouteProp } from "@react-navigation/native";
-import { PostContainer } from "../../Components/PostContainer";
 import { definitions } from "../../types/supabase";
+import Post from "../../Components/Post";
+import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
 
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Posts">;
@@ -54,6 +55,29 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 		};
 	};
 
+	const [openedModalData, setOpenedModalData] = useState<{
+		modalType: "MENU" | "SHARE";
+		username: string;
+		postId: number;
+	} | null>(null);
+
+	const closeModal = () => {
+		setOpenedModalData(null);
+	};
+	const onClose = () => setOpenedModalData(null);
+
+	const openModal = (
+		modalType: "MENU" | "SHARE",
+		username: string,
+		postId: number
+	) => {
+		setOpenedModalData({
+			modalType,
+			postId: postId,
+			username: username,
+		});
+	};
+
 	return (
 		<>
 			<StatusBar
@@ -69,27 +93,46 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 				<Appbar.BackAction onPress={goBack} />
 				<Appbar.Content title="Posts" />
 			</Appbar.Header>
-			{route.params.postList && (
-				<FlatList
-					ref={listRef}
-					getItemLayout={getItemLayout}
-					data={route.params.postList.sort(
-						(a, b) =>
-							new Date(b.postedAt).getTime() -
-							new Date(a.postedAt).getTime()
-					)}
-					ItemSeparatorComponent={Divider}
-					renderItem={({ item }) => <PostContainer item={item} />}
-					keyExtractor={(item) => item.postId.toString()}
-					bouncesZoom
-					bounces
-					snapToAlignment={"start"}
-					showsVerticalScrollIndicator
-					style={{
-						backgroundColor: colors.background,
-					}}
-				/>
-			)}
+
+			<PostBottomSheetWrapper
+				onClose={onClose}
+				openedModalData={openedModalData}
+			>
+				{route.params.postList && (
+					<FlatList
+						ref={listRef}
+						getItemLayout={getItemLayout}
+						data={route.params.postList.sort(
+							(a, b) =>
+								new Date(b.postedAt).getTime() -
+								new Date(a.postedAt).getTime()
+						)}
+						ItemSeparatorComponent={Divider}
+						renderItem={({ item }) => (
+							<Post
+								closeModal={closeModal}
+								openModal={openModal}
+								caption={item.caption}
+								imageUrl={item.imageUrl}
+								postId={item.postId}
+								postedAt={item.postedAt}
+								user={{
+									username: item.user,
+									profilePic: undefined,
+								}}
+							/>
+						)}
+						keyExtractor={(item) => item.postId.toString()}
+						bouncesZoom
+						bounces
+						snapToAlignment={"start"}
+						showsVerticalScrollIndicator
+						style={{
+							backgroundColor: colors.background,
+						}}
+					/>
+				)}
+			</PostBottomSheetWrapper>
 		</>
 	);
 };

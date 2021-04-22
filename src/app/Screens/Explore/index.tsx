@@ -225,7 +225,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 										post,
 										user: {
 											username: post.user,
-											profilePic: null,
+											profilePic: undefined,
 										},
 									});
 								}}

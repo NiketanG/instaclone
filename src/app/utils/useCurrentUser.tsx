@@ -51,7 +51,7 @@ const useCurrentUser = () => {
 
 			setCurrentUser(data);
 		}
-	}, []);
+	}, [bio, email, name, profilePic, username]);
 
 	useEffect(() => {
 		if (email && username) {

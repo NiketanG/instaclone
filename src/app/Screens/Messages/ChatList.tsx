@@ -1,6 +1,6 @@
 import { RouteProp } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
@@ -14,23 +14,22 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { Appbar, Caption, Divider, Text, useTheme } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
 import { MessageStackNavigationParams } from "../../types/navigation";
-import useMessageList, { MessageList } from "../../utils/useMessageList";
+import useChatList, { ChatList } from "../../utils/useChatList";
+import useUser from "../../utils/useUser";
 import { getTimeDistance } from "../../utils/utils";
 
 type Props = {
-	route: RouteProp<MessageStackNavigationParams, "MessageList">;
-	navigation: StackNavigationProp<
-		MessageStackNavigationParams,
-		"MessageList"
-	>;
+	route: RouteProp<MessageStackNavigationParams, "ChatList">;
+	navigation: StackNavigationProp<MessageStackNavigationParams, "ChatList">;
 };
 
 type UserItemProps = {
-	item: MessageList;
+	item: ChatList;
 	openMessage: (username: string) => void;
 };
 
 const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
+	const { user } = useUser(item.username);
 	return (
 		<TouchableOpacity
 			key={item.username}
@@ -42,7 +41,7 @@ const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
 			}}
 			onPress={() => openMessage(item.username)}
 		>
-			<UserAvatar size={32} />
+			<UserAvatar size={32} profilePicture={user?.profilePic} />
 			<View
 				style={{
 					marginLeft: 16,
@@ -73,12 +72,11 @@ const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
 const MessagesList: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
 	const { height } = useWindowDimensions();
-	const { messageList, loading, fetchMessageList } = useMessageList();
+	const { messageList, loading, fetchMessageList } = useChatList();
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const newMessage = () => {
-		console.log("new");
-	};
+	const newMessage = () => navigation.navigate("NewChat");
+
 	const goBack = () =>
 		route.params.rootNavigation
 			? route.params.rootNavigation.goBack()
@@ -89,6 +87,20 @@ const MessagesList: React.FC<Props> = ({ navigation, route }) => {
 			username,
 		});
 	};
+
+	const [searchResults, setSearchResults] = useState<ChatList[] | null>();
+
+	useEffect(() => {
+		if (searchTerm.length > 0) {
+			setSearchResults(
+				messageList.filter((item) =>
+					item.username.includes(searchTerm.toLowerCase())
+				)
+			);
+		} else {
+			setSearchResults(null);
+		}
+	}, [messageList, searchTerm]);
 
 	return (
 		<View
@@ -110,7 +122,7 @@ const MessagesList: React.FC<Props> = ({ navigation, route }) => {
 			>
 				<Appbar.BackAction onPress={goBack} />
 				<Appbar.Content title="Messages" />
-				<Appbar.Action icon="plus" onPress={fetchMessageList} />
+				<Appbar.Action icon="plus" onPress={newMessage} />
 			</Appbar.Header>
 
 			{loading && (
@@ -159,13 +171,17 @@ const MessagesList: React.FC<Props> = ({ navigation, route }) => {
 						<Text>Nothing to see here, yet.</Text>
 					</View>
 				}
-				data={messageList
-					.slice()
-					.sort(
-						(a, b) =>
-							new Date(b.lastMessageAt).getTime() -
-							new Date(a.lastMessageAt).getTime()
-					)}
+				data={
+					searchResults
+						? searchResults
+						: messageList
+								.slice()
+								.sort(
+									(a, b) =>
+										new Date(b.lastMessageAt).getTime() -
+										new Date(a.lastMessageAt).getTime()
+								)
+				}
 				ItemSeparatorComponent={Divider}
 				renderItem={({ item }) => (
 					<UserListItem item={item} openMessage={openMessage} />

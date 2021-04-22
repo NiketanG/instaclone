@@ -1,41 +1,29 @@
 import { SupabaseRealtimePayload } from "@supabase/supabase-js";
 import { useContext, useEffect, useRef, useState } from "react";
-import MessagesStore, { Message } from "../store/MessagesStore";
+import MessagesStore from "../store/MessagesStore";
 import { definitions } from "../types/supabase";
 import { AppContext } from "./appContext";
 import supabaseClient from "./supabaseClient";
 import { getMessageListFromDb } from "./supabaseUtils";
+import { getUsersList } from "./utils";
 
-export type MessageList = {
+export type ChatList = {
 	username: string;
 	lastMessageAt: string;
 	text: string | undefined;
 	messageType: string;
 };
 type ReturnType = {
-	messageList: MessageList[];
+	messageList: ChatList[];
 	loading: boolean;
 	fetchMessageList: () => void;
 };
 
-const useMessageList = (): ReturnType => {
-	const [messageList, setMessageList] = useState<Array<MessageList>>([]);
+const useChatList = (): ReturnType => {
+	const [messageList, setMessageList] = useState<Array<ChatList>>([]);
 	const [loading, setLoading] = useState(true);
 
 	const { username: currentUser } = useContext(AppContext);
-
-	const getUsersList = (messageListData: Message[]) => {
-		const users = messageListData.map((msg) => ({
-			username: msg.sender === currentUser ? msg.receiver : msg.sender,
-			messageType: msg.message_type,
-			text: msg.text,
-			lastMessageAt: msg.received_at,
-		}));
-
-		return [
-			...new Map(users.map((item) => [item.username, item])).values(),
-		];
-	};
 
 	const messageListRef = useRef(messageList);
 	useEffect(() => {
@@ -100,11 +88,14 @@ const useMessageList = (): ReturnType => {
 	}, [currentUser]);
 
 	const fetchMessageListData = async () => {
+		if (!currentUser)
+			return {
+				messageList: null,
+			};
 		try {
 			const messageListData = (await getMessageListFromDb()) || [];
-
 			return {
-				messageList: getUsersList(messageListData),
+				messageList: getUsersList(messageListData, currentUser),
 			};
 		} catch (err) {
 			console.error("[fetchUserData]", err);
@@ -127,10 +118,10 @@ const useMessageList = (): ReturnType => {
 						new Date(b.received_at).getTime() -
 						new Date(a.received_at).getTime()
 				);
-			if (messageListData) setMessageList(getUsersList(messageListData));
+			if (messageListData)
+				setMessageList(getUsersList(messageListData, currentUser));
 			setLoading(false);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentUser]);
 
 	const fetchMessageList = async () => {
@@ -160,4 +151,4 @@ const useMessageList = (): ReturnType => {
 	};
 };
 
-export default useMessageList;
+export default useChatList;

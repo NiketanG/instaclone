@@ -1,101 +1,32 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-	Image,
-	Text,
-	ToastAndroid,
-	useWindowDimensions,
-	View,
-} from "react-native";
+import React, { useState } from "react";
+import { Image, Text, useWindowDimensions } from "react-native";
 import {
 	Caption,
 	Card,
 	IconButton,
-	List,
 	Paragraph,
 	Title,
 	useTheme,
 } from "react-native-paper";
-import { format, formatDistanceToNow } from "date-fns";
 import Icon from "react-native-vector-icons/Ionicons";
-import { AppContext } from "../../utils/appContext";
 import { useNavigation } from "@react-navigation/native";
-import Modal from "react-native-modal";
 import { UserAvatar } from "../UserAvatar";
-import PostsStore, { Post as PostType } from "../../store/PostsStore";
+import { Post as PostType } from "../../store/PostsStore";
 import usePost from "../../utils/usePost";
-import supabaseClient from "../../utils/supabaseClient";
-import { definitions } from "../../types/supabase";
 import { getTimeDistance } from "../../utils/utils";
 
-type ModalProps = {
-	closeModal: () => void;
-	ownPost: boolean;
-	postId: number;
-	username: string;
-	viewProfile: () => void;
-};
-const PostModal: React.FC<ModalProps> = ({
-	postId,
-	closeModal,
-	ownPost,
-	viewProfile,
-}) => {
-	const { width } = useWindowDimensions();
-	const navigation = useNavigation();
-	const deletePost = async () => {
-		try {
-			await PostsStore.deletePost(postId);
-			closeModal();
-			navigation.goBack();
-		} catch (err) {
-			console.error("[deletePost]", err);
-			ToastAndroid.show("An error occured", ToastAndroid.LONG);
-		}
-	};
-
-	const openProfile = () => {
-		closeModal();
-		viewProfile();
-	};
-	return (
-		<View
-			style={{
-				width,
-				backgroundColor: "#2f2f2f",
-				justifyContent: "center",
-				position: "absolute",
-				bottom: 0,
-				paddingVertical: 16,
-			}}
-		>
-			{ownPost && (
-				<List.Item
-					title="Delete Post"
-					onPress={deletePost}
-					style={{
-						paddingHorizontal: 16,
-					}}
-				/>
-			)}
-
-			<List.Item
-				title="View Profile"
-				onPress={openProfile}
-				style={{
-					paddingHorizontal: 16,
-				}}
-			/>
-		</View>
-	);
-};
-
-type User = {
-	username: string;
-	profilePic?: string | null;
-};
+import { User } from "../../store/UsersStore";
+import useUser from "../../utils/useUser";
 
 type Props = Pick<PostType, "imageUrl" | "caption" | "postedAt" | "postId"> & {
-	user: User;
+	user: Pick<User, "username" | "profilePic">;
+	openModal: (
+		modalType: "MENU" | "SHARE",
+		username: string,
+		postId: number
+	) => void;
+
+	closeModal: (modalType: "MENU" | "SHARE") => void;
 };
 
 const Post: React.FC<Props> = ({
@@ -104,6 +35,7 @@ const Post: React.FC<Props> = ({
 	postId,
 	postedAt,
 	user: { username, profilePic },
+	openModal,
 }) => {
 	const navigation = useNavigation();
 
@@ -113,43 +45,9 @@ const Post: React.FC<Props> = ({
 	const [expandedCaption, setExpandedCaption] = useState(false);
 	const toggleExpandCaption = () => setExpandedCaption(!expandedCaption);
 
-	const { username: currentUsername } = useContext(AppContext);
-
 	const { liked, likes, toggleLike } = usePost(postId);
 
-	const [userProfilePic, setUserProfilePic] = useState<string | null>(null);
-	useEffect(() => {
-		(async () => {
-			if (!username) return;
-			if (profilePic) {
-				setUserProfilePic(profilePic);
-				return;
-			} else {
-				const userRes = await supabaseClient
-					.from<definitions["users"]>("users")
-					.select("*")
-					.eq("username", username);
-
-				if (userRes.error || userRes.data.length === 0) {
-					console.error(
-						"[fetchUserProfilePic_Response]",
-						userRes.error
-					);
-					setUserProfilePic(null);
-					return;
-				} else {
-					if (userRes.data[0].profilePic)
-						setUserProfilePic(userRes.data[0].profilePic);
-				}
-			}
-		})();
-	}, [username, profilePic]);
-
-	const [showModal, setShowModal] = useState(false);
-
-	const openModal = () => setShowModal(true);
-
-	const closeModal = () => setShowModal(false);
+	const { user } = useUser(username);
 
 	const goBack = () => navigation.goBack();
 
@@ -160,29 +58,28 @@ const Post: React.FC<Props> = ({
 			goBack,
 		});
 
+	const openComments = () =>
+		navigation.navigate("Comments", {
+			post: {
+				caption,
+				postedAt,
+				postId,
+			},
+			user: {
+				username,
+				profilePic: profilePic || user?.profilePic,
+			},
+		});
+
+	const openMenuModal = () => openModal("MENU", username, postId);
+	const openShareModal = () => openModal("SHARE", username, postId);
+
 	return (
 		<>
-			<Modal
-				hideModalContentWhileAnimating
-				isVisible={showModal}
-				useNativeDriverForBackdrop
-				onBackdropPress={closeModal}
-				onBackButtonPress={closeModal}
-				animationIn="slideInUp"
-				style={{
-					margin: 0,
-				}}
-			>
-				<PostModal
-					viewProfile={viewProfile}
-					username={username}
-					postId={postId}
-					ownPost={currentUsername === username}
-					closeModal={closeModal}
-				/>
-			</Modal>
 			<Card
 				style={{
+					zIndex: 0,
+					elevation: 0,
 					backgroundColor: colors.background,
 				}}
 			>
@@ -190,7 +87,7 @@ const Post: React.FC<Props> = ({
 					title={username}
 					left={() => (
 						<UserAvatar
-							profilePicture={userProfilePic}
+							profilePicture={profilePic || user?.profilePic}
 							onPress={viewProfile}
 						/>
 					)}
@@ -198,7 +95,7 @@ const Post: React.FC<Props> = ({
 						<IconButton
 							{...props}
 							icon="dots-vertical"
-							onPress={openModal}
+							onPress={openMenuModal}
 						/>
 					)}
 					titleStyle={{
@@ -245,21 +142,21 @@ const Post: React.FC<Props> = ({
 							paddingRight: 0,
 						}}
 						color={colors.text}
-						onPress={() => {
-							navigation.navigate("Comments", {
-								post: {
-									caption,
-									postedAt,
-									postId,
-								},
-								user: {
-									username,
-									profilePic,
-								},
-							});
-						}}
+						onPress={openComments}
 						backgroundColor="transparent"
 						name="chatbubble-outline"
+						size={22}
+					/>
+					<Icon.Button
+						style={{
+							margin: 0,
+							paddingLeft: 8,
+							paddingRight: 0,
+						}}
+						onPress={openShareModal}
+						color={colors.text}
+						backgroundColor="transparent"
+						name={"paper-plane-outline"}
 						size={22}
 					/>
 				</Card.Actions>

@@ -1,6 +1,21 @@
 import { format, formatDistanceToNow } from "date-fns";
+import { Message } from "../store/MessagesStore";
 import { Post } from "../store/PostsStore";
 import { definitions } from "../types/supabase";
+
+export const getUsersList = (
+	messageListData: Message[],
+	currentUser: string
+) => {
+	const users = messageListData.map((msg) => ({
+		username: msg.sender === currentUser ? msg.receiver : msg.sender,
+		messageType: msg.message_type,
+		text: msg.text,
+		lastMessageAt: msg.received_at,
+	}));
+
+	return [...new Map(users.map((item) => [item.username, item])).values()];
+};
 
 export function uniqueList<Model>(
 	oldList: Model[],

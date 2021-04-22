@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Theme } from "../types";
 
 type ContextType = {
+	loading: boolean;
 	signupDone: boolean;
 	setSignupDone: (newState: boolean) => void;
 
@@ -28,6 +29,7 @@ type ContextType = {
 };
 
 export const AppContext = createContext<ContextType>({
+	loading: false,
 	signupDone: false,
 	setSignupDone: () => {},
 
@@ -56,6 +58,7 @@ type Props = {
 	children: React.ReactNode;
 };
 const AppContextProvider: React.FC<Props> = ({ children }) => {
+	const [loading, setLoading] = useState(true);
 	const [signupDone, setSignupDone] = useState(false);
 	const [username, setUsername] = useState<string | null>(null);
 	const [name, setName] = useState<string | null>(null);
@@ -100,9 +103,10 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 	};
 
 	useEffect(() => {
-		AsyncStorage.getItem("signupDone").then((res) =>
-			setSignupDone(res === "true")
-		);
+		AsyncStorage.getItem("signupDone").then((res) => {
+			setLoading(false);
+			setSignupDone(res === "true");
+		});
 		AsyncStorage.getItem("username").then((res) => setUsername(res));
 		AsyncStorage.getItem("email").then((res) => setEmail(res));
 		AsyncStorage.getItem("bio").then((res) => setBio(res));
@@ -128,6 +132,7 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 	return (
 		<AppContext.Provider
 			value={{
+				loading,
 				signupDone,
 				setSignupDone: updateSignUpDone,
 
