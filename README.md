@@ -14,7 +14,7 @@ npm install
 
 Setup Supabase Project and configure [`supabaseClient.ts`](src/app/utils/supabaseClient.ts)
 
-> Use the Database structure from [db_dump.sql](db_dump.sql) in Supabase.
+> Use the Database structure from [db_structure.sql](db_structure.sql) in Supabase.
 
 Configure Cloudinary for Image Uploads.
 
@@ -52,8 +52,8 @@ npm run android
 
 # To Do
 
--   [ ] Messaging
--   [ ] Caching
+-   [x] Messaging
+-   [ ] Better Caching
 -   [ ] Filters for Posts
 -   [ ] Stories
 -   [ ] Better Navigation and State Persistence

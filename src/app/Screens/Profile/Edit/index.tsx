@@ -10,7 +10,7 @@ import {
 	useTheme,
 } from "react-native-paper";
 import { ProfileStackParams } from "../../../types/navigation";
-import { Image, StatusBar, ToastAndroid, View } from "react-native";
+import { Image, Keyboard, StatusBar, ToastAndroid, View } from "react-native";
 import { AppContext } from "../../../utils/appContext";
 import Icon from "react-native-vector-icons/Ionicons";
 import ImagePicker, {
@@ -19,7 +19,6 @@ import ImagePicker, {
 } from "react-native-image-crop-picker";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
-import "react-native-get-random-values";
 import UsersStore from "../../../store/UsersStore";
 import supabaseClient from "../../../utils/supabaseClient";
 import { definitions } from "../../../types/supabase";
@@ -91,6 +90,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 				console.error("No email");
 				return;
 			}
+			Keyboard.dismiss();
 			setLoading(true);
 
 			if (username !== currentUser.username) {
@@ -135,6 +135,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 
 			updateName(name);
 			updateBio(bio);
+
 			updateUsername(username);
 			if (userImagePath) updateProfilePic(userImagePath);
 

@@ -385,6 +385,8 @@ export const fetchUserFromDb = async (
 export const editUserInDb = async (username: string, newData: User) => {
 	if (!username) return null;
 	try {
+		console.log("username", username);
+		console.log("newData", newData);
 		const res = await supabaseClient
 			.from<definitions["users"]>("users")
 			.update({

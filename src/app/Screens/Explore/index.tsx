@@ -7,14 +7,9 @@ import {
 	useWindowDimensions,
 	TouchableHighlight,
 	RefreshControl,
-} from "react-native";
-import {
-	Caption,
-	IconButton,
-	Text,
 	TextInput,
-	useTheme,
-} from "react-native-paper";
+} from "react-native";
+import { Caption, IconButton, Text, useTheme } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
 
 import { ExploreStackNavigationParams } from "../../types/navigation";
@@ -121,18 +116,21 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 						style={{ marginTop: 12, marginRight: 8 }}
 					/>
 				)}
+
 				<TextInput
 					placeholder="Search"
-					dense
-					style={{
-						backgroundColor: colors.surface,
-						flexGrow: 1,
-					}}
-					mode="outlined"
-					onFocus={() => setSearchFocused(true)}
-					// onBlur={() => setSearchFocused(false)}
+					placeholderTextColor={"gray"}
 					value={searchTerm}
+					onFocus={() => setSearchFocused(true)}
 					onChangeText={(text) => searchUser(text)}
+					style={{
+						flex: 1,
+						height: 40,
+						backgroundColor: "#2a2a2a",
+						borderRadius: 12,
+						paddingHorizontal: 16,
+						color: colors.text,
+					}}
 				/>
 			</View>
 			{searchFocused ? (

@@ -11,6 +11,7 @@ import {
 import SwipeTabNavigation from "./Routes/MainSwipeNavigation";
 import SignInNavigation from "./Routes/SignInNavigation";
 import AppContextProvider, { AppContext } from "./utils/appContext";
+
 // eslint-disable-next-line no-undef
 const theme: ReactNativePaper.Theme = {
 	...DarkTheme,
