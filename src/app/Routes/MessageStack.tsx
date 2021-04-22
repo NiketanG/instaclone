@@ -23,21 +23,24 @@ type Props = {
 		"Messages"
 	>;
 };
-const MessageStack: React.FC<Props> = ({ navigation }) => (
-	<NavigationContainer independent>
-		<Stack.Navigator headerMode="none" initialRouteName="ChatList">
-			<Stack.Screen
-				name="ChatList"
-				component={ChatList}
-				initialParams={{ rootNavigation: navigation }}
-			/>
-			<Stack.Screen name="Messages" component={Messages} />
-			<Stack.Screen name="NewChat" component={NewChat} />
-			<Stack.Screen name="Profile" component={ProfilePageStack} />
-			<Stack.Screen name="Post" component={PostDetail} />
-			<Stack.Screen name="Comments" component={Comments} />
-		</Stack.Navigator>
-	</NavigationContainer>
-);
+const MessageStack: React.FC<Props> = ({ navigation }) => {
+	const goBack = () => navigation.goBack();
+	return (
+		<NavigationContainer independent>
+			<Stack.Navigator headerMode="none" initialRouteName="ChatList">
+				<Stack.Screen
+					name="ChatList"
+					component={ChatList}
+					initialParams={{ goBack }}
+				/>
+				<Stack.Screen name="Messages" component={Messages} />
+				<Stack.Screen name="NewChat" component={NewChat} />
+				<Stack.Screen name="Profile" component={ProfilePageStack} />
+				<Stack.Screen name="Post" component={PostDetail} />
+				<Stack.Screen name="Comments" component={Comments} />
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
+};
 
 export default MessageStack;

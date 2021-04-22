@@ -18,7 +18,7 @@ type Props = {
 	navigation: BottomTabNavigationProp<TabNavigationParams, "Explore">;
 };
 
-const ExplorePageStack: React.FC<Props> = ({ route }) => {
+const ExplorePageStack: React.FC<Props> = () => {
 	return (
 		<NavigationContainer independent>
 			<Stack.Navigator headerMode="none" initialRouteName="Explore">

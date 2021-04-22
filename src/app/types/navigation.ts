@@ -3,14 +3,10 @@ import { Follower } from "../store/FollowersStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "../store/UsersStore";
 import { definitions } from "./supabase";
-import { MaterialTopTabNavigationProp } from "@react-navigation/material-top-tabs";
 
 export type MessageStackNavigationParams = {
 	ChatList: {
-		rootNavigation: MaterialTopTabNavigationProp<
-			SwipeTabNavigationParams,
-			"Messages"
-		>;
+		goBack: () => void;
 	};
 	NewChat: undefined;
 	Messages: {
@@ -44,7 +40,9 @@ export type SwipeTabNavigationParams = {
 	Messages: undefined;
 };
 export type HomeStackNavigationParams = {
-	Home: undefined;
+	Home: {
+		openMessages: () => void;
+	};
 	Comments: CommentsPageParams;
 	Profile: ProfilePageProps & {
 		goBack: () => void;
@@ -105,7 +103,9 @@ export type PostStackNavigationParams = {
 };
 
 export type TabNavigationParams = {
-	Home: undefined;
+	Home: {
+		openMessages: () => void;
+	};
 	Explore: undefined;
 	// Activity: undefined;
 	New: undefined;

@@ -77,10 +77,7 @@ const MessagesList: React.FC<Props> = ({ navigation, route }) => {
 
 	const newMessage = () => navigation.navigate("NewChat");
 
-	const goBack = () =>
-		route.params.rootNavigation
-			? route.params.rootNavigation.goBack()
-			: null;
+	const goBack = () => route.params.goBack && route.params.goBack();
 
 	const openMessage = (username: string) => {
 		navigation.navigate("Messages", {

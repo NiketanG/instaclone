@@ -33,7 +33,8 @@ const Home: React.FC<Props> = observer(({ route }) => {
 
 	const { height } = useWindowDimensions();
 
-	const openMessages = () => {};
+	const openMessages = () =>
+		route.params.openMessages && route.params.openMessages();
 
 	const [openedModalData, setOpenedModalData] = useState<{
 		modalType: "MENU" | "SHARE";
@@ -41,22 +42,20 @@ const Home: React.FC<Props> = observer(({ route }) => {
 		postId: number;
 	} | null>(null);
 
-	const closeModal = () => {
-		setOpenedModalData(null);
-	};
+	const closeModal = () => setOpenedModalData(null);
+
 	const onClose = () => setOpenedModalData(null);
 
 	const openModal = (
 		modalType: "MENU" | "SHARE",
 		username: string,
 		postId: number
-	) => {
+	) =>
 		setOpenedModalData({
 			modalType,
 			postId: postId,
 			username: username,
 		});
-	};
 
 	return (
 		<View

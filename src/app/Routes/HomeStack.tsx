@@ -17,10 +17,16 @@ type Props = {
 	navigation: BottomTabNavigationProp<TabNavigationParams, "Home">;
 };
 
-const HomePageStack: React.FC<Props> = () => (
+const HomePageStack: React.FC<Props> = ({ route }) => (
 	<NavigationContainer independent>
 		<Stack.Navigator headerMode="none" initialRouteName="Home">
-			<Stack.Screen name="Home" component={Home} />
+			<Stack.Screen
+				name="Home"
+				component={Home}
+				initialParams={{
+					openMessages: route.params.openMessages,
+				}}
+			/>
 			<Stack.Screen name="Comments" component={Comments} />
 			<Stack.Screen name="Profile" component={ProfilePageStack} />
 		</Stack.Navigator>
