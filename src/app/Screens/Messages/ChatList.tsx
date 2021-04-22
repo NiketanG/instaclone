@@ -21,6 +21,7 @@ import { getTimeDistance } from "../../utils/utils";
 type Props = {
 	route: RouteProp<MessageStackNavigationParams, "ChatList">;
 	navigation: StackNavigationProp<MessageStackNavigationParams, "ChatList">;
+	goBack: () => void;
 };
 
 type UserItemProps = {
@@ -69,15 +70,13 @@ const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
 	);
 };
 
-const MessagesList: React.FC<Props> = ({ navigation, route }) => {
+const MessagesList: React.FC<Props> = ({ navigation, route, goBack }) => {
 	const { colors, dark } = useTheme();
 	const { height } = useWindowDimensions();
 	const { messageList, loading, fetchMessageList } = useChatList();
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const newMessage = () => navigation.navigate("NewChat");
-
-	const goBack = () => route.params.goBack && route.params.goBack();
 
 	const openMessage = (username: string) => {
 		navigation.navigate("Messages", {

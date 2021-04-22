@@ -5,17 +5,13 @@ import { User } from "../store/UsersStore";
 import { definitions } from "./supabase";
 
 export type MessageStackNavigationParams = {
-	ChatList: {
-		goBack: () => void;
-	};
+	ChatList: undefined;
 	NewChat: undefined;
 	Messages: {
 		username: string;
 	};
 	Comments: CommentsPageParams;
-	Profile: ProfilePageProps & {
-		goBack: () => void;
-	};
+	Profile: ProfilePageProps;
 	Post: {
 		post: Pick<Post, "caption" | "postedAt" | "postId" | "imageUrl">;
 		user: Pick<User, "username" | "profilePic">;
@@ -40,22 +36,16 @@ export type SwipeTabNavigationParams = {
 	Messages: undefined;
 };
 export type HomeStackNavigationParams = {
-	Home: {
-		openMessages: () => void;
-	};
+	Home: undefined;
 	Comments: CommentsPageParams;
-	Profile: ProfilePageProps & {
-		goBack: () => void;
-	};
+	Profile: ProfilePageProps;
 };
 
 export type ProfileStackParams = {
 	Messages: {
 		username: string;
 	};
-	ProfilePage: ProfilePageProps & {
-		goBack?: () => void;
-	};
+	ProfilePage: ProfilePageProps & { goBack: () => void };
 	Followers: ProfilePageProps & {
 		followers: Follower[];
 	};
@@ -82,9 +72,7 @@ export type ExploreStackNavigationParams = {
 		user: Pick<User, "username" | "profilePic">;
 	};
 	Comments: CommentsPageParams;
-	Profile: ProfilePageProps & {
-		goBack: () => void;
-	};
+	Profile: ProfilePageProps;
 };
 export type PostListParams = {
 	goBack: () => void;
@@ -103,9 +91,7 @@ export type PostStackNavigationParams = {
 };
 
 export type TabNavigationParams = {
-	Home: {
-		openMessages: () => void;
-	};
+	Home: undefined;
 	Explore: undefined;
 	// Activity: undefined;
 	New: undefined;

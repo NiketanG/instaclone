@@ -24,17 +24,15 @@ import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
 type Props = {
 	route: RouteProp<HomeStackNavigationParams, "Home">;
 	navigation: StackNavigationProp<HomeStackNavigationParams, "Home">;
+	openMessages: () => void;
 };
 
-const Home: React.FC<Props> = observer(({ route }) => {
+const Home: React.FC<Props> = observer(({ openMessages }) => {
 	const { colors, dark } = useTheme();
 
 	const { fetchFeed, loading, posts: feedPosts } = useFeed();
 
 	const { height } = useWindowDimensions();
-
-	const openMessages = () =>
-		route.params.openMessages && route.params.openMessages();
 
 	const [openedModalData, setOpenedModalData] = useState<{
 		modalType: "MENU" | "SHARE";

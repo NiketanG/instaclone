@@ -28,11 +28,9 @@ const MessageStack: React.FC<Props> = ({ navigation }) => {
 	return (
 		<NavigationContainer independent>
 			<Stack.Navigator headerMode="none" initialRouteName="ChatList">
-				<Stack.Screen
-					name="ChatList"
-					component={ChatList}
-					initialParams={{ goBack }}
-				/>
+				<Stack.Screen name="ChatList">
+					{(props) => <ChatList {...props} goBack={goBack} />}
+				</Stack.Screen>
 				<Stack.Screen name="Messages" component={Messages} />
 				<Stack.Screen name="NewChat" component={NewChat} />
 				<Stack.Screen name="Profile" component={ProfilePageStack} />

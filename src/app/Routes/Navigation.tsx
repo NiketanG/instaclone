@@ -59,10 +59,6 @@ export const TabNavigation: React.FC<Props> = ({ navigation }) => {
 			>
 				<Tab.Screen
 					name="Home"
-					component={HomePageStack}
-					initialParams={{
-						openMessages,
-					}}
 					options={{
 						tabBarIcon: ({ color, focused }) => (
 							<TabBarIcon
@@ -71,7 +67,11 @@ export const TabNavigation: React.FC<Props> = ({ navigation }) => {
 							/>
 						),
 					}}
-				/>
+				>
+					{(props) => (
+						<HomePageStack {...props} openMessages={openMessages} />
+					)}
+				</Tab.Screen>
 				<Tab.Screen
 					name="Explore"
 					component={ExplorePageStack}
