@@ -57,7 +57,9 @@ const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
 				</Text>
 				<Caption>
 					{item.text
-						? item.text
+						? `${item.text.substr(0, 25)}${
+								item.text.length > 25 ? "..." : ""
+						  }`
 						: item.messageType === "POST"
 						? "Sent a post"
 						: item.messageType === "IMAGE"
@@ -78,11 +80,10 @@ const MessagesList: React.FC<Props> = ({ navigation, route, goBack }) => {
 
 	const newMessage = () => navigation.navigate("NewChat");
 
-	const openMessage = (username: string) => {
+	const openMessage = (username: string) =>
 		navigation.navigate("Messages", {
 			username,
 		});
-	};
 
 	const [searchResults, setSearchResults] = useState<ChatList[] | null>();
 

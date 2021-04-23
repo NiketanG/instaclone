@@ -129,7 +129,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 						</Title>
 					)}
 				</View>
-				{!route.params.username && (
+				{isCurrentUser && (
 					<IconButton
 						icon="cog-outline"
 						size={20}
