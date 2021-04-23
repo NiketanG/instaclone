@@ -14,6 +14,7 @@ import PostDetail from "../Screens/Post";
 import Comments from "../Screens/Comments";
 import NewChat from "../Screens/Messages/NewChat";
 import EditPost from "../Screens/Post/EditPost";
+import Likes from "../Screens/Likes";
 
 const Stack = createStackNavigator<MessageStackNavigationParams>();
 
@@ -38,6 +39,7 @@ const MessageStack: React.FC<Props> = ({ navigation }) => {
 				<Stack.Screen name="Post" component={PostDetail} />
 				<Stack.Screen name="EditPost" component={EditPost} />
 				<Stack.Screen name="Comments" component={Comments} />
+				<Stack.Screen name="Likes" component={Likes} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

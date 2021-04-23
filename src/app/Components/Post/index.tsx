@@ -58,6 +58,7 @@ const Post: React.FC<Props> = ({
 			showBackArrow: true,
 		});
 
+	const openLikes = () => navigation.navigate("Likes", { postId });
 	const openComments = () =>
 		navigation.navigate("Comments", {
 			post: {
@@ -163,6 +164,7 @@ const Post: React.FC<Props> = ({
 				<Card.Content>
 					{likes.length > 0 && (
 						<Text
+							onPress={openLikes}
 							style={{
 								color: colors.placeholder,
 							}}

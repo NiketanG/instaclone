@@ -13,7 +13,7 @@ import NewChatItem, {
 	NewChatItemType,
 } from "../../Screens/Messages/NewChatItem";
 import { Follower } from "../../store/FollowersStore";
-import MessagesStore, { Message } from "../../store/MessagesStore";
+import MessagesStore from "../../store/MessagesStore";
 import { AppContext } from "../../utils/appContext";
 import { newMessageInDb } from "../../utils/supabaseUtils";
 import useChatList, { ChatList } from "../../utils/useChatList";
@@ -26,7 +26,7 @@ type ModalProps = {
 
 const PostShareModal: React.FC<ModalProps> = ({ postId, closeModal }) => {
 	const { colors } = useTheme();
-	const { width, height } = useWindowDimensions();
+	const { height } = useWindowDimensions();
 	const { messageList, loading } = useChatList();
 	const [searchTerm, setSearchTerm] = useState("");
 

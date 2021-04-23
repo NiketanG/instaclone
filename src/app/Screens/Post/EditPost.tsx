@@ -35,9 +35,7 @@ const EditPost: React.FC<Props> = ({ route, navigation }) => {
 	}, [post, user]);
 
 	useEffect(() => {
-		if (post) {
-			setCaption(post.caption || "");
-		}
+		if (post) setCaption(post.caption || "");
 	}, [post]);
 
 	const [loading, setLoading] = useState(false);
