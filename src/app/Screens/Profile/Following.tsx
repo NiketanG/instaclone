@@ -1,10 +1,11 @@
 import { ScrollView, StatusBar, TouchableHighlight, View } from "react-native";
 import { Appbar, Button, Text, Title, useTheme } from "react-native-paper";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ProfileStackParams } from "../../types/navigation";
 import FollowersStore from "../../store/FollowersStore";
+import useCurrentUser from "../../utils/useCurrentUser";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "Following">;
@@ -14,6 +15,17 @@ type Props = {
 const Following: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
 	const goBack = () => navigation.goBack();
+
+	const currentUser = useCurrentUser();
+	const [isCurrentUser, setIsCurrentUser] = useState(false);
+	useEffect(() => {
+		if (route.params.username === currentUser?.username) {
+			setIsCurrentUser(true);
+		} else {
+			setIsCurrentUser(false);
+		}
+	}, [currentUser, route.params.username]);
+
 	const viewProfile = (username: string) => {
 		navigation.push("ProfilePage", {
 			username,
@@ -24,7 +36,7 @@ const Following: React.FC<Props> = ({ navigation, route }) => {
 	const [following, setFollowing] = useState(() => route.params.following);
 
 	const unfollowUser = async (username: string) => {
-		if (!route.params.username || !route.params.isCurrentUser) return;
+		if (!route.params.username || !isCurrentUser) return;
 
 		const res = FollowersStore.unfollowUser(
 			username,
@@ -92,7 +104,7 @@ const Following: React.FC<Props> = ({ navigation, route }) => {
 								>
 									{follower.following}
 								</Text>
-								{route.params.isCurrentUser && (
+								{isCurrentUser && (
 									<Button
 										mode="outlined"
 										onPress={() => {

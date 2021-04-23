@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavigationContainer, RouteProp } from "@react-navigation/native";
 import {
 	createStackNavigator,
@@ -12,6 +12,7 @@ import Followers from "../Screens/Profile/Followers";
 import Following from "../Screens/Profile/Following";
 import PostStack from "./PostStack";
 import Messages from "../Screens/Messages/Messages";
+import { AppContext } from "../utils/appContext";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "ProfilePage">;
@@ -21,6 +22,7 @@ type Props = {
 const Stack = createStackNavigator<ProfileStackParams>();
 
 const ProfilePageStack: React.FC<Props> = ({ route }) => {
+	const currentUser = useContext(AppContext);
 	return (
 		<NavigationContainer independent>
 			<Stack.Navigator headerMode="none" initialRouteName="ProfilePage">
@@ -28,7 +30,7 @@ const ProfilePageStack: React.FC<Props> = ({ route }) => {
 					name="ProfilePage"
 					component={Profile}
 					initialParams={{
-						isCurrentUser: true,
+						username: currentUser.username || undefined,
 						...route.params,
 					}}
 				/>
@@ -36,7 +38,7 @@ const ProfilePageStack: React.FC<Props> = ({ route }) => {
 					name="Followers"
 					component={Followers}
 					initialParams={{
-						isCurrentUser: true,
+						username: currentUser.username || undefined,
 						...route.params,
 					}}
 				/>
@@ -44,7 +46,7 @@ const ProfilePageStack: React.FC<Props> = ({ route }) => {
 					name="Following"
 					component={Following}
 					initialParams={{
-						isCurrentUser: true,
+						username: currentUser.username || undefined,
 						...route.params,
 					}}
 				/>

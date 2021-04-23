@@ -74,11 +74,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 	};
 
 	useEffect(() => {
-		if (
-			savedUsername &&
-			(route.params.isCurrentUser ||
-				route.params.username === savedUsername)
-		) {
+		if (savedUsername && route.params.username === savedUsername) {
 			setIsCurrentUser(true);
 		}
 	}, [savedUsername, route.params]);
@@ -180,7 +176,6 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 							<TouchableHighlight
 								onPress={() => {
 									navigation.navigate("Followers", {
-										isCurrentUser,
 										username: user?.username,
 										profilePic: undefined,
 										followers: followers || [],
@@ -199,7 +194,6 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 							<TouchableHighlight
 								onPress={() => {
 									navigation.navigate("Following", {
-										isCurrentUser,
 										username: user?.username,
 										profilePic: undefined,
 										following: following || [],
@@ -365,7 +359,8 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 										onPress={() => {
 											if (user)
 												navigation.navigate("Posts", {
-													goBack: navigation.goBack,
+													goBack: () =>
+														navigation.goBack(),
 													user: {
 														username:
 															user?.username,

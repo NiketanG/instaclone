@@ -45,7 +45,7 @@ export type ProfileStackParams = {
 	Messages: {
 		username: string;
 	};
-	ProfilePage: ProfilePageProps & { goBack: () => void };
+	ProfilePage: ProfilePageProps & { goBack?: () => void };
 	Followers: ProfilePageProps & {
 		followers: Follower[];
 	};
@@ -60,7 +60,6 @@ export type ProfileStackParams = {
 export interface UserProfile {
 	username?: string;
 	profilePic?: string;
-	isCurrentUser?: boolean;
 }
 
 type ProfilePageProps = UserProfile;
