@@ -49,7 +49,7 @@ const Followers: React.FC<Props> = ({ navigation, route }) => {
 				<Title>All Followers</Title>
 				{route.params.followers.map((follower) => (
 					<TouchableHighlight
-						key={follower.following}
+						key={follower.follower}
 						onPress={() => viewProfile(follower.follower)}
 					>
 						<View
