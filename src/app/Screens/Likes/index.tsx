@@ -25,7 +25,7 @@ type Props = {
 
 type LikeListItemProps = {
 	item: Like;
-	openProfile: (username: string) => void;
+	openProfile: (username: string, profilePic?: string) => void;
 };
 
 const LikeListItem: React.FC<LikeListItemProps> = ({ item, openProfile }) => {
@@ -39,7 +39,7 @@ const LikeListItem: React.FC<LikeListItemProps> = ({ item, openProfile }) => {
 				alignItems: "center",
 				margin: 16,
 			}}
-			onPress={() => openProfile(item.user)}
+			onPress={() => openProfile(item.user, user?.profilePic)}
 		>
 			<UserAvatar size={32} profilePicture={user?.profilePic} />
 			<View
@@ -80,7 +80,16 @@ const Likes: React.FC<Props> = ({ route, navigation }) => {
 	}, [likes, searchTerm]);
 	const { height } = useWindowDimensions();
 
-	const openProfile = () => {};
+	const goBack = () => navigation.goBack();
+
+	const openProfile = (username: string, profilePic?: string) => {
+		navigation.navigate("Profile", {
+			username,
+			profilePic,
+			showBackArrow: true,
+			goBack,
+		});
+	};
 
 	return (
 		<View
