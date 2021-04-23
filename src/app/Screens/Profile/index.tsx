@@ -109,7 +109,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 						alignItems: "center",
 					}}
 				>
-					{route.params.username && (
+					{route.params.showBackArrow && route.params.username && (
 						<IconButton
 							icon="arrow-left"
 							size={20}

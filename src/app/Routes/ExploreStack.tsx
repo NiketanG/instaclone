@@ -25,13 +25,7 @@ const ExplorePageStack: React.FC<Props> = () => {
 				<Stack.Screen name="Explore" component={Explore} />
 				<Stack.Screen name="PostDetail" component={PostDetail} />
 				<Stack.Screen name="Comments" component={Comments} />
-				<Stack.Screen
-					name="Profile"
-					component={ProfilePageStack}
-					initialParams={{
-						isCurrentUser: false,
-					}}
-				/>
+				<Stack.Screen name="Profile" component={ProfilePageStack} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

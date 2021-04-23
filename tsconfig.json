@@ -11,11 +11,12 @@
 		"moduleResolution": "node",
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
-		"skipLibCheck": false,
+		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"noFallthroughCasesInSwitch": true,
 		"resolveJsonModule": true
 	},
-	"exclude": ["node_modules", "babel.config.js", "metro.config.js"],
-	"include": ["**/*.ts", "**/*.tsx", "**/*.js"]
+	"include": ["**/*.ts", "**/*.tsx", "**/*.js"],
+
+	"exclude": ["node_modules", "babel.config.js", "metro.config.js"]
 }

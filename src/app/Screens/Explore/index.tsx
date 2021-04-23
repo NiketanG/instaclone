@@ -166,6 +166,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 										username: user.username,
 										profilePic: user.profilePic,
 										goBack,
+										showBackArrow: true,
 									});
 								}}
 							>

@@ -85,6 +85,7 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 			username: openedModalData?.username,
 			isCurrentUser: false,
 			goBack,
+			showBackArrow: true,
 		});
 
 	const closeModal = (modalType: "MENU" | "SHARE") => {

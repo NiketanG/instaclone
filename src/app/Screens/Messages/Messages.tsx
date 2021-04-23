@@ -35,6 +35,7 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const { messages, loading, newMessage, deleteMessage } = useMessages(
 		route.params.username
 	);
+
 	const { selectFromGallery } = useImageUpload();
 
 	const addImage = async () => {
@@ -64,9 +65,8 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 
 	const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
 
-	const selectMessage = (username: string, messsageId: number) => {
-		if (username === currentUser) setSelectedMessage(messsageId);
-	};
+	const selectMessage = (username: string, messsageId: number) =>
+		username === currentUser && setSelectedMessage(messsageId);
 
 	const sendMessage = () => {
 		if (messageText.length === 0) return;
@@ -89,7 +89,9 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const openProfile = () => {
 		navigation.navigate("Profile", {
 			username: route.params.username,
-			goBack: () => navigation.goBack(),
+			goBack,
+
+			showBackArrow: true,
 		});
 	};
 	const scrollViewRef = useRef<ScrollView>(null);

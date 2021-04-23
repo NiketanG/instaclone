@@ -16,6 +16,7 @@ const Followers: React.FC<Props> = ({ navigation, route }) => {
 	const viewProfile = (username: string) => {
 		navigation.push("ProfilePage", {
 			username,
+			showBackArrow: true,
 		});
 	};
 

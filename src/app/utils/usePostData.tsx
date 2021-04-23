@@ -25,7 +25,7 @@ const usePostData = (postId?: number): ReturnType => {
 		try {
 			let response: {
 				post: Post | null;
-				user: user | null;
+				user: User | null;
 			} = {
 				post: null,
 				user: null,
@@ -66,7 +66,12 @@ const usePostData = (postId?: number): ReturnType => {
 				(userData.data && userData.data.length > 0) ||
 				!userData.error
 			) {
-				response.user = userData.data[0];
+				response.user = {
+					bio: userData.data[0].bio,
+					name: userData.data[0].name,
+					profilePic: userData.data[0].profilePic,
+					username: userData.data[0].username,
+				};
 			} else {
 				console.error(
 					`[fetchPostData_Response]

@@ -52,6 +52,7 @@ const PostMessage: React.FC<Props> = ({ message, selectMessage }) => {
 		navigation.navigate("Profile", {
 			username: post?.user,
 			profilePic: user?.profilePic,
+			showBackArrow: true,
 			goBack,
 		});
 	};

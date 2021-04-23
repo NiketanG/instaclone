@@ -31,6 +31,7 @@ const ProfilePageStack: React.FC<Props> = ({ route }) => {
 					component={Profile}
 					initialParams={{
 						username: currentUser.username || undefined,
+						showBackArrow: false,
 						...route.params,
 					}}
 				/>

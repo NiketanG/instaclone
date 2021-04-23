@@ -54,8 +54,8 @@ const Post: React.FC<Props> = ({
 	const viewProfile = () =>
 		navigation.navigate("Profile", {
 			username,
-			isCurrentUser: false,
 			goBack,
+			showBackArrow: true,
 		});
 
 	const openComments = () =>

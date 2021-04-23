@@ -1,6 +1,5 @@
 import { Post } from "../store/PostsStore";
 import { Follower } from "../store/FollowersStore";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "../store/UsersStore";
 import { definitions } from "./supabase";
 
@@ -11,7 +10,10 @@ export type MessageStackNavigationParams = {
 		username: string;
 	};
 	Comments: CommentsPageParams;
-	Profile: ProfilePageProps;
+	Profile: ProfilePageProps & {
+		goBack?: () => void;
+		showBackArrow?: boolean;
+	};
 	Post: {
 		post: Pick<Post, "caption" | "postedAt" | "postId" | "imageUrl">;
 		user: Pick<User, "username" | "profilePic">;
@@ -45,7 +47,10 @@ export type ProfileStackParams = {
 	Messages: {
 		username: string;
 	};
-	ProfilePage: ProfilePageProps & { goBack?: () => void };
+	ProfilePage: ProfilePageProps & {
+		goBack?: () => void;
+		showBackArrow?: boolean;
+	};
 	Followers: ProfilePageProps & {
 		followers: Follower[];
 	};
@@ -71,7 +76,10 @@ export type ExploreStackNavigationParams = {
 		user: Pick<User, "username" | "profilePic">;
 	};
 	Comments: CommentsPageParams;
-	Profile: ProfilePageProps;
+	Profile: ProfilePageProps & {
+		goBack?: () => void;
+		showBackArrow?: boolean;
+	};
 };
 export type PostListParams = {
 	goBack: () => void;
@@ -86,7 +94,10 @@ export type PostListParams = {
 export type PostStackNavigationParams = {
 	PostList: PostListParams;
 	Comments: CommentsPageParams;
-	Profile: StackNavigationProp<ProfileStackParams, "ProfilePage">;
+	Profile: ProfilePageProps & {
+		goBack?: () => void;
+		showBackArrow?: boolean;
+	};
 };
 
 export type TabNavigationParams = {
