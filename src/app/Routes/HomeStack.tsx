@@ -9,6 +9,7 @@ import Comments from "../Screens/Comments";
 import ProfilePageStack from "./ProfileStack";
 import Home from "../Screens/Home";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import EditPost from "../Screens/Post/EditPost";
 
 const Stack = createStackNavigator<HomeStackNavigationParams>();
 
@@ -25,6 +26,7 @@ const HomePageStack: React.FC<Props> = ({ openMessages }) => (
 				{(props) => <Home {...props} openMessages={openMessages} />}
 			</Stack.Screen>
 			<Stack.Screen name="Comments" component={Comments} />
+			<Stack.Screen name="EditPost" component={EditPost} />
 			<Stack.Screen name="Profile" component={ProfilePageStack} />
 		</Stack.Navigator>
 	</NavigationContainer>

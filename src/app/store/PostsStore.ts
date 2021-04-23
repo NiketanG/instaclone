@@ -2,6 +2,7 @@ import { Instance, SnapshotOut, types, flow } from "mobx-state-tree";
 import { definitions } from "../types/supabase";
 import {
 	deletePostFromDb,
+	editPostInDb,
 	fetchPostsByUserFromDb,
 	newPostInDb,
 } from "../utils/supabaseUtils";
@@ -60,12 +61,13 @@ const PostsStore = types
 			}
 		});
 
-		const editPost = (postId: number, newData: Post) => {
+		const editPost = flow(function* (postId: number, caption?: string) {
 			const postToEdit = self.posts.findIndex(
 				(post) => post.postId === postId
 			);
-			if (postToEdit) Object.assign(self.posts[postToEdit], newData);
-		};
+			if (postToEdit) Object.assign(self.posts[postToEdit], { caption });
+			yield editPostInDb(postId, caption);
+		});
 
 		const fetchPostsByUser = flow(function* (username: string) {
 			let postsByUser: Post[] =

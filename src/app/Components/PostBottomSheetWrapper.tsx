@@ -100,7 +100,7 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 		<>
 			<BottomSheet
 				snapPoints={[
-					openedModalData?.username === currentUsername ? 154 : 104,
+					openedModalData?.username === currentUsername ? 204 : 104,
 					0,
 					0,
 				]}

@@ -382,11 +382,31 @@ export const fetchUserFromDb = async (
 	}
 };
 
+export const editPostInDb = async (postId: number, caption?: string) => {
+	if (!postId) return null;
+	try {
+		const res = await supabaseClient
+			.from<definitions["posts"]>("posts")
+			.update({
+				caption,
+			})
+			.match({
+				postId,
+			});
+		if (res.error || res.data.length === 0) {
+			console.error("[editPostInDb_Response]", res.error);
+			return null;
+		}
+		return res.data[0];
+	} catch (err) {
+		console.error("[editPostInDb]", err);
+		return null;
+	}
+};
+
 export const editUserInDb = async (username: string, newData: User) => {
 	if (!username) return null;
 	try {
-		console.log("username", username);
-		console.log("newData", newData);
 		const res = await supabaseClient
 			.from<definitions["users"]>("users")
 			.update({
@@ -397,7 +417,7 @@ export const editUserInDb = async (username: string, newData: User) => {
 			});
 		if (res.error || res.data.length === 0) {
 			console.error("[editUserInDb_Response]", res.error);
-			return false;
+			return null;
 		}
 		return res.data[0];
 	} catch (err) {

@@ -31,6 +31,12 @@ export const PostModal: React.FC<ModalProps> = ({
 		}
 	};
 
+	const editPost = () => {
+		navigation.navigate("EditPost", {
+			postId,
+		});
+	};
+
 	const openProfile = () => {
 		closeModal();
 		viewProfile();
@@ -48,13 +54,22 @@ export const PostModal: React.FC<ModalProps> = ({
 			}}
 		>
 			{ownPost && (
-				<List.Item
-					title="Delete Post"
-					onPress={deletePost}
-					style={{
-						paddingHorizontal: 16,
-					}}
-				/>
+				<>
+					<List.Item
+						title="Delete Post"
+						onPress={deletePost}
+						style={{
+							paddingHorizontal: 16,
+						}}
+					/>
+					<List.Item
+						title="Edit Post"
+						onPress={editPost}
+						style={{
+							paddingHorizontal: 16,
+						}}
+					/>
+				</>
 			)}
 
 			<List.Item

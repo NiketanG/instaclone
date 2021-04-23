@@ -10,6 +10,7 @@ import PostDetail from "../Screens/Post";
 import ProfilePageStack from "./ProfileStack";
 import Comments from "../Screens/Comments";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import EditPost from "../Screens/Post/EditPost";
 
 const Stack = createStackNavigator<ExploreStackNavigationParams>();
 
@@ -25,6 +26,7 @@ const ExplorePageStack: React.FC<Props> = () => {
 				<Stack.Screen name="Explore" component={Explore} />
 				<Stack.Screen name="PostDetail" component={PostDetail} />
 				<Stack.Screen name="Comments" component={Comments} />
+				<Stack.Screen name="EditPost" component={EditPost} />
 				<Stack.Screen name="Profile" component={ProfilePageStack} />
 			</Stack.Navigator>
 		</NavigationContainer>

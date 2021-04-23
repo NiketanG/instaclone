@@ -18,6 +18,7 @@ export type MessageStackNavigationParams = {
 		post: Pick<Post, "caption" | "postedAt" | "postId" | "imageUrl">;
 		user: Pick<User, "username" | "profilePic">;
 	};
+	EditPost: { postId: number; caption?: string; imageUrl?: string };
 };
 export type SignInNavigationParams = {
 	Login: undefined;
@@ -41,6 +42,7 @@ export type HomeStackNavigationParams = {
 	Home: undefined;
 	Comments: CommentsPageParams;
 	Profile: ProfilePageProps;
+	EditPost: { postId: number; caption?: string; imageUrl?: string };
 };
 
 export type ProfileStackParams = {
@@ -75,6 +77,7 @@ export type ExploreStackNavigationParams = {
 		post: Pick<Post, "caption" | "postedAt" | "postId" | "imageUrl">;
 		user: Pick<User, "username" | "profilePic">;
 	};
+	EditPost: { postId: number; caption?: string; imageUrl?: string };
 	Comments: CommentsPageParams;
 	Profile: ProfilePageProps & {
 		goBack?: () => void;
@@ -98,6 +101,7 @@ export type PostStackNavigationParams = {
 		goBack?: () => void;
 		showBackArrow?: boolean;
 	};
+	EditPost: { postId: number; caption?: string; imageUrl?: string };
 };
 
 export type TabNavigationParams = {

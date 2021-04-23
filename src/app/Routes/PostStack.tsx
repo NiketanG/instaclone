@@ -11,6 +11,7 @@ import {
 import Comments from "../Screens/Comments";
 import PostList from "../Screens/PostList";
 import ProfilePageStack from "./ProfileStack";
+import EditPost from "../Screens/Post/EditPost";
 
 const Stack = createStackNavigator<PostStackNavigationParams>();
 
@@ -29,6 +30,7 @@ const PostStack = ({ route: { params } }: Props) => {
 				/>
 				<Stack.Screen name="Comments" component={Comments} />
 				<Stack.Screen name="Profile" component={ProfilePageStack} />
+				<Stack.Screen name="EditPost" component={EditPost} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

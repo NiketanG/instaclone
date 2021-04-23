@@ -13,6 +13,7 @@ import { MaterialTopTabNavigationProp } from "@react-navigation/material-top-tab
 import PostDetail from "../Screens/Post";
 import Comments from "../Screens/Comments";
 import NewChat from "../Screens/Messages/NewChat";
+import EditPost from "../Screens/Post/EditPost";
 
 const Stack = createStackNavigator<MessageStackNavigationParams>();
 
@@ -35,6 +36,7 @@ const MessageStack: React.FC<Props> = ({ navigation }) => {
 				<Stack.Screen name="NewChat" component={NewChat} />
 				<Stack.Screen name="Profile" component={ProfilePageStack} />
 				<Stack.Screen name="Post" component={PostDetail} />
+				<Stack.Screen name="EditPost" component={EditPost} />
 				<Stack.Screen name="Comments" component={Comments} />
 			</Stack.Navigator>
 		</NavigationContainer>
