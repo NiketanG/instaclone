@@ -57,7 +57,7 @@ export const deleteMessageFromDb = async (messageId: number) => {
 			.from<definitions["messages"]>("messages")
 			.delete()
 			.match({
-				messageId: messageId,
+				messageId,
 			});
 		if (res.error) {
 			console.error("[deleteMessageFromDb_Response]", res.error);
@@ -547,7 +547,7 @@ export const deletePostFromDb = async (postId: number) => {
 			.from<definitions["posts"]>("posts")
 			.delete()
 			.match({
-				postId: postId,
+				postId,
 			});
 		if (res.error) {
 			console.error("[deletePostFromDb_Response]", res.error);

@@ -72,7 +72,7 @@ const UserListItem: React.FC<UserItemProps> = ({ item, openMessage }) => {
 	);
 };
 
-const MessagesList: React.FC<Props> = ({ navigation, route, goBack }) => {
+const MessagesList: React.FC<Props> = ({ navigation, goBack }) => {
 	const { colors, dark } = useTheme();
 	const { height } = useWindowDimensions();
 	const { messageList, loading, fetchMessageList } = useChatList();
