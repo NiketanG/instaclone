@@ -23,7 +23,7 @@ const useChatList = (): ReturnType => {
 	const [messageList, setMessageList] = useState<Array<ChatList>>([]);
 	const [loading, setLoading] = useState(true);
 
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 
 	const messageListRef = useRef(messageList);
 	useEffect(() => {
@@ -46,7 +46,7 @@ const useChatList = (): ReturnType => {
 		MessagesStore.addMessage(receivedMessage);
 
 		const user =
-			receivedMessage.sender === currentUser
+			receivedMessage.sender === currentUser?.username
 				? receivedMessage.receiver
 				: receivedMessage.sender;
 
@@ -75,7 +75,7 @@ const useChatList = (): ReturnType => {
 		} else {
 			const messagesSubscription = supabaseClient
 				.from<definitions["messages"]>(
-					`messages:receiver=eq.${currentUser}`
+					`messages:receiver=eq.${currentUser?.username}`
 				)
 				.on("INSERT", newMessageReceived)
 				.subscribe();
@@ -95,7 +95,10 @@ const useChatList = (): ReturnType => {
 		try {
 			const messageListData = (await getMessageListFromDb()) || [];
 			return {
-				messageList: getUsersList(messageListData, currentUser),
+				messageList: getUsersList(
+					messageListData,
+					currentUser?.username
+				),
 			};
 		} catch (err) {
 			console.error("[fetchUserData]", err);
@@ -110,8 +113,8 @@ const useChatList = (): ReturnType => {
 			const messageListData = MessagesStore.messages
 				.filter(
 					(message) =>
-						message.sender === currentUser ||
-						message.receiver === currentUser
+						message.sender === currentUser?.username ||
+						message.receiver === currentUser?.username
 				)
 				.sort(
 					(a, b) =>
@@ -119,7 +122,9 @@ const useChatList = (): ReturnType => {
 						new Date(a.received_at).getTime()
 				);
 			if (messageListData)
-				setMessageList(getUsersList(messageListData, currentUser));
+				setMessageList(
+					getUsersList(messageListData, currentUser?.username)
+				);
 			setLoading(false);
 		}
 	}, [currentUser]);

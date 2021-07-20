@@ -9,17 +9,27 @@ import { definitions } from "../types/supabase";
 import supabaseClient from "./supabaseClient";
 import { mapPosts } from "./utils";
 
+export const getCurrentUser = async (): Promise<User | null> => {
+	const currentUserString = await AsyncStorage.getItem("user");
+	if (!currentUserString) {
+		console.error("[getCurrentUser] No Current User");
+		return null;
+	}
+	const currentUser = JSON.parse(currentUserString);
+	if (!currentUser || !currentUser.username) {
+		console.error("[getCurrentUser] JSON Parse Fail", currentUserString);
+		return null;
+	}
+	return currentUser;
+};
 export const newMessageInDb = async (
 	newMessage: Pick<
 		Message,
 		"receiver" | "text" | "imageUrl" | "message_type" | "postId"
 	>
 ): Promise<Message | null> => {
-	const currentUser = await AsyncStorage.getItem("username");
-	if (!currentUser) {
-		console.error("[getMessageListFromDb] No Current User");
-		return null;
-	}
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return null;
 	const newMessageData = await supabaseClient
 		.from<definitions["messages"]>("messages")
 		.insert({
@@ -28,7 +38,7 @@ export const newMessageInDb = async (
 			message_type: newMessage.message_type || "TEXT",
 			text: newMessage.text,
 			receiver: newMessage.receiver,
-			sender: currentUser,
+			sender: currentUser.username,
 		});
 
 	if (
@@ -51,6 +61,9 @@ export const newMessageInDb = async (
 };
 
 export const deleteMessageFromDb = async (messageId: number) => {
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return false;
+
 	if (!messageId) return false;
 	try {
 		const res = await supabaseClient
@@ -58,6 +71,7 @@ export const deleteMessageFromDb = async (messageId: number) => {
 			.delete()
 			.match({
 				messageId,
+				user: currentUser.username,
 			});
 		if (res.error) {
 			console.error("[deleteMessageFromDb_Response]", res.error);
@@ -71,19 +85,18 @@ export const deleteMessageFromDb = async (messageId: number) => {
 };
 
 export const getMessageListFromDb = async (): Promise<Message[] | null> => {
-	const currentUser = await AsyncStorage.getItem("username");
-	if (!currentUser) {
-		console.error("[getMessageListFromDb] No Current User");
-		return null;
-	}
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return null;
 
 	const messagesData = await supabaseClient
 		.from<definitions["messages"]>("messages")
 		.select("*")
-		.or(`sender.eq.${currentUser},receiver.eq.${currentUser}`);
+		.or(
+			`sender.eq.${currentUser.username},receiver.eq.${currentUser.username}`
+		);
 
 	if (!messagesData || messagesData.error || !messagesData.data)
-		console.error("[getMessagesFromDb]", messagesData.error);
+		console.error("[getMessageListFromDb]", messagesData.error);
 
 	return (
 		messagesData.data?.map((msg) => ({
@@ -98,18 +111,14 @@ export const getMessageListFromDb = async (): Promise<Message[] | null> => {
 export const getMessagesFromDb = async (
 	username: string
 ): Promise<Message[] | null> => {
-	if (!username) return null;
-	const currentUser = await AsyncStorage.getItem("username");
-	if (!currentUser) {
-		console.error("[getMessageListFromDb] No Current User");
-		return null;
-	}
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return null;
 
 	const messagesData = await supabaseClient
 		.from<definitions["messages"]>("messages")
 		.select("*")
 		.or(
-			`sender.in.(${username}, ${currentUser}),receiver.in.(${username}, ${currentUser})`
+			`sender.in.(${username}, ${currentUser.username}),receiver.in.(${username}, ${currentUser.username})`
 		);
 
 	if (!messagesData || messagesData.error || !messagesData.data)
@@ -139,13 +148,13 @@ export const getLikesFromDb = async (postId: number): Promise<Like[]> => {
 
 export const checkIfLiked = async (postId: number): Promise<boolean> => {
 	if (!postId) return false;
-	const currentUser = await AsyncStorage.getItem("username");
+	const currentUser = await getCurrentUser();
 	if (!currentUser) return false;
 	const likedData = await supabaseClient
 		.from<definitions["likes"]>("likes")
 		.select("*")
 		.eq("postId", postId)
-		.eq("user", currentUser);
+		.eq("user", currentUser.username);
 
 	if (!likedData) return false;
 	if (likedData.error) {
@@ -158,7 +167,7 @@ export const checkIfLiked = async (postId: number): Promise<boolean> => {
 
 export const likePostInDb = async (postId: number): Promise<Like | null> => {
 	if (!postId) return null;
-	const currentUser = await AsyncStorage.getItem("username");
+	const currentUser = await getCurrentUser();
 	if (!currentUser) return null;
 	try {
 		const isLiked = await checkIfLiked(postId);
@@ -167,7 +176,7 @@ export const likePostInDb = async (postId: number): Promise<Like | null> => {
 				.from<definitions["likes"]>("likes")
 				.insert({
 					postId,
-					user: currentUser,
+					user: currentUser.username,
 				});
 
 			if ((like.data && like.data.length > 0) || !like.error) {
@@ -210,7 +219,7 @@ export const toggleLikeInDb = async (postId: number) => {
 
 export const unlikePostInDb = async (postId: number): Promise<boolean> => {
 	if (!postId) return false;
-	const currentUser = await AsyncStorage.getItem("username");
+	const currentUser = await getCurrentUser();
 	if (!currentUser) return false;
 	try {
 		const isLiked = await checkIfLiked(postId);
@@ -220,7 +229,7 @@ export const unlikePostInDb = async (postId: number): Promise<boolean> => {
 				.delete()
 				.match({
 					postId,
-					user: currentUser,
+					user: currentUser.username,
 				});
 			if (!like) return false;
 			if (like.error) {
@@ -240,13 +249,13 @@ export const unlikePostInDb = async (postId: number): Promise<boolean> => {
 
 export const checkFollowingInDb = async (username: string) => {
 	try {
-		const currentUser = await AsyncStorage.getItem("username");
+		const currentUser = await getCurrentUser();
 		if (!currentUser) return false;
 
 		const followingRes = await supabaseClient
 			.from<definitions["followers"]>("followers")
 			.select("*")
-			.eq("follower", currentUser.toLowerCase())
+			.eq("follower", currentUser.username.toLowerCase())
 			.eq("following", username.toLowerCase());
 		if (followingRes.error) {
 			console.error("[checkFollowingInDb_Response]", followingRes.error);
@@ -263,15 +272,15 @@ export const checkFollowingInDb = async (username: string) => {
 
 export const unfollowUserInDb = async (username: string) => {
 	const isFollowing = await checkFollowingInDb(username);
-	const currentUser = await AsyncStorage.getItem("username");
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return false;
 
 	if (isFollowing) {
-		if (!currentUser) return false;
 		const followingRes = await supabaseClient
 			.from<definitions["followers"]>("followers")
 			.delete()
 			.match({
-				follower: currentUser.toLowerCase(),
+				follower: currentUser.username.toLowerCase(),
 				following: username.toLowerCase(),
 			});
 
@@ -287,7 +296,7 @@ export const unfollowUserInDb = async (username: string) => {
 
 export const followUserInDb = async (username: string) => {
 	const isFollowing = await checkFollowingInDb(username);
-	const currentUser = await AsyncStorage.getItem("username");
+	const currentUser = await getCurrentUser();
 
 	if (!isFollowing) {
 		if (!currentUser) return false;
@@ -295,7 +304,7 @@ export const followUserInDb = async (username: string) => {
 			.from<definitions["followers"]>("followers")
 
 			.insert({
-				follower: currentUser.toLowerCase(),
+				follower: currentUser.username.toLowerCase(),
 				following: username.toLowerCase(),
 			});
 
@@ -384,6 +393,8 @@ export const fetchUserFromDb = async (
 
 export const editPostInDb = async (postId: number, caption?: string) => {
 	if (!postId) return null;
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return null;
 	try {
 		const res = await supabaseClient
 			.from<definitions["posts"]>("posts")
@@ -392,6 +403,7 @@ export const editPostInDb = async (postId: number, caption?: string) => {
 			})
 			.match({
 				postId,
+				user: currentUser.username,
 			});
 		if (res.error || res.data.length === 0) {
 			console.error("[editPostInDb_Response]", res.error);
@@ -406,6 +418,8 @@ export const editPostInDb = async (postId: number, caption?: string) => {
 
 export const editUserInDb = async (username: string, newData: User) => {
 	if (!username) return null;
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return null;
 	try {
 		const res = await supabaseClient
 			.from<definitions["users"]>("users")
@@ -413,7 +427,7 @@ export const editUserInDb = async (username: string, newData: User) => {
 				...newData,
 			})
 			.match({
-				username,
+				username: currentUser.username,
 			});
 		if (res.error || res.data.length === 0) {
 			console.error("[editUserInDb_Response]", res.error);
@@ -487,12 +501,15 @@ export const newCommentInDb = async (
 
 export const deleteCommentFromDb = async (commentId: number) => {
 	if (!commentId) return false;
+	const currentUser = await getCurrentUser();
+	if (!currentUser) return null;
 	try {
 		const res = await supabaseClient
 			.from<definitions["comments"]>("comments")
 			.delete()
 			.match({
 				id: commentId,
+				user: currentUser.username,
 			});
 		if (res.error) {
 			console.error("[deleteCommentFromDb_Response]", res.error);
@@ -542,12 +559,17 @@ export const fetchPostsByUserFromDb = async (
 
 export const deletePostFromDb = async (postId: number) => {
 	if (!postId) return false;
+	const currentUser = await getCurrentUser();
+
+	if (!currentUser) return null;
+
 	try {
 		const res = await supabaseClient
 			.from<definitions["posts"]>("posts")
 			.delete()
 			.match({
 				postId,
+				user: currentUser.username,
 			});
 		if (res.error) {
 			console.error("[deletePostFromDb_Response]", res.error);

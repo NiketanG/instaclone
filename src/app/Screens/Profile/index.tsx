@@ -25,13 +25,13 @@ import {
 } from "react-native-paper";
 import Icon from "react-native-vector-icons/Ionicons";
 import { UserAvatar } from "../../Components/UserAvatar";
-import { ProfileStackParams } from "../../types/navigation";
+import { ProfileStackParams } from "../../types/navigation/ProfileStack";
 import { AppContext } from "../../utils/appContext";
 import useUser from "../../utils/useUser";
 
 type Props = {
-	route: RouteProp<ProfileStackParams, "ProfilePage">;
-	navigation: StackNavigationProp<ProfileStackParams, "ProfilePage">;
+	route: RouteProp<ProfileStackParams, "Profile">;
+	navigation: StackNavigationProp<ProfileStackParams, "Profile">;
 };
 
 const Profile: React.FC<Props> = observer(({ navigation, route }) => {
@@ -44,11 +44,13 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 
 	const [isCurrentUser, setIsCurrentUser] = useState(false);
 
-	const { username: savedUsername } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
+
+	const goBack = () => navigation.goBack();
 
 	const openMessage = () => {
 		if (route.params.username)
-			navigation.navigate("Messages", {
+			navigation.navigate("Messages" as any, {
 				username: route.params.username,
 			});
 	};
@@ -63,21 +65,16 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 		fetchUser,
 		followUser,
 		unfollowUser,
-	} = useUser(route.params.username || savedUsername);
-
-	const goBack = () => {
-		if (route.params.goBack) {
-			route.params.goBack();
-		} else {
-			navigation.goBack();
-		}
-	};
+	} = useUser(route.params?.username || currentUser?.username);
 
 	useEffect(() => {
-		if (savedUsername && route.params.username === savedUsername) {
+		if (
+			currentUser?.username &&
+			route.params.username === currentUser?.username
+		) {
 			setIsCurrentUser(true);
 		}
-	}, [savedUsername, route.params]);
+	}, [currentUser, route.params]);
 
 	return (
 		<View
@@ -109,23 +106,25 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 						alignItems: "center",
 					}}
 				>
-					{route.params.showBackArrow && route.params.username && (
+					{!isCurrentUser && (
 						<IconButton
 							icon="arrow-left"
 							size={20}
 							style={{
-								marginRight: 16,
+								marginRight: -4,
 							}}
 							onPress={goBack}
 						/>
 					)}
-					{user?.username && (
+					{route.params.username && (
 						<Title
 							style={{
+								marginTop: -4,
+								marginLeft: 16,
 								color: colors.text,
 							}}
 						>
-							{user.username}
+							{route.params.username}
 						</Title>
 					)}
 				</View>
@@ -175,11 +174,11 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 							</View>
 							<TouchableHighlight
 								onPress={() => {
-									navigation.navigate("Followers", {
-										username: user?.username,
-										profilePic: undefined,
-										followers: followers || [],
-									});
+									if (user && followers)
+										navigation.navigate("Followers", {
+											username: user.username,
+											followers,
+										});
 								}}
 							>
 								<View style={styles.textContainer}>
@@ -193,11 +192,11 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 							</TouchableHighlight>
 							<TouchableHighlight
 								onPress={() => {
-									navigation.navigate("Following", {
-										username: user?.username,
-										profilePic: undefined,
-										following: following || [],
-									});
+									if (user && following)
+										navigation.navigate("Following", {
+											username: user.username,
+											following,
+										});
 								}}
 							>
 								<View style={styles.textContainer}>
@@ -358,18 +357,13 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 										key={post.postId}
 										onPress={() => {
 											if (user)
-												navigation.navigate("Posts", {
-													goBack: () =>
-														navigation.goBack(),
-													user: {
-														username:
-															user?.username,
-														profilePic:
-															user?.profilePic,
-													},
-													postId: post.postId,
-													postList: posts,
-												});
+												navigation.navigate(
+													"PostsList",
+													{
+														postId: post.postId,
+														postList: posts,
+													}
+												);
 										}}
 									>
 										<Image

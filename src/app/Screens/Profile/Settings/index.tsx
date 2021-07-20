@@ -1,7 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useContext } from "react";
 import { Appbar, List, useTheme } from "react-native-paper";
-import { ProfileStackParams } from "../../../types/navigation";
+import { ProfileStackParams } from "../../../types/navigation/ProfileStack";
 import { Alert, Linking, StatusBar, View } from "react-native";
 import { AppContext } from "../../../utils/appContext";
 

@@ -12,7 +12,7 @@ import {
 import { Caption, IconButton, Text, useTheme } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
 
-import { ExploreStackNavigationParams } from "../../types/navigation";
+import { ExploreStackNavigationParams } from "../../types/navigation/ExploreStack";
 import { StackNavigationProp } from "@react-navigation/stack";
 import UsersStore from "../../store/UsersStore";
 import { Post } from "../../store/PostsStore";
@@ -85,8 +85,6 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 
 	const [searchFocused, setSearchFocused] = useState(false);
 	const [loading, setLoading] = useState(false);
-
-	const goBack = () => navigation.goBack();
 
 	const closeSearch = () => {
 		setSearchFocused(false);
@@ -162,11 +160,12 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 								key={user.username}
 								onPress={() => {
 									setSearchTerm("");
-									navigation.navigate("Profile", {
-										username: user.username,
-										profilePic: user.profilePic,
-										goBack,
-										showBackArrow: true,
+									navigation.navigate("PostsList" as any, {
+										screen: "Profile",
+										params: {
+											username: user.username,
+											profilePic: user.profilePic,
+										},
 									});
 								}}
 							>
@@ -220,11 +219,11 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 							<TouchableHighlight
 								key={post.postId}
 								onPress={() => {
-									navigation.navigate("PostDetail", {
-										post,
-										user: {
-											username: post.user,
-											profilePic: undefined,
+									navigation.navigate("PostsList" as any, {
+										screen: "PostsList",
+										params: {
+											postId: post.postId,
+											postList: postList,
 										},
 									});
 								}}

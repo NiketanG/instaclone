@@ -30,8 +30,8 @@ const PostShareModal: React.FC<ModalProps> = ({ postId, closeModal }) => {
 	const { messageList, loading } = useChatList();
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const { username: currentUsername } = useContext(AppContext);
-	const { following } = useUser(currentUsername);
+	const { user: currentUser } = useContext(AppContext);
+	const { following } = useUser(currentUser?.username);
 
 	const [chatList, setChatList] = useState<NewChatItemType[]>([]);
 

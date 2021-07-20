@@ -12,15 +12,11 @@ export const CommentItem: React.FC<{
 	selectComment: (username: string, commentId: number) => void;
 	selectedComment: number | null;
 }> = ({ item, selectComment, selectedComment }) => {
-	const goBack = () => {
-		navigation.goBack();
-	};
 	const navigation = useNavigation();
+
 	const viewProfile = (username: string) => {
 		navigation.navigate("Profile", {
 			username,
-			isCurrentUser: false,
-			goBack: goBack,
 		});
 	};
 

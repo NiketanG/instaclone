@@ -3,7 +3,7 @@ import { Appbar, Text, Title, useTheme } from "react-native-paper";
 import React from "react";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams } from "../../types/navigation";
+import { ProfileStackParams } from "../../types/navigation/ProfileStack";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "Followers">;
@@ -14,9 +14,8 @@ const Followers: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
 	const goBack = () => navigation.goBack();
 	const viewProfile = (username: string) => {
-		navigation.push("ProfilePage", {
+		navigation.push("Profile", {
 			username,
-			showBackArrow: true,
 		});
 	};
 
@@ -38,7 +37,7 @@ const Followers: React.FC<Props> = ({ navigation, route }) => {
 				}}
 			>
 				<Appbar.Action icon="arrow-left" onPress={goBack} />
-				<Appbar.Content title={route.params.username || "Following"} />
+				<Appbar.Content title={"Followers"} />
 			</Appbar.Header>
 
 			<ScrollView

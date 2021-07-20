@@ -23,7 +23,7 @@ type PostData = {
 };
 const usePost = (postId?: number | null): PostData => {
 	const [loading, setLoading] = useState(true);
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 	const [likes, setLikes] = useState<Array<Like>>([]);
 	const [comments, setComments] = useState<Array<Comment>>([]);
 	const [liked, setLiked] = useState(false);
@@ -54,7 +54,9 @@ const usePost = (postId?: number | null): PostData => {
 				);
 
 			const isLiked = likesData.find(
-				(like) => like.postId === postId && like.user === currentUser
+				(like) =>
+					like.postId === postId &&
+					like.user === currentUser?.username
 			)
 				? true
 				: false;
@@ -90,12 +92,13 @@ const usePost = (postId?: number | null): PostData => {
 		setLiked(false);
 		setLikes(
 			likes.filter(
-				(like) => like.postId !== postId && like.user !== currentUser
+				(like) =>
+					like.postId !== postId && like.user !== currentUser.username
 			)
 		);
 		LikesStore.deleteLike({
 			postId,
-			user: currentUser,
+			user: currentUser.username,
 		});
 		await unlikePostInDb(postId);
 	};
@@ -127,7 +130,8 @@ const usePost = (postId?: number | null): PostData => {
 			if (likesData) {
 				const isLiked = likesData.find(
 					(like) =>
-						like.postId === postId && like.user === currentUser
+						like.postId === postId &&
+						like.user === currentUser.username
 				)
 					? true
 					: false;

@@ -11,12 +11,12 @@ import {
 	Colors,
 } from "react-native-paper";
 import PostsStore from "../../store/PostsStore";
-import { PostStackNavigationParams } from "../../types/navigation";
+import { PostStackParamsList } from "../../types/navigation/PostStack";
 import usePostData from "../../utils/usePostData";
 
 type Props = {
-	route: RouteProp<PostStackNavigationParams, "EditPost">;
-	navigation: StackNavigationProp<PostStackNavigationParams, "EditPost">;
+	route: RouteProp<PostStackParamsList, "EditPost">;
+	navigation: StackNavigationProp<PostStackParamsList, "EditPost">;
 };
 
 const EditPost: React.FC<Props> = ({ route, navigation }) => {

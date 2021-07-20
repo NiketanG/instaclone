@@ -9,7 +9,7 @@ type Props = {
 	selectMessage: (username: string, messageId: number) => void;
 };
 const TextMessage: React.FC<Props> = ({ message, selectMessage }) => {
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 	const { width } = useWindowDimensions();
 
 	return (
@@ -22,14 +22,14 @@ const TextMessage: React.FC<Props> = ({ message, selectMessage }) => {
 					display: "flex",
 					flexDirection: "row",
 					justifyContent:
-						message.sender === currentUser
+						message.sender === currentUser?.username
 							? "flex-end"
 							: "flex-start",
 				}}
 			>
 				<Text
 					style={{
-						minHeight: 48,
+						minHeight: 40,
 						maxWidth: width / 2 - 16,
 						textAlignVertical: "center",
 						paddingHorizontal: 16,

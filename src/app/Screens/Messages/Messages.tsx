@@ -54,7 +54,7 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 	};
 
 	const [messageText, setMessageText] = useState("");
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 	const goBack = () => {
 		if (selectedMessage) {
 			setSelectedMessage(null);
@@ -66,7 +66,7 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
 
 	const selectMessage = (username: string, messsageId: number) =>
-		username === currentUser && setSelectedMessage(messsageId);
+		username === currentUser?.username && setSelectedMessage(messsageId);
 
 	const sendMessage = () => {
 		if (messageText.length === 0) return;
@@ -89,9 +89,6 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const openProfile = () => {
 		navigation.navigate("Profile", {
 			username: route.params.username,
-			goBack,
-
-			showBackArrow: true,
 		});
 	};
 	const scrollViewRef = useRef<ScrollView>(null);

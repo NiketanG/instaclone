@@ -26,7 +26,7 @@ const useMessages = (username: string): ReturnType => {
 	const [messages, setMessages] = useState<Array<Message>>([]);
 	const [loading, setLoading] = useState(true);
 
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 
 	const fetchMessagesData = async () => {
 		if (!username || !currentUser) return null;
@@ -75,7 +75,7 @@ const useMessages = (username: string): ReturnType => {
 		} else {
 			const messagesSubscription = supabaseClient
 				.from<definitions["messages"]>(
-					`messages:receiver=eq.${currentUser}`
+					`messages:receiver=eq.${currentUser.username}`
 				)
 				.on("INSERT", newMessageReceived)
 				.subscribe();
@@ -125,7 +125,7 @@ const useMessages = (username: string): ReturnType => {
 		if (username && currentUser) {
 			const fetchedMessages = MessagesStore.messages
 				.filter((message) =>
-					[username, currentUser].includes(
+					[username, currentUser.username].includes(
 						message.sender || message.received_at
 					)
 				)

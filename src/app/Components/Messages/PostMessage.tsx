@@ -20,7 +20,7 @@ type MessagesNavigationProp = StackNavigationProp<
 	"Messages"
 >;
 const PostMessage: React.FC<Props> = ({ message, selectMessage }) => {
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 	const { width } = useWindowDimensions();
 	const { colors } = useTheme();
 
@@ -29,20 +29,15 @@ const PostMessage: React.FC<Props> = ({ message, selectMessage }) => {
 
 	const navigation = useNavigation<MessagesNavigationProp>();
 
-	const goBack = () => navigation.goBack();
-
 	const openPost = () => {
 		if (!post) return;
-		navigation.navigate("Post", {
-			post: {
-				caption: post?.caption,
-				imageUrl: post?.imageUrl,
-				postId: post?.postId,
-				postedAt: post?.postedAt,
-			},
-			user: {
-				profilePic: user?.profilePic,
-				username: post.user,
+		navigation.navigate("Post" as any, {
+			screen: "Post",
+			params: {
+				post: post,
+				user: {
+					username: post.user,
+				},
 			},
 		});
 	};
@@ -52,8 +47,6 @@ const PostMessage: React.FC<Props> = ({ message, selectMessage }) => {
 		navigation.navigate("Profile", {
 			username: post?.user,
 			profilePic: user?.profilePic,
-			showBackArrow: true,
-			goBack,
 		});
 	};
 	return (
@@ -72,7 +65,7 @@ const PostMessage: React.FC<Props> = ({ message, selectMessage }) => {
 					borderRadius: 12,
 					flexDirection: "row",
 					justifyContent:
-						message.sender === currentUser
+						message.sender === currentUser?.username
 							? "flex-end"
 							: "flex-start",
 				}}

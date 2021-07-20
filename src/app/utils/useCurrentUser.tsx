@@ -12,67 +12,41 @@ type CurrentUser = {
 };
 const useCurrentUser = () => {
 	const [currentUser, setCurrentUser] = useState<CurrentUser>();
-	const {
-		email,
-		name,
-		bio,
-		profilePic,
-		username,
-		setEmail,
-		setBio,
-		setProfilePic,
-		setName,
-	} = useContext(AppContext);
+	const { user, setUser } = useContext(AppContext);
 
 	const fetchUser = async (currentEmail: string) => {
-		const user = await supabaseClient
+		const userRes = await supabaseClient
 			.from<definitions["users"]>("users")
 			.select("*")
 			.eq("email", currentEmail);
-		if (user.error || user.data.length === 0) {
+		if (userRes.error || userRes.data.length === 0) {
 			console.error(
-				user.error || "[useCurrentUser] No user data returned"
+				userRes.error || "[useCurrentUser] No user data returned"
 			);
 			return null;
 		} else {
-			return user.data[0];
+			return userRes.data[0];
 		}
 	};
 
 	useEffect(() => {
-		if (email && username && name) {
-			const data: CurrentUser = {
-				email,
-				username,
-				name,
-			};
-			if (bio) data.bio = bio;
-			if (profilePic) data.profilePic = profilePic;
-
+		if (user) {
+			const data: CurrentUser = user;
 			setCurrentUser(data);
 		}
-	}, [bio, email, name, profilePic, username]);
+	}, [user]);
 
 	useEffect(() => {
-		if (email && username) {
-			fetchUser(email).then((userData) => {
+		if (user)
+			fetchUser(user.email).then((userData) => {
 				if (userData) {
-					setEmail(userData.email);
-					setName(userData.name);
-					if (userData.bio) setBio(userData.bio);
-					if (userData.profilePic) setProfilePic(userData.profilePic);
-					setCurrentUser({
-						email: userData.email,
-						name: userData.name,
-						username: userData.username,
-						bio: userData.bio,
-						profilePic: userData.profilePic,
-					});
+					const data: CurrentUser = userData;
+					setUser(data);
+					setCurrentUser(data);
 				}
 			});
-		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [email, username]);
+	}, [user]);
 	return currentUser;
 };
 

@@ -16,7 +16,7 @@ const useFeed = (): FeedPosts => {
 	const [posts, setPosts] = useState<Array<Post>>([]);
 	const [loading, setLoading] = useState(true);
 
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 
 	const fetchFeedData = async (): Promise<Pick<FeedPosts, "posts">> => {
 		if (!currentUser) {
@@ -27,7 +27,9 @@ const useFeed = (): FeedPosts => {
 		let tempPosts: Post[] = [];
 
 		try {
-			const followingList = await fetchFollowingFromDb(currentUser);
+			const followingList = await fetchFollowingFromDb(
+				currentUser.username
+			);
 			if (followingList) {
 				const usersList = followingList.map((user) => user.following);
 				const feedPosts = await supabaseClient
@@ -45,7 +47,7 @@ const useFeed = (): FeedPosts => {
 				const ownPosts = await supabaseClient
 					.from<definitions["posts"]>("posts")
 					.select("*")
-					.eq("user", currentUser);
+					.eq("user", currentUser.username);
 
 				let mappedOwnPosts: Post[] = [];
 				if (ownPosts.error)
@@ -70,7 +72,7 @@ const useFeed = (): FeedPosts => {
 	useEffect(() => {
 		if (currentUser) {
 			const followingList = FollowersStore.followers.filter(
-				(follower) => follower.follower === currentUser
+				(follower) => follower.follower === currentUser.username
 			);
 			let tempPosts: Post[] = [];
 
@@ -88,7 +90,7 @@ const useFeed = (): FeedPosts => {
 				tempPosts = feedPosts;
 
 				const ownPosts = PostsStore.posts
-					.filter((post) => post.user === currentUser)
+					.filter((post) => post.user === currentUser.username)
 					.sort(
 						(a, b) =>
 							new Date(b.postedAt).getTime() -

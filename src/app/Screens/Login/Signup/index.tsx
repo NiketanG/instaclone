@@ -16,11 +16,12 @@ import Icon from "react-native-vector-icons/Ionicons";
 
 import { AppContext } from "../../../utils/appContext";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { SignInNavigationParams } from "../../../types/navigation";
+import { SignInNavigationParams } from "../../../types/navigation/SignInStack";
 import { RouteProp } from "@react-navigation/core";
 import { definitions } from "../../../types/supabase";
 import supabaseClient from "../../../utils/supabaseClient";
 import uploadToCloudinary from "../../../utils/uploadToCloudinary";
+import { User } from "../../../types";
 type Props = {
 	navigation: StackNavigationProp<SignInNavigationParams, "Signup">;
 	route: RouteProp<SignInNavigationParams, "Signup">;
@@ -30,13 +31,7 @@ const Signup: React.FC<Props> = ({ route }) => {
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 
-	const {
-		setSignupDone,
-		setUsername: saveUsername,
-		setProfilePic,
-		setEmail,
-		setName: updateName,
-	} = useContext(AppContext);
+	const { setSignupDone, setUser } = useContext(AppContext);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -133,13 +128,17 @@ const Signup: React.FC<Props> = ({ route }) => {
 				);
 			}
 
-			updateName(name);
-			setEmail(route.params.email);
+			const data: User = {
+				name,
+				email: route.params.email,
+				username: username.toLowerCase(),
+			};
+
 			setLoading(false);
 			setSignupDone(true);
-			saveUsername(username.toLowerCase());
-			if (userImagePath) setProfilePic(userImagePath);
+			if (userImagePath) data.profilePic = userImagePath;
 			setImagePath(null);
+			setUser(data);
 			ToastAndroid.show("Signed up", ToastAndroid.LONG);
 		} catch (err) {
 			setLoading(false);

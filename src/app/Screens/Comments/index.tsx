@@ -15,7 +15,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { AppContext } from "../../utils/appContext";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { PostStackNavigationParams } from "../../types/navigation";
+import { PostStackParamsList } from "../../types/navigation/PostStack";
 import { FlatList } from "react-native-gesture-handler";
 import { UserAvatar } from "../../Components/UserAvatar";
 import { observer } from "mobx-react-lite";
@@ -23,13 +23,13 @@ import { CommentItem } from "./CommentItem";
 import usePost from "../../utils/usePost";
 
 type Props = {
-	route: RouteProp<PostStackNavigationParams, "Comments">;
-	navigation: StackNavigationProp<PostStackNavigationParams, "Comments">;
+	route: RouteProp<PostStackParamsList, "Comments">;
+	navigation: StackNavigationProp<PostStackParamsList, "Comments">;
 };
 
 const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 	const { colors } = useTheme();
-	const { username: currentUsername } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 
 	const [commentText, setCommentText] = useState("");
 
@@ -41,14 +41,14 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 		if (
 			commentText.length === 0 ||
 			!route.params.post.postId ||
-			!currentUsername
+			!currentUser
 		)
 			return;
 		try {
 			addComment({
 				comment: commentText,
 				postId: route.params.post.postId,
-				user: currentUsername,
+				user: currentUser.username,
 			});
 			setCommentText("");
 		} catch (err) {
@@ -60,7 +60,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 	const [selectedComment, setSelectedComment] = useState<number | null>(null);
 
 	const selectComment = (username: string, commentId: number) => {
-		if (username === currentUsername) setSelectedComment(commentId);
+		if (username === currentUser?.username) setSelectedComment(commentId);
 	};
 
 	const goBack = () => {

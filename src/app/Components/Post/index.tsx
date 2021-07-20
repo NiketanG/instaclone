@@ -17,6 +17,7 @@ import { getTimeDistance } from "../../utils/utils";
 
 import { User } from "../../store/UsersStore";
 import useUser from "../../utils/useUser";
+import { FeedNavigationProp } from "../../types/navigation/PostStack";
 
 type Props = Pick<PostType, "imageUrl" | "caption" | "postedAt" | "postId"> & {
 	user: Pick<User, "username" | "profilePic">;
@@ -37,7 +38,7 @@ const Post: React.FC<Props> = ({
 	user: { username, profilePic },
 	openModal,
 }) => {
-	const navigation = useNavigation();
+	const navigation = useNavigation<FeedNavigationProp>();
 
 	const { colors } = useTheme();
 	const { width } = useWindowDimensions();
@@ -49,26 +50,24 @@ const Post: React.FC<Props> = ({
 
 	const { user } = useUser(username);
 
-	const goBack = () => navigation.goBack();
-
 	const viewProfile = () =>
-		navigation.navigate("Profile", {
-			username,
-			goBack,
-			showBackArrow: true,
+		navigation.navigate("Profile" as any, {
+			username: user?.username,
+			profilePic: user?.profilePic,
+			name: user?.name,
 		});
 
 	const openLikes = () => navigation.navigate("Likes", { postId });
 	const openComments = () =>
 		navigation.navigate("Comments", {
 			post: {
-				caption,
-				postedAt,
 				postId,
+				postedAt,
+				user: username,
+				caption,
 			},
 			user: {
-				username,
-				profilePic: profilePic || user?.profilePic,
+				...user,
 			},
 		});
 
@@ -76,130 +75,126 @@ const Post: React.FC<Props> = ({
 	const openShareModal = () => openModal("SHARE", username, postId);
 
 	return (
-		<>
-			<Card
+		<Card
+			style={{
+				zIndex: 0,
+				elevation: 0,
+				backgroundColor: colors.background,
+			}}
+		>
+			<Card.Title
+				title={username}
+				left={() => (
+					<UserAvatar
+						profilePicture={profilePic || user?.profilePic}
+						onPress={viewProfile}
+					/>
+				)}
+				right={(props) => (
+					<IconButton
+						{...props}
+						icon="dots-vertical"
+						onPress={openMenuModal}
+					/>
+				)}
+				titleStyle={{
+					fontSize: 18,
+					marginLeft: -16,
+				}}
 				style={{
-					zIndex: 0,
-					elevation: 0,
-					backgroundColor: colors.background,
+					borderBottomColor: colors.placeholder,
+					borderBottomWidth: 0.5,
+				}}
+			/>
+
+			<Image
+				source={{ uri: imageUrl }}
+				style={{
+					width,
+					height: width,
+				}}
+				width={width}
+				height={width}
+			/>
+			<Card.Actions
+				style={{
+					marginTop: -4,
+					marginBottom: -8,
 				}}
 			>
-				<Card.Title
-					title={username}
-					left={() => (
-						<UserAvatar
-							profilePicture={profilePic || user?.profilePic}
-							onPress={viewProfile}
-						/>
-					)}
-					right={(props) => (
-						<IconButton
-							{...props}
-							icon="dots-vertical"
-							onPress={openMenuModal}
-						/>
-					)}
-					titleStyle={{
-						fontSize: 18,
-						marginLeft: -16,
-					}}
+				<Icon.Button
 					style={{
-						borderBottomColor: colors.placeholder,
-						borderBottomWidth: 0.5,
+						margin: 0,
+						paddingLeft: 8,
+						paddingRight: 0,
 					}}
+					onPress={toggleLike}
+					color={colors.text}
+					backgroundColor="transparent"
+					name={liked ? "heart" : "heart-outline"}
+					size={22}
 				/>
-
-				<Image
-					source={{ uri: imageUrl }}
+				<Icon.Button
 					style={{
-						width,
-						height: width,
+						margin: 0,
+						paddingLeft: 8,
+						paddingRight: 0,
 					}}
-					width={width}
-					height={width}
+					color={colors.text}
+					onPress={openComments}
+					backgroundColor="transparent"
+					name="chatbubble-outline"
+					size={22}
 				/>
-				<Card.Actions
+				<Icon.Button
 					style={{
-						marginTop: -4,
-						marginBottom: -8,
+						margin: 0,
+						paddingLeft: 8,
+						paddingRight: 0,
 					}}
-				>
-					<Icon.Button
+					onPress={openShareModal}
+					color={colors.text}
+					backgroundColor="transparent"
+					name={"paper-plane-outline"}
+					size={22}
+				/>
+			</Card.Actions>
+			<Card.Content>
+				{likes.length > 0 && (
+					<Text
+						onPress={openLikes}
 						style={{
-							margin: 0,
-							paddingLeft: 8,
-							paddingRight: 0,
+							color: colors.placeholder,
 						}}
-						onPress={toggleLike}
-						color={colors.text}
-						backgroundColor="transparent"
-						name={liked ? "heart" : "heart-outline"}
-						size={22}
-					/>
-					<Icon.Button
-						style={{
-							margin: 0,
-							paddingLeft: 8,
-							paddingRight: 0,
-						}}
-						color={colors.text}
-						onPress={openComments}
-						backgroundColor="transparent"
-						name="chatbubble-outline"
-						size={22}
-					/>
-					<Icon.Button
-						style={{
-							margin: 0,
-							paddingLeft: 8,
-							paddingRight: 0,
-						}}
-						onPress={openShareModal}
-						color={colors.text}
-						backgroundColor="transparent"
-						name={"paper-plane-outline"}
-						size={22}
-					/>
-				</Card.Actions>
-				<Card.Content>
-					{likes.length > 0 && (
-						<Text
-							onPress={openLikes}
-							style={{
-								color: colors.placeholder,
-							}}
+					>
+						{likes.length > 1 ? `${likes.length} likes` : `1 like`}
+					</Text>
+				)}
+				<Title>{username}</Title>
+				{caption ? (
+					<>
+						<Paragraph
+							numberOfLines={expandedCaption ? undefined : 1}
+							onPress={toggleExpandCaption}
 						>
-							{likes.length > 1
-								? `${likes.length} likes`
-								: `1 like`}
-						</Text>
-					)}
-					<Title>{username}</Title>
-					{caption ? (
-						<>
-							<Paragraph
-								numberOfLines={expandedCaption ? undefined : 1}
-								onPress={toggleExpandCaption}
-							>
-								{caption}
-							</Paragraph>
+							{caption}
+						</Paragraph>
 
-							{caption.length > 50 && (
-								<Text
-									style={{
-										fontWeight: "bold",
-										color: colors.placeholder,
-									}}
-								>
-									{expandedCaption ? "Less" : "More"}
-								</Text>
-							)}
-						</>
-					) : null}
-					<Caption>{getTimeDistance(postedAt)}</Caption>
-				</Card.Content>
-			</Card>
-		</>
+						{caption.length > 50 && (
+							<Text
+								style={{
+									fontWeight: "bold",
+									color: colors.placeholder,
+								}}
+							>
+								{expandedCaption ? "Less" : "More"}
+							</Text>
+						)}
+					</>
+				) : null}
+				<Caption>{getTimeDistance(postedAt)}</Caption>
+			</Card.Content>
+		</Card>
 	);
 };
 

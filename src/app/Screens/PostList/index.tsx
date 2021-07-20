@@ -2,26 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import { Appbar, Divider, useTheme } from "react-native-paper";
 import { FlatList, StatusBar, useWindowDimensions } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams } from "../../types/navigation";
+import { ProfileStackParams } from "../../types/navigation/ProfileStack";
 import { RouteProp } from "@react-navigation/native";
 import { definitions } from "../../types/supabase";
 import Post from "../../Components/Post";
 import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
 
 type Props = {
-	navigation: StackNavigationProp<ProfileStackParams, "Posts">;
-	route: RouteProp<ProfileStackParams, "Posts">;
+	navigation: StackNavigationProp<ProfileStackParams, "PostsList">;
+	route: RouteProp<ProfileStackParams, "PostsList">;
 };
 
 const PostList: React.FC<Props> = ({ navigation, route }) => {
 	const listRef = useRef<FlatList>(null);
-	const goBack = () => {
-		if (route.params.goBack) {
-			route.params.goBack();
-		} else {
-			navigation.goBack();
-		}
-	};
+	const goBack = () => navigation.goBack();
 
 	const { colors } = useTheme();
 
@@ -33,6 +27,7 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 
 			listRef.current?.scrollToIndex({
 				index: postIndex,
+				animated: false,
 			});
 		}
 	}, [route]);

@@ -5,11 +5,11 @@ import { View } from "react-native";
 import { Appbar, useTheme } from "react-native-paper";
 import Post from "../../Components/Post";
 import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
-import { ExploreStackNavigationParams } from "../../types/navigation";
+import { PostStackParamsList } from "../../types/navigation/PostStack";
 
 type Props = {
-	route: RouteProp<ExploreStackNavigationParams, "PostDetail">;
-	navigation: StackNavigationProp<ExploreStackNavigationParams, "PostDetail">;
+	route: RouteProp<PostStackParamsList, "Post">;
+	navigation: StackNavigationProp<PostStackParamsList, "Post">;
 };
 
 const PostDetail: React.FC<Props> = ({ route, navigation }) => {
@@ -64,7 +64,10 @@ const PostDetail: React.FC<Props> = ({ route, navigation }) => {
 					imageUrl={route.params.post.imageUrl}
 					postId={route.params.post.postId}
 					postedAt={route.params.post.postedAt}
-					user={route.params.user}
+					user={{
+						profilePic: route.params.user.profilePic,
+						username: route.params.user.username,
+					}}
 				/>
 			</PostBottomSheetWrapper>
 		</View>

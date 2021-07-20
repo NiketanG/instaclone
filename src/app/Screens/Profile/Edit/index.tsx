@@ -9,7 +9,7 @@ import {
 	Title,
 	useTheme,
 } from "react-native-paper";
-import { ProfileStackParams } from "../../../types/navigation";
+import { ProfileStackParams } from "../../../types/navigation/ProfileStack";
 import { Image, Keyboard, StatusBar, ToastAndroid, View } from "react-native";
 import { AppContext } from "../../../utils/appContext";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -38,12 +38,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 	const [bio, setBio] = useState("");
 	const [imagePath, setImagePath] = useState<string | null>(null);
 
-	const {
-		setProfilePic: updateProfilePic,
-		setUsername: updateUsername,
-		setName: updateName,
-		setBio: updateBio,
-	} = useContext(AppContext);
+	const { user, setUser } = useContext(AppContext);
 
 	useEffect(() => {
 		if (currentUser) {
@@ -84,6 +79,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 	};
 
 	const updateProfile = async () => {
+		if (!user) return;
 		try {
 			if (username.length < 3) return;
 			if (!currentUser?.email) {
@@ -133,11 +129,13 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 				profilePic: userImagePath || "",
 			});
 
-			updateName(name);
-			updateBio(bio);
+			const data = { ...user };
+			data.name = name;
+			data.bio = bio;
+			data.username = username;
 
-			updateUsername(username);
-			if (userImagePath) updateProfilePic(userImagePath);
+			if (userImagePath) data.profilePic = userImagePath;
+			setUser(data);
 
 			ToastAndroid.show("Profile updated", ToastAndroid.LONG);
 			navigation.goBack();

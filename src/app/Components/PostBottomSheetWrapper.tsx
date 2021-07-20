@@ -31,7 +31,7 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 	const shareModalRef = useRef<BottomSheet>(null);
 
 	const { height } = useWindowDimensions();
-	const { username: currentUsername } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 
 	useEffect(() => {
 		if (openedModalData?.modalType && openedModalData.postId) {
@@ -64,7 +64,7 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 				viewProfile={viewProfile}
 				username={openedModalData.username}
 				postId={openedModalData.postId}
-				ownPost={currentUsername === openedModalData.username}
+				ownPost={currentUser?.username === openedModalData.username}
 				closeModal={() => closeModal("MENU")}
 			/>
 		);
@@ -77,15 +77,11 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 			/>
 		);
 
-	const goBack = () => navigation.goBack();
-
 	const viewProfile = () =>
 		openedModalData &&
 		navigation.navigate("Profile", {
 			username: openedModalData?.username,
 			isCurrentUser: false,
-			goBack,
-			showBackArrow: true,
 		});
 
 	const closeModal = (modalType: "MENU" | "SHARE") => {
@@ -100,7 +96,9 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 		<>
 			<BottomSheet
 				snapPoints={[
-					openedModalData?.username === currentUsername ? 204 : 104,
+					openedModalData?.username === currentUser?.username
+						? 204
+						: 104,
 					0,
 					0,
 				]}

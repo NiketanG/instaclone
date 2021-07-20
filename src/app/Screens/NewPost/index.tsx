@@ -17,7 +17,7 @@ import {
 	Colors,
 	useTheme,
 } from "react-native-paper";
-import { TabNavigationParams } from "../../types/navigation";
+import { BottomTabParamList } from "../../types/navigation/BottomTab";
 import ImagePicker, {
 	Options,
 	Image as ImageResponse,
@@ -29,14 +29,14 @@ import uploadToCloudinary from "../../utils/uploadToCloudinary";
 import { definitions } from "../../types/supabase";
 
 type Props = {
-	route: RouteProp<TabNavigationParams, "New">;
-	navigation: BottomTabNavigationProp<TabNavigationParams, "New">;
+	route: RouteProp<BottomTabParamList, "New">;
+	navigation: BottomTabNavigationProp<BottomTabParamList, "New">;
 };
 
 const NewPost: React.FC<Props> = ({ navigation }) => {
 	const [imagePath, setImagePath] = useState<string | null>(null);
 
-	const { username } = useContext(AppContext);
+	const { user } = useContext(AppContext);
 
 	const imagePickerOptions: Options = {
 		mediaType: "photo",
@@ -76,7 +76,7 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 	const uploadPost = async () => {
 		try {
 			if (!imagePath) return;
-			if (!username) return;
+			if (!user) return;
 			setUploading(true);
 
 			const imageUrl = await uploadToCloudinary(imagePath);
@@ -88,7 +88,7 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 				> = {
 					caption,
 					imageUrl,
-					user: username,
+					user: user.username,
 				};
 
 				PostsStore.newPost(data);

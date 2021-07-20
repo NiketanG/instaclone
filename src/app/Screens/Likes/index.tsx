@@ -14,13 +14,13 @@ import {
 } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
 import { Like } from "../../store/LikesStore";
-import { PostStackNavigationParams } from "../../types/navigation";
+import { PostStackParamsList } from "../../types/navigation/PostStack";
 import usePost from "../../utils/usePost";
 import useUser from "../../utils/useUser";
 
 type Props = {
-	route: RouteProp<PostStackNavigationParams, "EditPost">;
-	navigation: StackNavigationProp<PostStackNavigationParams, "EditPost">;
+	route: RouteProp<PostStackParamsList, "Likes">;
+	navigation: StackNavigationProp<PostStackParamsList, "Likes">;
 };
 
 type LikeListItemProps = {
@@ -80,14 +80,10 @@ const Likes: React.FC<Props> = ({ route, navigation }) => {
 	}, [likes, searchTerm]);
 	const { height } = useWindowDimensions();
 
-	const goBack = () => navigation.goBack();
-
 	const openProfile = (username: string, profilePic?: string) => {
 		navigation.navigate("Profile", {
 			username,
 			profilePic,
-			showBackArrow: true,
-			goBack,
 		});
 	};
 

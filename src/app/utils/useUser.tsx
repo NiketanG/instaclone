@@ -23,7 +23,7 @@ const useUser = (username?: string | null) => {
 	const [following, setFollowing] = useState<Follower[]>([]);
 	const [isFollowing, setIsFollowing] = useState(false);
 
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 
 	const fetchUserData = async (usernameToFetch: string) => {
 		try {
@@ -79,7 +79,7 @@ const useUser = (username?: string | null) => {
 
 			const isFollowingUser = FollowersStore.followers.find(
 				(follower) =>
-					follower.follower === currentUser &&
+					follower.follower === currentUser.username &&
 					follower.following === username
 			);
 
@@ -130,18 +130,19 @@ const useUser = (username?: string | null) => {
 		if (!(currentUser && username)) return;
 		setIsFollowing(true);
 		const isFollowingInStore = followers.find(
-			(e) => e.follower === currentUser && e.following === username
+			(e) =>
+				e.follower === currentUser.username && e.following === username
 		);
 		const tempFollowers = followers;
 		if (!isFollowingInStore) {
 			tempFollowers.push({
-				follower: currentUser,
+				follower: currentUser.username,
 				following: username,
 			});
 		}
 		setFollowers(tempFollowers);
 
-		FollowersStore.followUser(username, currentUser);
+		FollowersStore.followUser(username, currentUser.username);
 	};
 
 	const unfollowUser = async () => {
@@ -150,11 +151,11 @@ const useUser = (username?: string | null) => {
 		const tempFollowers = followers.filter(
 			(follower) =>
 				follower.following !== username &&
-				follower.follower !== currentUser
+				follower.follower !== currentUser.username
 		);
 		setFollowers(tempFollowers);
 
-		FollowersStore.unfollowUser(username, currentUser);
+		FollowersStore.unfollowUser(username, currentUser.username);
 	};
 
 	useEffect(() => {
