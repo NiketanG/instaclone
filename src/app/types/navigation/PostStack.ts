@@ -1,5 +1,5 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import { User } from "../../types";
+import { LikeFull, PostFull, User } from "../../types";
 import { definitions } from "../supabase";
 
 export type PostStackParamsList = {
@@ -12,9 +12,11 @@ export type PostStackParamsList = {
 		user: Partial<User>;
 	};
 
-	Likes: Pick<definitions["posts"], "postId">;
+	Likes: {
+		likes: LikeFull[];
+	};
 	Post: {
-		post: definitions["posts"];
+		post: PostFull;
 		user: definitions["users"];
 	};
 

@@ -3,19 +3,14 @@ import { View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Caption, Text } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
-import useUser from "../../utils/useUser";
-
-export type NewChatItemType = {
-	username: string;
-};
+import { UserMin } from "../../types";
 
 type NewChatItemProps = {
-	item: NewChatItemType;
-	openMessage?: (username: string) => void;
+	item: UserMin;
+	openMessage: (user: UserMin) => void;
 };
 
 const NewChatItem: React.FC<NewChatItemProps> = ({ item, openMessage }) => {
-	const { user } = useUser(item.username);
 	return (
 		<TouchableOpacity
 			key={item.username}
@@ -25,13 +20,9 @@ const NewChatItem: React.FC<NewChatItemProps> = ({ item, openMessage }) => {
 				alignItems: "center",
 				margin: 16,
 			}}
-			onPress={() =>
-				openMessage
-					? openMessage(item.username)
-					: console.log("no open message")
-			}
+			onPress={() => openMessage(item)}
 		>
-			<UserAvatar size={32} profilePicture={user?.profilePic} />
+			<UserAvatar size={32} profilePicture={item.profilePic} />
 			<View
 				style={{
 					marginLeft: 16,
@@ -44,7 +35,7 @@ const NewChatItem: React.FC<NewChatItemProps> = ({ item, openMessage }) => {
 				>
 					{item.username}
 				</Text>
-				<Caption>{user?.name}</Caption>
+				<Caption>{item.name}</Caption>
 			</View>
 		</TouchableOpacity>
 	);

@@ -20,8 +20,9 @@ import { SignInNavigationParams } from "../../../types/navigation/SignInStack";
 import { RouteProp } from "@react-navigation/core";
 import { definitions } from "../../../types/supabase";
 import supabaseClient from "../../../utils/supabaseClient";
-import uploadToCloudinary from "../../../utils/uploadToCloudinary";
 import { User } from "../../../types";
+import uploadToSupabase from "../../../utils/uploadToSupabase";
+import { isUsernameAvailable } from "../../../../api";
 type Props = {
 	navigation: StackNavigationProp<SignInNavigationParams, "Signup">;
 	route: RouteProp<SignInNavigationParams, "Signup">;
@@ -59,8 +60,9 @@ const Signup: React.FC<Props> = ({ route }) => {
 	const imagePickerOptions: Options = {
 		mediaType: "photo",
 		cropping: true,
-		width: 1024,
-		height: 1024,
+		forceJpg: true,
+		width: 256,
+		height: 256,
 		includeBase64: true,
 	};
 
@@ -83,15 +85,11 @@ const Signup: React.FC<Props> = ({ route }) => {
 			if (username.length < 3) return;
 
 			setLoading(true);
-			const userExists = await supabaseClient
-				.from<definitions["users"]>("users")
-				.select("*")
-				.eq("username", username.toLowerCase());
-			if (userExists?.error) {
-				console.error(userExists.error);
+			const isUsernameAvail = await isUsernameAvailable(username);
+			if (isUsernameAvail === null) {
 				ToastAndroid.show("An error occured", ToastAndroid.LONG);
 			}
-			if (userExists && userExists.data && userExists.data.length > 0) {
+			if (isUsernameAvail === false) {
 				setLoading(false);
 				setUsernameAvailable(false);
 				return;
@@ -104,9 +102,14 @@ const Signup: React.FC<Props> = ({ route }) => {
 				if (imagePath.startsWith("http")) {
 					userImagePath = imagePath;
 				} else {
-					userImagePath = await uploadToCloudinary(imagePath);
+					userImagePath = await uploadToSupabase(
+						imagePath,
+						"jpg",
+						"profilePictures"
+					);
 				}
 			}
+
 			const newUserRes = await supabaseClient
 				.from<definitions["users"]>("users")
 				.insert([
@@ -115,7 +118,7 @@ const Signup: React.FC<Props> = ({ route }) => {
 						email: route.params.email,
 						username: username.toLowerCase(),
 						name,
-						profilePic: userImagePath?.toString() || "",
+						profilePic: userImagePath?.toString(),
 					},
 				]);
 
@@ -134,7 +137,6 @@ const Signup: React.FC<Props> = ({ route }) => {
 				username: username.toLowerCase(),
 			};
 
-			setLoading(false);
 			setSignupDone(true);
 			if (userImagePath) data.profilePic = userImagePath;
 			setImagePath(null);

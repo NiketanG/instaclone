@@ -4,43 +4,48 @@ import {
 	FlatList,
 	StatusBar,
 	TextInput,
-	ToastAndroid,
 	useWindowDimensions,
 	View,
 } from "react-native";
 import { Divider, Text, useTheme } from "react-native-paper";
-import NewChatItem, {
-	NewChatItemType,
-} from "../../Screens/Messages/NewChatItem";
-import { Follower } from "../../store/FollowersStore";
-import MessagesStore from "../../store/MessagesStore";
+import { useQuery } from "react-query";
+import { getChatsForUser, getUser } from "../../../api";
+import NewChatItem from "../../Screens/Messages/NewChatItem";
+
+import { ChatItem, FollowingFull, UserMin } from "../../types";
 import { AppContext } from "../../utils/appContext";
-import { newMessageInDb } from "../../utils/supabaseUtils";
-import useChatList, { ChatList } from "../../utils/useChatList";
-import useUser from "../../utils/useUser";
 
 type ModalProps = {
 	closeModal: () => void;
-	postId: number;
+	sendMessage: (user: UserMin) => void;
 };
 
-const PostShareModal: React.FC<ModalProps> = ({ postId, closeModal }) => {
+const ShareModal: React.FC<ModalProps> = ({ sendMessage, closeModal }) => {
 	const { colors } = useTheme();
 	const { height } = useWindowDimensions();
-	const { messageList, loading } = useChatList();
+	const { data: messageList, isLoading } = useQuery(`chatList`, () =>
+		getChatsForUser()
+	);
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const { user: currentUser } = useContext(AppContext);
-	const { following } = useUser(currentUser?.username);
+	const { data } = useQuery(
+		`userInfo_${currentUser?.username}`,
+		() => getUser(currentUser?.username as any),
+		{
+			enabled: currentUser?.username !== null,
+		}
+	);
 
-	const [chatList, setChatList] = useState<NewChatItemType[]>([]);
+	const [chatList, setChatList] = useState<UserMin[]>([]);
 
-	const getUsersList = (chatsList: ChatList[], followingList: Follower[]) => {
-		const followingListData = followingList.map((user) => ({
-			username: user.following,
-		}));
-
-		const chatListData = [...chatsList, ...followingListData];
+	const getUsersList = (
+		chatsList: ChatItem[],
+		followingList: FollowingFull[]
+	) => {
+		const tempChatsList = chatsList.map((item) => item.user);
+		const tempFollowingList = followingList.map((item) => item.following);
+		const chatListData = [...tempChatsList, ...tempFollowingList];
 		return [
 			...new Map(
 				chatListData.map((item) => [item.username, item])
@@ -48,16 +53,20 @@ const PostShareModal: React.FC<ModalProps> = ({ postId, closeModal }) => {
 		];
 	};
 
-	const [searchResults, setSearchResults] = useState<
-		NewChatItemType[] | null
-	>(null);
+	const [searchResults, setSearchResults] = useState<UserMin[] | null>(null);
 
 	useEffect(() => {
-		if (searchTerm.length > 0) {
+		if (searchTerm.length > 0 && messageList) {
 			setSearchResults(
-				messageList.filter((item) =>
-					item.username.includes(searchTerm.toLowerCase())
-				)
+				messageList
+					.filter(
+						(item) =>
+							item.user.username.includes(
+								searchTerm.toLowerCase()
+							) ||
+							item.user.name.includes(searchTerm.toLowerCase())
+					)
+					.map((item) => item.user)
 			);
 		} else {
 			setSearchResults(null);
@@ -65,50 +74,45 @@ const PostShareModal: React.FC<ModalProps> = ({ postId, closeModal }) => {
 	}, [messageList, searchTerm]);
 
 	useEffect(() => {
-		if (messageList && following)
-			setChatList(getUsersList(messageList, following));
-	}, [messageList, following]);
+		if (messageList && data?.following)
+			setChatList(getUsersList(messageList, data.following));
+	}, [messageList, data?.following]);
 
 	useEffect(() => {
-		if (searchTerm.length > 0) {
+		if (searchTerm.length > 0 && messageList) {
 			setSearchResults(
-				messageList.filter((item) =>
-					item.username.includes(searchTerm.toLowerCase())
-				)
+				messageList
+					.filter(
+						(item) =>
+							item.user.username.includes(
+								searchTerm.toLowerCase()
+							) ||
+							item.user.name.includes(searchTerm.toLowerCase())
+					)
+					.map((item) => item.user)
 			);
 		} else {
 			setSearchResults(null);
 		}
 	}, [messageList, searchTerm]);
 
-	const newMessage = async (username: string) => {
-		const messageToSend = {
-			imageUrl: undefined,
-			message_type: "POST",
-			postId: postId,
-			receiver: username,
-			text: undefined,
-		};
-		const newMessageData = await newMessageInDb(messageToSend);
-		if (newMessageData) {
-			MessagesStore.addMessage(newMessageData);
-			ToastAndroid.show("Post sent", ToastAndroid.LONG);
-		}
+	const sendNewMessage = async (user: UserMin) => {
+		sendMessage(user);
 		closeModal();
 	};
 
 	return (
 		<View
 			style={{
-				height: height / 1.5,
-				zIndex: 2,
-				elevation: 2,
-				backgroundColor: "#1f1f1f",
+				height: height,
+				zIndex: 10,
+				elevation: 10,
+				backgroundColor: colors.surface,
 				paddingVertical: 16,
 				justifyContent: "center",
 			}}
 		>
-			{loading && (
+			{isLoading && (
 				<View
 					style={{
 						flex: 1,
@@ -165,7 +169,7 @@ const PostShareModal: React.FC<ModalProps> = ({ postId, closeModal }) => {
 				data={searchResults ? searchResults : chatList}
 				ItemSeparatorComponent={Divider}
 				renderItem={({ item }) => (
-					<NewChatItem item={item} openMessage={newMessage} />
+					<NewChatItem item={item} openMessage={sendNewMessage} />
 				)}
 				keyExtractor={(item) => item.username}
 				bouncesZoom
@@ -175,4 +179,4 @@ const PostShareModal: React.FC<ModalProps> = ({ postId, closeModal }) => {
 	);
 };
 
-export default PostShareModal;
+export default ShareModal;

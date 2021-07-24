@@ -1,6 +1,6 @@
 import React from "react";
 import { Image } from "react-native";
-import { TouchableHighlight } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 type AvatarProps = {
 	profilePicture?: string | null;
@@ -13,7 +13,7 @@ export const UserAvatar: React.FC<AvatarProps> = ({
 	onPress,
 }) => (
 	// <Avatar.Icon {...props} icon="heart" size={30} />
-	<TouchableHighlight onPress={onPress}>
+	<TouchableOpacity onPress={onPress}>
 		{profilePicture ? (
 			<Image
 				source={{
@@ -39,5 +39,5 @@ export const UserAvatar: React.FC<AvatarProps> = ({
 				}}
 			/>
 		)}
-	</TouchableHighlight>
+	</TouchableOpacity>
 );

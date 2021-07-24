@@ -4,26 +4,24 @@ import { Caption, Paragraph, Text } from "react-native-paper";
 import { format, formatDistanceToNow } from "date-fns";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import { UserAvatar } from "../../Components/UserAvatar";
-import { definitions } from "../../types/supabase";
 import { useNavigation } from "@react-navigation/core";
+import { CommentFull, UserMin } from "../../types";
 
 export const CommentItem: React.FC<{
-	item: definitions["comments"];
+	item: CommentFull;
 	selectComment: (username: string, commentId: number) => void;
 	selectedComment: number | null;
 }> = ({ item, selectComment, selectedComment }) => {
 	const navigation = useNavigation();
 
-	const viewProfile = (username: string) => {
-		navigation.navigate("Profile", {
-			username,
-		});
+	const viewProfile = (user: UserMin) => {
+		navigation.navigate("Profile", user);
 	};
 
 	return (
 		<TouchableHighlight
 			onLongPress={() => {
-				selectComment(item.user, item.id);
+				selectComment(item.user.username, item.id);
 			}}
 			key={item.id}
 		>
@@ -50,7 +48,7 @@ export const CommentItem: React.FC<{
 							fontWeight: "bold",
 						}}
 					>
-						{item.user}
+						{item.user.username}
 					</Text>
 					<Paragraph>{item.comment}</Paragraph>
 					<Caption>

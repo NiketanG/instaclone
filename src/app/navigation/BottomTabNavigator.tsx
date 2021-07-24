@@ -8,6 +8,8 @@ import Feather from "react-native-vector-icons/Feather";
 import ProfilePageStack from "./ProfileStack";
 import ExploreStackNavigator from "./ExploreStack";
 import HomePageStack from "./HomeStack";
+import ActivityStackNavigator from "./ActivityStack";
+import { DeviceEventEmitter } from "react-native";
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -26,11 +28,18 @@ const BottomTabNavigator: React.FC<any> = () => {
 			initialRouteName="Home"
 			tabBarOptions={{
 				showLabel: false,
+				tabStyle: { height: 48 },
 			}}
 		>
 			<BottomTab.Screen
 				name="Home"
 				component={HomePageStack}
+				listeners={{
+					blur: (e) =>
+						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+					focus: (e) =>
+						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+				}}
 				options={{
 					tabBarIcon: ({ color, focused }) =>
 						focused ? (
@@ -66,7 +75,7 @@ const BottomTabNavigator: React.FC<any> = () => {
 			/>
 			<BottomTab.Screen
 				name="Notifications"
-				component={NewPost}
+				component={ActivityStackNavigator}
 				options={{
 					tabBarIcon: ({ color, focused }) => (
 						<TabBarIcon

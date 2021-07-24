@@ -1,11 +1,11 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
-import PostStack from "../navigation/PostStack";
-import ProfilePageStack from "../navigation/ProfileStack";
+import PostStack from "./PostStack";
+import ProfilePageStack from "./ProfileStack";
 import ChatList from "../Screens/Messages/ChatList";
 import Messages from "../Screens/Messages/Messages";
 import NewChat from "../Screens/Messages/NewChat";
-import { MessageStackNavigationParams } from "../types/navigation";
+import { MessageStackNavigationParams } from "../types/navigation/MessagesStack";
 
 const Stack = createStackNavigator<MessageStackNavigationParams>();
 

@@ -1,30 +1,37 @@
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
-	ActivityIndicator,
+	BackHandler,
+	DeviceEventEmitter,
 	Image,
 	ScrollView,
 	StatusBar,
+	Text,
 	TextInput,
 	useWindowDimensions,
 	View,
 } from "react-native";
-
+import { IconButton, TouchableRipple, useTheme } from "react-native-paper";
+import { useMutation, useQuery } from "react-query";
 import {
-	Appbar,
-	useTheme,
-	IconButton,
-	TouchableRipple,
-} from "react-native-paper";
+	deleteMessage,
+	getMessagesByUser,
+	getStoryById,
+	newMessage,
+} from "../../../api";
 import ImageMessage from "../../Components/Messages/ImageMessage";
 import PostMessage from "../../Components/Messages/PostMessage";
 import TextMessage from "../../Components/Messages/TextMessage";
-import { MessageStackNavigationParams } from "../../types/navigation";
+import { MessageNoUsers, StoryListType } from "../../types";
+import { MessageStackNavigationParams } from "../../types/navigation/MessagesStack";
+import { definitions } from "../../types/supabase";
 import { AppContext } from "../../utils/appContext";
-import useImageUpload from "../../utils/useImageUpload";
-import useMessages from "../../utils/useMessages";
-
+import { queryClient } from "../../utils/queryClient";
+import useImageUpload from "../../../hooks/useImageUpload";
+import StoryMessage from "../../Components/Messages/StoryMessage";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { UserAvatar } from "../../Components/UserAvatar";
 type Props = {
 	route: RouteProp<MessageStackNavigationParams, "Messages">;
 	navigation: StackNavigationProp<MessageStackNavigationParams, "Messages">;
@@ -32,9 +39,135 @@ type Props = {
 
 const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
-	const { messages, loading, newMessage, deleteMessage } = useMessages(
-		route.params.username
+
+	const { data, isLoading: loading } = useQuery(
+		`messagesByUser_${route.params.username}`,
+		() => getMessagesByUser(route.params.username)
 	);
+	const scrollViewRef = useRef<ScrollView>(null);
+
+	useEffect(() => {
+		if (!loading) scrollViewRef.current?.scrollToEnd();
+	}, [scrollViewRef, loading]);
+
+	const openStory = async (storyId: number | undefined) => {
+		if (!storyId) return;
+		const storyData = await getStoryById(storyId);
+
+		if (!storyData) return;
+
+		let storiesToView: {
+			[key: string]: StoryListType;
+		} | null = {};
+
+		storiesToView[storyData.user.username] = {
+			user: storyData.user,
+			stories: [
+				{
+					id: storyData.id,
+					imageUrl: storyData.imageUrl,
+					postedAt: storyData.postedAt,
+				},
+			],
+		};
+
+		navigation.navigate("ViewStory" as any, {
+			storyList: storiesToView,
+			user: storyData.user.username,
+		});
+	};
+
+	useEffect(() => {
+		const handler = () => {
+			scrollViewRef.current?.scrollToEnd();
+		};
+		const listener = DeviceEventEmitter.addListener("newMessage", handler);
+
+		return () => {
+			listener.remove();
+		};
+	}, []);
+
+	const newMessageMutation = useMutation<
+		definitions["messages"] | null,
+		unknown,
+		Pick<
+			definitions["messages"],
+			"imageUrl" | "message_type" | "text" | "receiver"
+		>
+	>((msg) => newMessage(msg), {
+		onMutate: async (msg) => {
+			await queryClient.cancelQueries(
+				`messagesByUser_${route.params.username}`
+			);
+			const previousMessages = queryClient.getQueryData<
+				MessageNoUsers[] | null | undefined
+			>(`messagesByUser_${route.params.username}`);
+
+			if (!currentUser) return { previousMessages };
+
+			if (previousMessages) {
+				queryClient.setQueryData<MessageNoUsers[]>(
+					`messagesByUser_${route.params.username}`,
+					[
+						...previousMessages,
+						{
+							messageId: Math.random(),
+							message_type: msg.message_type,
+							received_at: new Date().toISOString(),
+							receiver: msg.receiver,
+							sender: currentUser.username,
+							imageUrl: msg.imageUrl,
+							text: msg.text,
+						},
+					]
+				);
+			}
+			return { previousMessages };
+		},
+		// Always refetch after error or success:
+		onSettled: () => {
+			queryClient.invalidateQueries(
+				`messagesByUser_${route.params.username}`
+			);
+			queryClient.invalidateQueries(`chatList`);
+		},
+	});
+
+	const deleteMessageMutation = useMutation<boolean | null, unknown, number>(
+		(messageId) => deleteMessage(messageId),
+		{
+			onMutate: async (messageId) => {
+				await queryClient.cancelQueries(
+					`messagesByUser_${route.params.username}`
+				);
+				const previousMessages = queryClient.getQueryData<
+					MessageNoUsers[] | null | undefined
+				>(`messagesByUser_${route.params.username}`);
+
+				if (!currentUser) return { previousMessages };
+
+				if (previousMessages) {
+					queryClient.setQueryData<MessageNoUsers[]>(
+						`messagesByUser_${route.params.username}`,
+						previousMessages.filter(
+							(item) => item.messageId !== messageId
+						)
+					);
+				}
+				return { previousMessages };
+			},
+			// Always refetch after error or success:
+			onSettled: () => {
+				queryClient.invalidateQueries(
+					`messagesByUser_${route.params.username}`
+				);
+				queryClient.invalidateQueries(`chatList`);
+			},
+		}
+	);
+
+	const { user: currentUser } = useContext(AppContext);
 
 	const { selectFromGallery } = useImageUpload();
 
@@ -44,17 +177,18 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 			console.error("[addImage] Error while uploading");
 			return;
 		}
-		newMessage({
+
+		if (!route.params.username) return;
+		newMessageMutation.mutate({
 			receiver: route.params.username,
-			text: messageText,
 			imageUrl: uploadedImage,
 			message_type: "IMAGE",
-			postId: undefined,
 		});
+		scrollViewRef.current?.scrollToEnd();
 	};
 
 	const [messageText, setMessageText] = useState("");
-	const { user: currentUser } = useContext(AppContext);
+
 	const goBack = () => {
 		if (selectedMessage) {
 			setSelectedMessage(null);
@@ -71,18 +205,16 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 	const sendMessage = () => {
 		if (messageText.length === 0) return;
 		setMessageText("");
-		newMessage({
+		newMessageMutation.mutate({
 			receiver: route.params.username,
 			text: messageText,
-			imageUrl: undefined,
 			message_type: "TEXT",
-			postId: undefined,
 		});
 		scrollViewRef.current?.scrollToEnd();
 	};
 
 	const removeMessage = () => {
-		if (selectedMessage) deleteMessage(selectedMessage);
+		if (selectedMessage) deleteMessageMutation.mutate(selectedMessage);
 		setSelectedMessage(null);
 	};
 
@@ -91,11 +223,6 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 			username: route.params.username,
 		});
 	};
-	const scrollViewRef = useRef<ScrollView>(null);
-
-	useEffect(() => {
-		if (scrollViewRef && !loading) scrollViewRef.current?.scrollToEnd();
-	}, [scrollViewRef, loading]);
 
 	const [expanded, setExpanded] = useState(false);
 	const [expandedImageUrl, setExpandedImageUrl] = useState<string | null>(
@@ -107,6 +234,31 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 		setExpanded(!expanded);
 		setExpandedImageUrl(imageUrl || null);
 	};
+
+	useFocusEffect(
+		React.useCallback(() => {
+			const onBackPress = () => {
+				if (expanded && setExpandedImageUrl) {
+					setExpanded(false);
+					setExpandedImageUrl(null);
+					return true;
+				} else if (selectedMessage) {
+					setSelectedMessage(null);
+					return true;
+				} else {
+					return false;
+				}
+			};
+
+			BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+			return () =>
+				BackHandler.removeEventListener(
+					"hardwareBackPress",
+					onBackPress
+				);
+		}, [expanded, setExpandedImageUrl, selectedMessage])
+	);
 
 	return (
 		<View
@@ -121,22 +273,68 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 				barStyle={dark ? "light-content" : "dark-content"}
 				animated
 			/>
-			<Appbar.Header
+			<View
 				style={{
+					height: 56,
 					backgroundColor: selectedMessage
 						? "#009688"
 						: colors.background,
+					width,
+					paddingHorizontal: 24,
+					paddingVertical: 16,
+					justifyContent: "space-between",
+					display: "flex",
+					flexDirection: "row",
 				}}
 			>
-				<Appbar.BackAction onPress={goBack} />
-				<Appbar.Content
-					title={route.params.username}
-					onPress={openProfile}
-				/>
+				<View
+					style={{
+						display: "flex",
+						flexDirection: "row",
+						flexGrow: 1,
+						alignItems: "center",
+					}}
+				>
+					<MaterialCommunityIcons
+						name="arrow-left"
+						color="white"
+						size={24}
+						onPress={goBack}
+						style={{
+							marginRight: 12,
+						}}
+					/>
+					{!selectedMessage && (
+						<UserAvatar
+							profilePicture={route.params.profilePic}
+							onPress={openProfile}
+						/>
+					)}
+					<Text
+						onPress={openProfile}
+						style={{
+							fontSize: 18,
+							marginLeft: 12,
+							marginTop: -6,
+							fontWeight: "bold",
+							color: "white",
+						}}
+					>
+						{selectedMessage
+							? "Selected Message"
+							: route.params.username}
+					</Text>
+				</View>
+
 				{selectedMessage && (
-					<Appbar.Action icon="delete" onPress={removeMessage} />
+					<MaterialCommunityIcons
+						name="delete"
+						color="white"
+						size={24}
+						onPress={removeMessage}
+					/>
 				)}
-			</Appbar.Header>
+			</View>
 
 			{expanded && expandedImageUrl && (
 				<TouchableRipple
@@ -172,94 +370,84 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 				</TouchableRipple>
 			)}
 
-			<View
+			<ScrollView
+				ref={scrollViewRef}
 				style={{
 					flex: 1,
 				}}
 			>
-				{loading ? (
-					<View
-						style={{
-							flex: 1,
-							flexGrow: 1,
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<ActivityIndicator color={colors.text} />
-					</View>
-				) : (
-					<>
-						<ScrollView
-							style={{
-								flex: 1,
-								flexGrow: 1,
-							}}
-							ref={scrollViewRef}
-						>
-							{messages.map((message) => {
-								if (message.message_type === "IMAGE")
-									return (
-										<ImageMessage
-											toggleImageExpand={() => {
-												toggleImageExpand(
-													message.imageUrl
-												);
-											}}
-											key={message.messageId}
-											message={message}
-											selectMessage={selectMessage}
-										/>
-									);
-
-								if (message.message_type === "POST")
-									return (
-										<PostMessage
-											key={message.messageId}
-											message={message}
-											selectMessage={selectMessage}
-										/>
-									);
-
-								if (message.message_type === "TEXT")
-									return (
-										<TextMessage
-											key={message.messageId}
-											message={message}
-											selectMessage={selectMessage}
-										/>
-									);
-							})}
-						</ScrollView>
-						<View
-							style={{
-								maxHeight: 48,
-								height: 48,
-								backgroundColor: "#3a3a3a",
-								marginHorizontal: 8,
-								marginVertical: 8,
-								borderRadius: 24,
-								display: "flex",
-								flexDirection: "row",
-							}}
-						>
-							<TextInput
-								value={messageText}
-								placeholder="Message..."
-								placeholderTextColor={"gray"}
-								onChangeText={(text) => setMessageText(text)}
-								style={{
-									flex: 1,
-									paddingLeft: 16,
-									color: colors.text,
+				{data?.map((message) => {
+					if (message.message_type === "IMAGE")
+						return (
+							<ImageMessage
+								toggleImageExpand={() => {
+									toggleImageExpand(message.imageUrl);
 								}}
-								onSubmitEditing={sendMessage}
+								key={message.messageId}
+								message={message}
+								selectMessage={selectMessage}
 							/>
-							<IconButton icon="attachment" onPress={addImage} />
-							<IconButton icon="send" onPress={sendMessage} />
-						</View>
-					</>
-				)}
+						);
+
+					if (message.message_type === "POST")
+						return (
+							<PostMessage
+								key={message.messageId}
+								message={message}
+								selectMessage={selectMessage}
+							/>
+						);
+
+					if (message.message_type === "TEXT")
+						return (
+							<TextMessage
+								key={message.messageId}
+								message={message}
+								selectMessage={selectMessage}
+							/>
+						);
+
+					if (
+						(message.message_type === "STORYREPLY" ||
+							message.message_type === "STORY") &&
+						message.storyId
+					)
+						return (
+							<StoryMessage
+								key={message.messageId}
+								message={message}
+								selectMessage={selectMessage}
+								openStory={() => openStory(message.storyId)}
+							/>
+						);
+				})}
+			</ScrollView>
+			<View
+				style={{
+					maxHeight: 48,
+					height: 48,
+					backgroundColor: "#3a3a3a",
+					marginHorizontal: 8,
+					marginVertical: 8,
+					borderRadius: 24,
+					display: "flex",
+					flexDirection: "row",
+				}}
+			>
+				<TextInput
+					value={messageText}
+					placeholder="Message..."
+					placeholderTextColor={"gray"}
+					onChangeText={(text) => setMessageText(text)}
+					style={{
+						flex: 1,
+						paddingLeft: 16,
+						color: colors.text,
+					}}
+					onSubmitEditing={sendMessage}
+				/>
+				<IconButton icon="attachment" onPress={addImage} />
+				<IconButton icon="send" onPress={sendMessage} />
 			</View>
 		</View>
 	);

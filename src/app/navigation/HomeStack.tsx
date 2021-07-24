@@ -8,7 +8,6 @@ const Stack = createStackNavigator<HomeStackNavigationParams>();
 const HomePageStack: React.FC<any> = () => (
 	<Stack.Navigator headerMode="none" initialRouteName="Feed">
 		<Stack.Screen name="Feed" component={PostStack} />
-		{/* <Stack.Screen name="Profile" component={ProfilePageStack} /> */}
 	</Stack.Navigator>
 );
 

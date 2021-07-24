@@ -4,798 +4,1230 @@
  */
 
 export interface paths {
-  "/": {
-    get: {
-      responses: {
-        /** OK */
-        200: unknown;
-      };
-    };
-  };
-  "/comments": {
-    get: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.comments.id"];
-          postId?: parameters["rowFilter.comments.postId"];
-          user?: parameters["rowFilter.comments.user"];
-          postedAt?: parameters["rowFilter.comments.postedAt"];
-          comment?: parameters["rowFilter.comments.comment"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["comments"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** comments */
-          comments?: definitions["comments"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.comments.id"];
-          postId?: parameters["rowFilter.comments.postId"];
-          user?: parameters["rowFilter.comments.user"];
-          postedAt?: parameters["rowFilter.comments.postedAt"];
-          comment?: parameters["rowFilter.comments.comment"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.comments.id"];
-          postId?: parameters["rowFilter.comments.postId"];
-          user?: parameters["rowFilter.comments.user"];
-          postedAt?: parameters["rowFilter.comments.postedAt"];
-          comment?: parameters["rowFilter.comments.comment"];
-        };
-        body: {
-          /** comments */
-          comments?: definitions["comments"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
-  "/followers": {
-    get: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.followers.id"];
-          follower?: parameters["rowFilter.followers.follower"];
-          following?: parameters["rowFilter.followers.following"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["followers"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** followers */
-          followers?: definitions["followers"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.followers.id"];
-          follower?: parameters["rowFilter.followers.follower"];
-          following?: parameters["rowFilter.followers.following"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.followers.id"];
-          follower?: parameters["rowFilter.followers.follower"];
-          following?: parameters["rowFilter.followers.following"];
-        };
-        body: {
-          /** followers */
-          followers?: definitions["followers"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
-  "/likes": {
-    get: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.likes.id"];
-          postId?: parameters["rowFilter.likes.postId"];
-          user?: parameters["rowFilter.likes.user"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["likes"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** likes */
-          likes?: definitions["likes"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.likes.id"];
-          postId?: parameters["rowFilter.likes.postId"];
-          user?: parameters["rowFilter.likes.user"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          id?: parameters["rowFilter.likes.id"];
-          postId?: parameters["rowFilter.likes.postId"];
-          user?: parameters["rowFilter.likes.user"];
-        };
-        body: {
-          /** likes */
-          likes?: definitions["likes"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
-  "/messages": {
-    get: {
-      parameters: {
-        query: {
-          messageId?: parameters["rowFilter.messages.messageId"];
-          /** TEXT or IMAGE or POST */
-          message_type?: parameters["rowFilter.messages.message_type"];
-          text?: parameters["rowFilter.messages.text"];
-          postId?: parameters["rowFilter.messages.postId"];
-          imageUrl?: parameters["rowFilter.messages.imageUrl"];
-          sender?: parameters["rowFilter.messages.sender"];
-          receiver?: parameters["rowFilter.messages.receiver"];
-          received_at?: parameters["rowFilter.messages.received_at"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["messages"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** messages */
-          messages?: definitions["messages"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          messageId?: parameters["rowFilter.messages.messageId"];
-          /** TEXT or IMAGE or POST */
-          message_type?: parameters["rowFilter.messages.message_type"];
-          text?: parameters["rowFilter.messages.text"];
-          postId?: parameters["rowFilter.messages.postId"];
-          imageUrl?: parameters["rowFilter.messages.imageUrl"];
-          sender?: parameters["rowFilter.messages.sender"];
-          receiver?: parameters["rowFilter.messages.receiver"];
-          received_at?: parameters["rowFilter.messages.received_at"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          messageId?: parameters["rowFilter.messages.messageId"];
-          /** TEXT or IMAGE or POST */
-          message_type?: parameters["rowFilter.messages.message_type"];
-          text?: parameters["rowFilter.messages.text"];
-          postId?: parameters["rowFilter.messages.postId"];
-          imageUrl?: parameters["rowFilter.messages.imageUrl"];
-          sender?: parameters["rowFilter.messages.sender"];
-          receiver?: parameters["rowFilter.messages.receiver"];
-          received_at?: parameters["rowFilter.messages.received_at"];
-        };
-        body: {
-          /** messages */
-          messages?: definitions["messages"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
-  "/posts": {
-    get: {
-      parameters: {
-        query: {
-          postId?: parameters["rowFilter.posts.postId"];
-          imageUrl?: parameters["rowFilter.posts.imageUrl"];
-          user?: parameters["rowFilter.posts.user"];
-          caption?: parameters["rowFilter.posts.caption"];
-          postedAt?: parameters["rowFilter.posts.postedAt"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["posts"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** posts */
-          posts?: definitions["posts"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          postId?: parameters["rowFilter.posts.postId"];
-          imageUrl?: parameters["rowFilter.posts.imageUrl"];
-          user?: parameters["rowFilter.posts.user"];
-          caption?: parameters["rowFilter.posts.caption"];
-          postedAt?: parameters["rowFilter.posts.postedAt"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          postId?: parameters["rowFilter.posts.postId"];
-          imageUrl?: parameters["rowFilter.posts.imageUrl"];
-          user?: parameters["rowFilter.posts.user"];
-          caption?: parameters["rowFilter.posts.caption"];
-          postedAt?: parameters["rowFilter.posts.postedAt"];
-        };
-        body: {
-          /** posts */
-          posts?: definitions["posts"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
-  "/users": {
-    get: {
-      parameters: {
-        query: {
-          username?: parameters["rowFilter.users.username"];
-          /** Name */
-          name?: parameters["rowFilter.users.name"];
-          /** Bio */
-          bio?: parameters["rowFilter.users.bio"];
-          /** Profile Picture */
-          profilePic?: parameters["rowFilter.users.profilePic"];
-          email?: parameters["rowFilter.users.email"];
-          /** Filtering Columns */
-          select?: parameters["select"];
-          /** Ordering */
-          order?: parameters["order"];
-          /** Limiting and Pagination */
-          offset?: parameters["offset"];
-          /** Limiting and Pagination */
-          limit?: parameters["limit"];
-        };
-        header: {
-          /** Limiting and Pagination */
-          Range?: parameters["range"];
-          /** Limiting and Pagination */
-          "Range-Unit"?: parameters["rangeUnit"];
-          /** Preference */
-          Prefer?: parameters["preferCount"];
-        };
-      };
-      responses: {
-        /** OK */
-        200: {
-          schema: definitions["users"][];
-        };
-        /** Partial Content */
-        206: unknown;
-      };
-    };
-    post: {
-      parameters: {
-        body: {
-          /** users */
-          users?: definitions["users"];
-        };
-        query: {
-          /** Filtering Columns */
-          select?: parameters["select"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** Created */
-        201: unknown;
-      };
-    };
-    delete: {
-      parameters: {
-        query: {
-          username?: parameters["rowFilter.users.username"];
-          /** Name */
-          name?: parameters["rowFilter.users.name"];
-          /** Bio */
-          bio?: parameters["rowFilter.users.bio"];
-          /** Profile Picture */
-          profilePic?: parameters["rowFilter.users.profilePic"];
-          email?: parameters["rowFilter.users.email"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-    patch: {
-      parameters: {
-        query: {
-          username?: parameters["rowFilter.users.username"];
-          /** Name */
-          name?: parameters["rowFilter.users.name"];
-          /** Bio */
-          bio?: parameters["rowFilter.users.bio"];
-          /** Profile Picture */
-          profilePic?: parameters["rowFilter.users.profilePic"];
-          email?: parameters["rowFilter.users.email"];
-        };
-        body: {
-          /** users */
-          users?: definitions["users"];
-        };
-        header: {
-          /** Preference */
-          Prefer?: parameters["preferReturn"];
-        };
-      };
-      responses: {
-        /** No Content */
-        204: never;
-      };
-    };
-  };
+	"/": {
+		get: {
+			responses: {
+				/** OK */
+				200: unknown;
+			};
+		};
+	};
+	"/comments": {
+		get: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.comments.id"];
+					postId?: parameters["rowFilter.comments.postId"];
+					user?: parameters["rowFilter.comments.user"];
+					postedAt?: parameters["rowFilter.comments.postedAt"];
+					comment?: parameters["rowFilter.comments.comment"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["comments"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** comments */
+					comments?: definitions["comments"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.comments.id"];
+					postId?: parameters["rowFilter.comments.postId"];
+					user?: parameters["rowFilter.comments.user"];
+					postedAt?: parameters["rowFilter.comments.postedAt"];
+					comment?: parameters["rowFilter.comments.comment"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.comments.id"];
+					postId?: parameters["rowFilter.comments.postId"];
+					user?: parameters["rowFilter.comments.user"];
+					postedAt?: parameters["rowFilter.comments.postedAt"];
+					comment?: parameters["rowFilter.comments.comment"];
+				};
+				body: {
+					/** comments */
+					comments?: definitions["comments"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/followers": {
+		get: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.followers.id"];
+					follower?: parameters["rowFilter.followers.follower"];
+					following?: parameters["rowFilter.followers.following"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["followers"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** followers */
+					followers?: definitions["followers"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.followers.id"];
+					follower?: parameters["rowFilter.followers.follower"];
+					following?: parameters["rowFilter.followers.following"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.followers.id"];
+					follower?: parameters["rowFilter.followers.follower"];
+					following?: parameters["rowFilter.followers.following"];
+				};
+				body: {
+					/** followers */
+					followers?: definitions["followers"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/likes": {
+		get: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.likes.id"];
+					postId?: parameters["rowFilter.likes.postId"];
+					user?: parameters["rowFilter.likes.user"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["likes"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** likes */
+					likes?: definitions["likes"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.likes.id"];
+					postId?: parameters["rowFilter.likes.postId"];
+					user?: parameters["rowFilter.likes.user"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.likes.id"];
+					postId?: parameters["rowFilter.likes.postId"];
+					user?: parameters["rowFilter.likes.user"];
+				};
+				body: {
+					/** likes */
+					likes?: definitions["likes"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/messages": {
+		get: {
+			parameters: {
+				query: {
+					messageId?: parameters["rowFilter.messages.messageId"];
+					/** TEXT, IMAGE, POST, STORY, STORYREPLY */
+					message_type?: parameters["rowFilter.messages.message_type"];
+					text?: parameters["rowFilter.messages.text"];
+					postId?: parameters["rowFilter.messages.postId"];
+					imageUrl?: parameters["rowFilter.messages.imageUrl"];
+					sender?: parameters["rowFilter.messages.sender"];
+					receiver?: parameters["rowFilter.messages.receiver"];
+					received_at?: parameters["rowFilter.messages.received_at"];
+					storyId?: parameters["rowFilter.messages.storyId"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["messages"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** messages */
+					messages?: definitions["messages"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					messageId?: parameters["rowFilter.messages.messageId"];
+					/** TEXT, IMAGE, POST, STORY, STORYREPLY */
+					message_type?: parameters["rowFilter.messages.message_type"];
+					text?: parameters["rowFilter.messages.text"];
+					postId?: parameters["rowFilter.messages.postId"];
+					imageUrl?: parameters["rowFilter.messages.imageUrl"];
+					sender?: parameters["rowFilter.messages.sender"];
+					receiver?: parameters["rowFilter.messages.receiver"];
+					received_at?: parameters["rowFilter.messages.received_at"];
+					storyId?: parameters["rowFilter.messages.storyId"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					messageId?: parameters["rowFilter.messages.messageId"];
+					/** TEXT, IMAGE, POST, STORY, STORYREPLY */
+					message_type?: parameters["rowFilter.messages.message_type"];
+					text?: parameters["rowFilter.messages.text"];
+					postId?: parameters["rowFilter.messages.postId"];
+					imageUrl?: parameters["rowFilter.messages.imageUrl"];
+					sender?: parameters["rowFilter.messages.sender"];
+					receiver?: parameters["rowFilter.messages.receiver"];
+					received_at?: parameters["rowFilter.messages.received_at"];
+					storyId?: parameters["rowFilter.messages.storyId"];
+				};
+				body: {
+					/** messages */
+					messages?: definitions["messages"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/notifications": {
+		get: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.notifications.id"];
+					/** Type of Notification: COMMENT, LIKE, FOLLOW */
+					type?: parameters["rowFilter.notifications.type"];
+					/** Created On */
+					createdOn?: parameters["rowFilter.notifications.createdOn"];
+					/** User */
+					toUser?: parameters["rowFilter.notifications.toUser"];
+					byUser?: parameters["rowFilter.notifications.byUser"];
+					/** Post */
+					post?: parameters["rowFilter.notifications.post"];
+					comment?: parameters["rowFilter.notifications.comment"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["notifications"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** notifications */
+					notifications?: definitions["notifications"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.notifications.id"];
+					/** Type of Notification: COMMENT, LIKE, FOLLOW */
+					type?: parameters["rowFilter.notifications.type"];
+					/** Created On */
+					createdOn?: parameters["rowFilter.notifications.createdOn"];
+					/** User */
+					toUser?: parameters["rowFilter.notifications.toUser"];
+					byUser?: parameters["rowFilter.notifications.byUser"];
+					/** Post */
+					post?: parameters["rowFilter.notifications.post"];
+					comment?: parameters["rowFilter.notifications.comment"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.notifications.id"];
+					/** Type of Notification: COMMENT, LIKE, FOLLOW */
+					type?: parameters["rowFilter.notifications.type"];
+					/** Created On */
+					createdOn?: parameters["rowFilter.notifications.createdOn"];
+					/** User */
+					toUser?: parameters["rowFilter.notifications.toUser"];
+					byUser?: parameters["rowFilter.notifications.byUser"];
+					/** Post */
+					post?: parameters["rowFilter.notifications.post"];
+					comment?: parameters["rowFilter.notifications.comment"];
+				};
+				body: {
+					/** notifications */
+					notifications?: definitions["notifications"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/posts": {
+		get: {
+			parameters: {
+				query: {
+					postId?: parameters["rowFilter.posts.postId"];
+					imageUrl?: parameters["rowFilter.posts.imageUrl"];
+					user?: parameters["rowFilter.posts.user"];
+					caption?: parameters["rowFilter.posts.caption"];
+					postedAt?: parameters["rowFilter.posts.postedAt"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["posts"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** posts */
+					posts?: definitions["posts"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					postId?: parameters["rowFilter.posts.postId"];
+					imageUrl?: parameters["rowFilter.posts.imageUrl"];
+					user?: parameters["rowFilter.posts.user"];
+					caption?: parameters["rowFilter.posts.caption"];
+					postedAt?: parameters["rowFilter.posts.postedAt"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					postId?: parameters["rowFilter.posts.postId"];
+					imageUrl?: parameters["rowFilter.posts.imageUrl"];
+					user?: parameters["rowFilter.posts.user"];
+					caption?: parameters["rowFilter.posts.caption"];
+					postedAt?: parameters["rowFilter.posts.postedAt"];
+				};
+				body: {
+					/** posts */
+					posts?: definitions["posts"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/stories": {
+		get: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.stories.id"];
+					/** Story Image URL */
+					imageUrl?: parameters["rowFilter.stories.imageUrl"];
+					/** User */
+					user?: parameters["rowFilter.stories.user"];
+					/** Posted At */
+					postedAt?: parameters["rowFilter.stories.postedAt"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["stories"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** stories */
+					stories?: definitions["stories"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.stories.id"];
+					/** Story Image URL */
+					imageUrl?: parameters["rowFilter.stories.imageUrl"];
+					/** User */
+					user?: parameters["rowFilter.stories.user"];
+					/** Posted At */
+					postedAt?: parameters["rowFilter.stories.postedAt"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					id?: parameters["rowFilter.stories.id"];
+					/** Story Image URL */
+					imageUrl?: parameters["rowFilter.stories.imageUrl"];
+					/** User */
+					user?: parameters["rowFilter.stories.user"];
+					/** Posted At */
+					postedAt?: parameters["rowFilter.stories.postedAt"];
+				};
+				body: {
+					/** stories */
+					stories?: definitions["stories"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/storyviews": {
+		get: {
+			parameters: {
+				query: {
+					storyId?: parameters["rowFilter.storyviews.storyId"];
+					id?: parameters["rowFilter.storyviews.id"];
+					user?: parameters["rowFilter.storyviews.user"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["storyviews"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** storyviews */
+					storyviews?: definitions["storyviews"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					storyId?: parameters["rowFilter.storyviews.storyId"];
+					id?: parameters["rowFilter.storyviews.id"];
+					user?: parameters["rowFilter.storyviews.user"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					storyId?: parameters["rowFilter.storyviews.storyId"];
+					id?: parameters["rowFilter.storyviews.id"];
+					user?: parameters["rowFilter.storyviews.user"];
+				};
+				body: {
+					/** storyviews */
+					storyviews?: definitions["storyviews"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
+	"/users": {
+		get: {
+			parameters: {
+				query: {
+					username?: parameters["rowFilter.users.username"];
+					/** Name */
+					name?: parameters["rowFilter.users.name"];
+					/** Bio */
+					bio?: parameters["rowFilter.users.bio"];
+					/** Profile Picture */
+					profilePic?: parameters["rowFilter.users.profilePic"];
+					email?: parameters["rowFilter.users.email"];
+					/** Notification Token for FCM */
+					notificationToken?: parameters["rowFilter.users.notificationToken"];
+					/** Filtering Columns */
+					select?: parameters["select"];
+					/** Ordering */
+					order?: parameters["order"];
+					/** Limiting and Pagination */
+					offset?: parameters["offset"];
+					/** Limiting and Pagination */
+					limit?: parameters["limit"];
+				};
+				header: {
+					/** Limiting and Pagination */
+					Range?: parameters["range"];
+					/** Limiting and Pagination */
+					"Range-Unit"?: parameters["rangeUnit"];
+					/** Preference */
+					Prefer?: parameters["preferCount"];
+				};
+			};
+			responses: {
+				/** OK */
+				200: {
+					schema: definitions["users"][];
+				};
+				/** Partial Content */
+				206: unknown;
+			};
+		};
+		post: {
+			parameters: {
+				body: {
+					/** users */
+					users?: definitions["users"];
+				};
+				query: {
+					/** Filtering Columns */
+					select?: parameters["select"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** Created */
+				201: unknown;
+			};
+		};
+		delete: {
+			parameters: {
+				query: {
+					username?: parameters["rowFilter.users.username"];
+					/** Name */
+					name?: parameters["rowFilter.users.name"];
+					/** Bio */
+					bio?: parameters["rowFilter.users.bio"];
+					/** Profile Picture */
+					profilePic?: parameters["rowFilter.users.profilePic"];
+					email?: parameters["rowFilter.users.email"];
+					/** Notification Token for FCM */
+					notificationToken?: parameters["rowFilter.users.notificationToken"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+		patch: {
+			parameters: {
+				query: {
+					username?: parameters["rowFilter.users.username"];
+					/** Name */
+					name?: parameters["rowFilter.users.name"];
+					/** Bio */
+					bio?: parameters["rowFilter.users.bio"];
+					/** Profile Picture */
+					profilePic?: parameters["rowFilter.users.profilePic"];
+					email?: parameters["rowFilter.users.email"];
+					/** Notification Token for FCM */
+					notificationToken?: parameters["rowFilter.users.notificationToken"];
+				};
+				body: {
+					/** users */
+					users?: definitions["users"];
+				};
+				header: {
+					/** Preference */
+					Prefer?: parameters["preferReturn"];
+				};
+			};
+			responses: {
+				/** No Content */
+				204: never;
+			};
+		};
+	};
 }
 
 export interface definitions {
-  comments: {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     */
-    id: number;
-    /**
-     * Note:
-     * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
-     */
-    postId: number;
-    /**
-     * Note:
-     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
-     */
-    user: string;
-    postedAt: string;
-    comment: string;
-  };
-  followers: {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     */
-    id: number;
-    /**
-     * Note:
-     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
-     */
-    follower: string;
-    /**
-     * Note:
-     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
-     */
-    following: string;
-  };
-  likes: {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     */
-    id: number;
-    /**
-     * Note:
-     * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
-     */
-    postId: number;
-    /**
-     * Note:
-     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
-     */
-    user: string;
-  };
-  messages: {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     */
-    messageId: number;
-    /** TEXT or IMAGE or POST */
-    message_type: string;
-    text?: string;
-    /**
-     * Note:
-     * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
-     */
-    postId?: number;
-    imageUrl?: string;
-    /**
-     * Note:
-     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
-     */
-    sender: string;
-    /**
-     * Note:
-     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
-     */
-    receiver: string;
-    received_at: string;
-  };
-  posts: {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     */
-    postId: number;
-    imageUrl: string;
-    /**
-     * Note:
-     * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
-     */
-    user: string;
-    caption?: string;
-    postedAt: string;
-  };
-  /** Users */
-  users: {
-    /**
-     * Note:
-     * This is a Primary Key.<pk/>
-     */
-    username: string;
-    /** Name */
-    name: string;
-    /** Bio */
-    bio?: string;
-    /** Profile Picture */
-    profilePic?: string;
-    email: string;
-  };
+	comments: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		id: number;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
+		 */
+		postId: number;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		user: string;
+		postedAt: string;
+		comment: string;
+	};
+	followers: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		id: number;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		follower: string;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		following: string;
+	};
+	likes: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		id: number;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
+		 */
+		postId: number;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		user: string;
+	};
+	messages: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		messageId: number;
+		/** TEXT, IMAGE, POST, STORY, STORYREPLY */
+		message_type: string;
+		text?: string;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
+		 */
+		postId?: number;
+		imageUrl?: string;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		sender: string;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		receiver: string;
+		received_at: string;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `stories.id`.<fk table='stories' column='id'/>
+		 */
+		storyId?: number;
+	};
+	notifications: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		id: number;
+		/** Type of Notification: COMMENT, LIKE, FOLLOW */
+		type: string;
+		/** Created On */
+		createdOn: string;
+		/**
+		 * User
+		 *
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		toUser: string;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		byUser: string;
+		/**
+		 * Post
+		 *
+		 * Note:
+		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
+		 */
+		post?: number;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `comments.id`.<fk table='comments' column='id'/>
+		 */
+		comment?: number;
+	};
+	posts: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		postId: number;
+		imageUrl: string;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		user: string;
+		caption?: string;
+		postedAt: string;
+	};
+	stories: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		id: number;
+		/** Story Image URL */
+		imageUrl: string;
+		/**
+		 * User
+		 *
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		user: string;
+		/** Posted At */
+		postedAt: string;
+	};
+	storyviews: {
+		/**
+		 * Note:
+		 * This is a Foreign Key to `stories.id`.<fk table='stories' column='id'/>
+		 */
+		storyId: number;
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		id: number;
+		/**
+		 * Note:
+		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
+		 */
+		user: string;
+	};
+	users: {
+		/**
+		 * Note:
+		 * This is a Primary Key.<pk/>
+		 */
+		username: string;
+		/** Name */
+		name: string;
+		/** Bio */
+		bio?: string;
+		/** Profile Picture */
+		profilePic?: string;
+		email: string;
+		/** Notification Token for FCM */
+		notificationToken?: string;
+	};
 }
 
 export interface parameters {
-  /** Preference */
-  preferParams: "params=single-object";
-  /** Preference */
-  preferReturn: "return=representation" | "return=minimal" | "return=none";
-  /** Preference */
-  preferCount: "count=none";
-  /** Filtering Columns */
-  select: string;
-  /** On Conflict */
-  on_conflict: string;
-  /** Ordering */
-  order: string;
-  /** Limiting and Pagination */
-  range: string;
-  /** Limiting and Pagination */
-  rangeUnit: string;
-  /** Limiting and Pagination */
-  offset: string;
-  /** Limiting and Pagination */
-  limit: string;
-  /** comments */
-  "body.comments": definitions["comments"];
-  "rowFilter.comments.id": string;
-  "rowFilter.comments.postId": string;
-  "rowFilter.comments.user": string;
-  "rowFilter.comments.postedAt": string;
-  "rowFilter.comments.comment": string;
-  /** followers */
-  "body.followers": definitions["followers"];
-  "rowFilter.followers.id": string;
-  "rowFilter.followers.follower": string;
-  "rowFilter.followers.following": string;
-  /** likes */
-  "body.likes": definitions["likes"];
-  "rowFilter.likes.id": string;
-  "rowFilter.likes.postId": string;
-  "rowFilter.likes.user": string;
-  /** messages */
-  "body.messages": definitions["messages"];
-  "rowFilter.messages.messageId": string;
-  /** TEXT or IMAGE or POST */
-  "rowFilter.messages.message_type": string;
-  "rowFilter.messages.text": string;
-  "rowFilter.messages.postId": string;
-  "rowFilter.messages.imageUrl": string;
-  "rowFilter.messages.sender": string;
-  "rowFilter.messages.receiver": string;
-  "rowFilter.messages.received_at": string;
-  /** posts */
-  "body.posts": definitions["posts"];
-  "rowFilter.posts.postId": string;
-  "rowFilter.posts.imageUrl": string;
-  "rowFilter.posts.user": string;
-  "rowFilter.posts.caption": string;
-  "rowFilter.posts.postedAt": string;
-  /** users */
-  "body.users": definitions["users"];
-  "rowFilter.users.username": string;
-  /** Name */
-  "rowFilter.users.name": string;
-  /** Bio */
-  "rowFilter.users.bio": string;
-  /** Profile Picture */
-  "rowFilter.users.profilePic": string;
-  "rowFilter.users.email": string;
+	/** Preference */
+	preferParams: "params=single-object";
+	/** Preference */
+	preferReturn: "return=representation" | "return=minimal" | "return=none";
+	/** Preference */
+	preferCount: "count=none";
+	/** Filtering Columns */
+	select: string;
+	/** On Conflict */
+	on_conflict: string;
+	/** Ordering */
+	order: string;
+	/** Limiting and Pagination */
+	range: string;
+	/** Limiting and Pagination */
+	rangeUnit: string;
+	/** Limiting and Pagination */
+	offset: string;
+	/** Limiting and Pagination */
+	limit: string;
+	/** comments */
+	"body.comments": definitions["comments"];
+	"rowFilter.comments.id": string;
+	"rowFilter.comments.postId": string;
+	"rowFilter.comments.user": string;
+	"rowFilter.comments.postedAt": string;
+	"rowFilter.comments.comment": string;
+	/** followers */
+	"body.followers": definitions["followers"];
+	"rowFilter.followers.id": string;
+	"rowFilter.followers.follower": string;
+	"rowFilter.followers.following": string;
+	/** likes */
+	"body.likes": definitions["likes"];
+	"rowFilter.likes.id": string;
+	"rowFilter.likes.postId": string;
+	"rowFilter.likes.user": string;
+	/** messages */
+	"body.messages": definitions["messages"];
+	"rowFilter.messages.messageId": string;
+	/** TEXT, IMAGE, POST, STORY, STORYREPLY */
+	"rowFilter.messages.message_type": string;
+	"rowFilter.messages.text": string;
+	"rowFilter.messages.postId": string;
+	"rowFilter.messages.imageUrl": string;
+	"rowFilter.messages.sender": string;
+	"rowFilter.messages.receiver": string;
+	"rowFilter.messages.received_at": string;
+	"rowFilter.messages.storyId": string;
+	/** notifications */
+	"body.notifications": definitions["notifications"];
+	"rowFilter.notifications.id": string;
+	/** Type of Notification: COMMENT, LIKE, FOLLOW */
+	"rowFilter.notifications.type": string;
+	/** Created On */
+	"rowFilter.notifications.createdOn": string;
+	/** User */
+	"rowFilter.notifications.toUser": string;
+	"rowFilter.notifications.byUser": string;
+	/** Post */
+	"rowFilter.notifications.post": string;
+	"rowFilter.notifications.comment": string;
+	/** posts */
+	"body.posts": definitions["posts"];
+	"rowFilter.posts.postId": string;
+	"rowFilter.posts.imageUrl": string;
+	"rowFilter.posts.user": string;
+	"rowFilter.posts.caption": string;
+	"rowFilter.posts.postedAt": string;
+	/** stories */
+	"body.stories": definitions["stories"];
+	"rowFilter.stories.id": string;
+	/** Story Image URL */
+	"rowFilter.stories.imageUrl": string;
+	/** User */
+	"rowFilter.stories.user": string;
+	/** Posted At */
+	"rowFilter.stories.postedAt": string;
+	/** storyviews */
+	"body.storyviews": definitions["storyviews"];
+	"rowFilter.storyviews.storyId": string;
+	"rowFilter.storyviews.id": string;
+	"rowFilter.storyviews.user": string;
+	/** users */
+	"body.users": definitions["users"];
+	"rowFilter.users.username": string;
+	/** Name */
+	"rowFilter.users.name": string;
+	/** Bio */
+	"rowFilter.users.bio": string;
+	/** Profile Picture */
+	"rowFilter.users.profilePic": string;
+	"rowFilter.users.email": string;
+	/** Notification Token for FCM */
+	"rowFilter.users.notificationToken": string;
 }
 
 export interface operations {}
+
+export interface external {}

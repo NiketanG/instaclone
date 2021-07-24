@@ -5,11 +5,11 @@ import {
 	Image,
 	useWindowDimensions,
 } from "react-native";
-import { Message } from "../../store/MessagesStore";
+import { MessageNoUsers } from "../../types";
 import { AppContext } from "../../utils/appContext";
 
 type Props = {
-	message: Message;
+	message: MessageNoUsers;
 	selectMessage: (username: string, messageId: number) => void;
 	toggleImageExpand: () => void;
 };

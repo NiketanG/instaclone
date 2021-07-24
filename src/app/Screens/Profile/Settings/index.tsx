@@ -1,6 +1,6 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useContext } from "react";
-import { Appbar, List, useTheme } from "react-native-paper";
+import { Appbar, Caption, List, useTheme } from "react-native-paper";
 import { ProfileStackParams } from "../../../types/navigation/ProfileStack";
 import { Alert, Linking, StatusBar, View } from "react-native";
 import { AppContext } from "../../../utils/appContext";
@@ -13,14 +13,10 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 	const { colors } = useTheme();
 	const { signout } = useContext(AppContext);
 
-	const openCode = async () => {
-		const supported = await Linking.canOpenURL(
-			"https://github.com/NiketanG/instaclone"
-		);
-		if (supported) {
-			Linking.openURL("https://github.com/NiketanG/instaclone");
-		}
-	};
+	const openCode = async () =>
+		Linking.openURL("https://github.com/NiketanG/instaclone");
+
+	const openGithub = () => Linking.openURL("https://github.com/NiketanG");
 	const signOut = () =>
 		Alert.alert(
 			"Are you sure you wanna log out?",
@@ -69,6 +65,13 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 					left={(props) => <List.Icon {...props} icon="code-tags" />}
 				/>
 			</View>
+			<Caption style={{ marginHorizontal: 24 }}>Version: v2.0</Caption>
+			<Caption
+				style={{ marginHorizontal: 24, marginBottom: 16 }}
+				onPress={openGithub}
+			>
+				By NiketanG
+			</Caption>
 		</>
 	);
 };

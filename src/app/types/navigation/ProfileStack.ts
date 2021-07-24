@@ -1,18 +1,16 @@
-import { Follower } from "../../store/FollowersStore";
-import { User } from "../../types";
-import { definitions } from "../supabase";
+import { FollowerFull, FollowingFull, PostWithUser, User } from "../../types";
 
 export type ProfileStackParams = {
 	Profile: Partial<User>;
 	Followers: Pick<User, "username"> & {
-		followers: Follower[];
+		followers: FollowerFull[];
 	};
 	Following: Pick<User, "username"> & {
-		following: Follower[];
+		following: FollowingFull[];
 	};
 	PostsList: {
 		postId: number;
-		postList: Array<definitions["posts"]>;
+		postList: PostWithUser[];
 	};
 	Settings: undefined;
 	EditProfile: undefined;

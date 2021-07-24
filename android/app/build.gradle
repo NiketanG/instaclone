@@ -1,4 +1,6 @@
 apply plugin: "com.android.application"
+apply plugin: 'com.google.gms.google-services' // <- Add this line
+
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 
@@ -132,6 +134,9 @@ android {
 
     defaultConfig {
         applicationId "com.nikketan.instaclone"
+
+        manifestPlaceholders = [appAuthRedirectScheme: 'com.nikketan.instaclone.auth']
+
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

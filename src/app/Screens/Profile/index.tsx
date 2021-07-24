@@ -1,6 +1,5 @@
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { observer } from "mobx-react-lite";
 import React, { useContext, useEffect, useState } from "react";
 import {
 	Image,
@@ -24,17 +23,21 @@ import {
 	useTheme,
 } from "react-native-paper";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useMutation, useQuery } from "react-query";
+import { followUser, getUser, unfollowUser } from "../../../api";
 import { UserAvatar } from "../../Components/UserAvatar";
+import { StoryListType, UserFull } from "../../types";
 import { ProfileStackParams } from "../../types/navigation/ProfileStack";
+import { definitions } from "../../types/supabase";
 import { AppContext } from "../../utils/appContext";
-import useUser from "../../utils/useUser";
+import { queryClient } from "../../utils/queryClient";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "Profile">;
 	navigation: StackNavigationProp<ProfileStackParams, "Profile">;
 };
 
-const Profile: React.FC<Props> = observer(({ navigation, route }) => {
+const Profile: React.FC<Props> = ({ navigation, route }) => {
 	const { width, height } = useWindowDimensions();
 
 	const imageMargin = 2;
@@ -48,25 +51,6 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 
 	const goBack = () => navigation.goBack();
 
-	const openMessage = () => {
-		if (route.params.username)
-			navigation.navigate("Messages" as any, {
-				username: route.params.username,
-			});
-	};
-
-	const {
-		user,
-		posts,
-		loading,
-		followers,
-		following,
-		isFollowing,
-		fetchUser,
-		followUser,
-		unfollowUser,
-	} = useUser(route.params?.username || currentUser?.username);
-
 	useEffect(() => {
 		if (
 			currentUser?.username &&
@@ -75,6 +59,148 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 			setIsCurrentUser(true);
 		}
 	}, [currentUser, route.params]);
+
+	const { data, isLoading, refetch } = useQuery(
+		`userInfo_${route.params.username}`,
+		() => getUser(route.params.username as any),
+		{
+			enabled: route.params?.username !== null,
+		}
+	);
+
+	const openMessage = () => {
+		if (route.params.username)
+			navigation.navigate("Messages" as any, {
+				screen: "Messages",
+				params: {
+					username: route.params.username,
+					profilePic: data?.profilePic,
+					name: data?.name,
+				},
+			});
+	};
+
+	const onMutate = async (username: string) => {
+		await queryClient.cancelQueries(`userInfo_${route.params.username}`);
+
+		const userData = queryClient.getQueryData<UserFull | null | undefined>(
+			`userInfo_${route.params.username}`
+		);
+
+		if (!currentUser)
+			return {
+				userData,
+			};
+
+		if (userData) {
+			const followingIndex = userData.followers.findIndex(
+				(item) => item.follower.username === currentUser.username
+			);
+			let followers = userData.followers;
+
+			if (followingIndex === -1) {
+				followers.push({
+					id: Math.random(),
+					follower: {
+						name: currentUser.name,
+						username: currentUser.username,
+						profilePic: currentUser.profilePic,
+					},
+					following: username,
+				});
+			} else {
+				followers = userData.followers.filter(
+					(item) => item.follower.username !== currentUser.username
+				);
+			}
+			queryClient.setQueryData<UserFull>(`userInfo_${username}`, {
+				...userData,
+				isFollowing: !userData.isFollowing,
+				followers,
+			});
+		}
+
+		return { userData };
+	};
+
+	const userFollowMutation = useMutation<
+		definitions["followers"] | null,
+		unknown,
+		string
+	>((username) => followUser(username), {
+		onMutate,
+		// Always refetch after error or success:
+		onSettled: () => {
+			queryClient.invalidateQueries(`userInfo_${route.params.username}`);
+			if (currentUser)
+				queryClient.invalidateQueries(
+					`userInfo_${currentUser.username}`
+				);
+		},
+	});
+	const userUnfollowMutation = useMutation<boolean | null, unknown, string>(
+		(username) => unfollowUser(username),
+		{
+			onMutate,
+			// Always refetch after error or success:
+			onSettled: () => {
+				queryClient.invalidateQueries(
+					`userInfo_${route.params.username}`
+				);
+				if (currentUser)
+					queryClient.invalidateQueries(
+						`userInfo_${currentUser.username}`
+					);
+			},
+		}
+	);
+
+	const [stories, setStories] = useState<Array<
+		definitions["stories"]
+	> | null>(null);
+
+	useEffect(() => {
+		if (!isLoading && data) {
+			const storyTime = new Date();
+			storyTime.setHours(storyTime.getHours() - 24);
+			const tempStories = data.stories.filter(
+				(item) =>
+					new Date(item.postedAt).getTime() >= storyTime.getTime()
+			);
+
+			setStories(tempStories);
+		}
+	}, [data, isLoading]);
+
+	const userFollow = () =>
+		route.params.username &&
+		userFollowMutation.mutate(route.params.username);
+
+	const userUnfollow = () =>
+		route.params.username &&
+		userUnfollowMutation.mutate(route.params.username);
+
+	const openStories = () => {
+		if (
+			!data ||
+			data.stories.length === 0 ||
+			!stories ||
+			stories.length === 0
+		)
+			return;
+
+		const storyList: {
+			[key: string]: StoryListType;
+		} | null = {};
+		storyList[data.username] = {
+			stories: stories,
+			user: data,
+		};
+		navigation.navigate("ViewStory" as any, {
+			storyList: storyList,
+			user: data.username,
+		});
+	};
 
 	return (
 		<View
@@ -144,12 +270,10 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 				removeClippedSubviews
 				snapToAlignment={"start"}
 				refreshControl={
-					user ? (
-						<RefreshControl
-							refreshing={loading}
-							onRefresh={() => fetchUser(user.username)}
-						/>
-					) : undefined
+					<RefreshControl
+						refreshing={isLoading}
+						onRefresh={refetch}
+					/>
 				}
 				contentContainerStyle={{
 					display: "flex",
@@ -159,14 +283,27 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 			>
 				<View style={styles.container}>
 					<View style={styles.userContainer}>
-						<UserAvatar
-							size={96}
-							profilePicture={user?.profilePic}
-						/>
+						<View
+							style={{
+								borderWidth: 1,
+								borderColor:
+									(!data || !stories || stories.length) > 0
+										? "white"
+										: "transparent",
+								borderRadius: 56,
+								padding: 6,
+							}}
+						>
+							<UserAvatar
+								size={96}
+								profilePicture={data?.profilePic}
+								onPress={openStories}
+							/>
+						</View>
 						<View style={styles.statsContainer}>
 							<View style={styles.textContainer}>
 								<Headline style={styles.statNumber}>
-									{posts?.length || 0}
+									{data?.posts?.length || 0}
 								</Headline>
 								<Subheading style={styles.statTitle}>
 									Posts
@@ -174,16 +311,16 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 							</View>
 							<TouchableHighlight
 								onPress={() => {
-									if (user && followers)
+									if (data)
 										navigation.navigate("Followers", {
-											username: user.username,
-											followers,
+											username: data.username,
+											followers: data.followers,
 										});
 								}}
 							>
 								<View style={styles.textContainer}>
 									<Headline style={styles.statNumber}>
-										{followers?.length}
+										{data?.followers.length}
 									</Headline>
 									<Subheading style={styles.statTitle}>
 										Followers
@@ -192,16 +329,16 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 							</TouchableHighlight>
 							<TouchableHighlight
 								onPress={() => {
-									if (user && following)
+									if (data)
 										navigation.navigate("Following", {
-											username: user.username,
-											following,
+											username: data.username,
+											following: data.following,
 										});
 								}}
 							>
 								<View style={styles.textContainer}>
 									<Headline style={styles.statNumber}>
-										{following?.length}
+										{data?.following.length}
 									</Headline>
 									<Subheading style={styles.statTitle}>
 										Following
@@ -211,7 +348,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 						</View>
 					</View>
 					<View style={styles.userInfo}>
-						<Subheading style={{}}>{user?.name}</Subheading>
+						<Subheading>{data?.name}</Subheading>
 						<Text
 							style={{
 								fontSize: 14,
@@ -219,7 +356,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 								color: "rgba(255,255,255,0.6)",
 							}}
 						>
-							{user?.bio}
+							{data?.bio}
 						</Text>
 					</View>
 
@@ -231,6 +368,8 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 								borderColor: colors.text,
 								marginTop: 16,
 							}}
+							compact
+							uppercase={false}
 							onPress={() => navigation.navigate("EditProfile")}
 						>
 							Edit Profile
@@ -243,7 +382,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 								justifyContent: "space-between",
 							}}
 						>
-							{!isFollowing ? (
+							{!data?.isFollowing ? (
 								<Button
 									mode="contained"
 									color={colors.primary}
@@ -252,7 +391,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 										borderColor: colors.text,
 										marginTop: 16,
 									}}
-									onPress={followUser}
+									onPress={userFollow}
 								>
 									Follow
 								</Button>
@@ -273,7 +412,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 											borderColor: colors.text,
 											marginTop: 16,
 										}}
-										onPress={unfollowUser}
+										onPress={userUnfollow}
 									>
 										Unfollow
 									</Button>
@@ -308,7 +447,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 						display: "flex",
 					}}
 				>
-					{loading && (
+					{isLoading && (
 						<View
 							style={{
 								height: "100%",
@@ -322,8 +461,8 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 						</View>
 					)}
 
-					{posts &&
-						(posts?.length === 0 ? (
+					{data?.posts &&
+						(data?.posts?.length === 0 ? (
 							<View
 								style={{
 									display: "flex",
@@ -346,7 +485,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 								</Text>
 							</View>
 						) : (
-							posts
+							data?.posts
 								.sort(
 									(a, b) =>
 										new Date(b.postedAt).getTime() -
@@ -356,14 +495,15 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 									<TouchableHighlight
 										key={post.postId}
 										onPress={() => {
-											if (user)
-												navigation.navigate(
-													"PostsList",
-													{
-														postId: post.postId,
-														postList: posts,
-													}
-												);
+											navigation.navigate("PostsList", {
+												postId: post.postId,
+												postList: data.posts.map(
+													(item) => ({
+														...item,
+														user: data,
+													})
+												),
+											});
 										}}
 									>
 										<Image
@@ -386,7 +526,7 @@ const Profile: React.FC<Props> = observer(({ navigation, route }) => {
 			</ScrollView>
 		</View>
 	);
-});
+};
 
 const styles = StyleSheet.create({
 	container: {

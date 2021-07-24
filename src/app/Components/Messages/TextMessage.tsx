@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { TouchableHighlight, View, useWindowDimensions } from "react-native";
 import { Text } from "react-native-paper";
-import { Message } from "../../store/MessagesStore";
+import { MessageNoUsers } from "../../types";
 import { AppContext } from "../../utils/appContext";
 
 type Props = {
-	message: Message;
+	message: MessageNoUsers;
 	selectMessage: (username: string, messageId: number) => void;
 };
 const TextMessage: React.FC<Props> = ({ message, selectMessage }) => {
@@ -35,6 +35,7 @@ const TextMessage: React.FC<Props> = ({ message, selectMessage }) => {
 						paddingHorizontal: 16,
 						backgroundColor: "#3a3a3a",
 						marginHorizontal: 8,
+						paddingVertical: 12,
 						marginVertical: 4,
 						borderRadius: 24,
 					}}
