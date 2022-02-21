@@ -1,5 +1,11 @@
-import React, { useContext, useState } from "react";
-import { RefreshControl, StatusBar, ToastAndroid, View } from "react-native";
+import React, { useContext, useRef, useState } from "react";
+import {
+	BackHandler,
+	RefreshControl,
+	StatusBar,
+	ToastAndroid,
+	View,
+} from "react-native";
 import {
 	Appbar,
 	Caption,
@@ -13,42 +19,209 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 
 import { AppContext } from "../../utils/appContext";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { PostStackNavigationParams } from "../../types/navigation";
+import { PostStackParamsList } from "../../types/navigation/PostStack";
 import { FlatList } from "react-native-gesture-handler";
 import { UserAvatar } from "../../Components/UserAvatar";
-import { observer } from "mobx-react-lite";
 import { CommentItem } from "./CommentItem";
-import usePost from "../../utils/usePost";
+import { useMutation, useQuery } from "react-query";
+import { addComment, deleteComment, getCommentsOnPost } from "../../../api";
+import { definitions } from "../../types/supabase";
+import { CommentFull, User } from "../../types";
+import { queryClient } from "../../utils/queryClient";
 
 type Props = {
-	route: RouteProp<PostStackNavigationParams, "Comments">;
-	navigation: StackNavigationProp<PostStackNavigationParams, "Comments">;
+	route: RouteProp<PostStackParamsList, "Comments">;
+	navigation: StackNavigationProp<PostStackParamsList, "Comments">;
 };
 
-const Comments: React.FC<Props> = observer(({ route, navigation }) => {
+type PostHeaderProps = {
+	post: Pick<
+		definitions["posts"],
+		"postId" | "caption" | "user" | "postedAt"
+	>;
+	user: Partial<User>;
+};
+const PostHeader: React.FC<PostHeaderProps> = ({
+	post: { postedAt, caption },
+	user: { username, profilePic },
+}) => {
+	return (
+		<>
+			<View
+				style={{
+					display: "flex",
+					flexDirection: "row",
+					alignItems: "center",
+					margin: 16,
+				}}
+			>
+				<UserAvatar profilePicture={profilePic} />
+				<View
+					style={{
+						marginHorizontal: 16,
+					}}
+				>
+					<Text
+						style={{
+							fontSize: 16,
+							fontWeight: "bold",
+						}}
+					>
+						{username}
+					</Text>
+					<Paragraph>{caption}</Paragraph>
+					<Caption>
+						{new Date(postedAt).getTime() >
+						new Date().getTime() - 1 * 24 * 60 * 60 * 1000
+							? `${formatDistanceToNow(new Date(postedAt))} ago`
+							: format(new Date(postedAt), "LLLL dd, yyyy")}
+					</Caption>
+				</View>
+			</View>
+			<Divider />
+		</>
+	);
+};
+
+const Comments: React.FC<Props> = ({ route, navigation }) => {
 	const { colors } = useTheme();
-	const { username: currentUsername } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 
 	const [commentText, setCommentText] = useState("");
 
-	const { comments, addComment, deleteComment, loading } = usePost(
-		route.params.post.postId
+	const [parentId, setParentId] = useState<CommentFull | null>(null);
+
+	const commentInputRef = useRef<any>(null);
+
+	const onReply = (parentComment: CommentFull | null) => {
+		setParentId(parentComment);
+		if (parentComment) {
+			setCommentText(`@${parentComment.user.username} `);
+			commentInputRef?.current?.focus();
+		}
+	};
+
+	const { data, isLoading, refetch } = useQuery(
+		`commentsOnPost_${route.params.post.postId}`,
+		() => getCommentsOnPost(route.params.post.postId)
+	);
+	const [selectedComment, setSelectedComment] = useState<number | null>(null);
+
+	useFocusEffect(
+		React.useCallback(() => {
+			const onBackPress = () => {
+				if (selectedComment) {
+					setSelectedComment(null);
+					return true;
+				}
+			};
+
+			BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+			return () =>
+				BackHandler.removeEventListener(
+					"hardwareBackPress",
+					onBackPress
+				);
+		}, [selectedComment])
+	);
+
+	const newCommentMutation = useMutation<
+		CommentFull | null,
+		unknown,
+		Pick<
+			definitions["comments"],
+			"comment" | "postId" | "user" | "parentId"
+		>
+	>((newComment) => addComment(newComment), {
+		onMutate: async (addedComment) => {
+			await queryClient.cancelQueries(
+				`commentsOnPost_${route.params.post.postId}`
+			);
+			const previousComments = queryClient.getQueryData<
+				CommentFull[] | null | undefined
+			>(`commentsOnPost_${route.params.post.postId}`);
+
+			if (!currentUser) return { previousComments };
+
+			// Optimistically update to the new value
+			if (previousComments) {
+				queryClient.setQueryData<CommentFull[]>(
+					`commentsOnPost_${route.params.post.postId}`,
+					[
+						...previousComments,
+						{
+							comment: addedComment.comment,
+							id: Math.random(),
+							postId: addedComment.postId,
+							postedAt: new Date().toISOString(),
+							user: {
+								name: currentUser?.name,
+								username: currentUser?.username,
+								profilePic: currentUser?.profilePic,
+							},
+						},
+					]
+				);
+			}
+			return { previousComments };
+		},
+		// Always refetch after error or success:
+		onSettled: () => {
+			queryClient.invalidateQueries(
+				`commentsOnPost_${route.params.post.postId}`
+			);
+		},
+	});
+
+	const deleteCommentMutation = useMutation<boolean | null, unknown, number>(
+		(commentToDelete) => deleteComment(commentToDelete),
+		{
+			onMutate: async (deletedComment) => {
+				await queryClient.cancelQueries(
+					`commentsOnPost_${route.params.post.postId}`
+				);
+				const previousComments = queryClient.getQueryData<
+					CommentFull[] | null | undefined
+				>(`commentsOnPost_${route.params.post.postId}`);
+
+				if (!currentUser) return { previousComments };
+
+				// Optimistically update to the new value
+				if (previousComments) {
+					queryClient.setQueryData<CommentFull[]>(
+						`commentsOnPost_${route.params.post.postId}`,
+						previousComments.filter(
+							(item) => item.id !== deletedComment
+						)
+					);
+				}
+				return { previousComments };
+			},
+			// Always refetch after error or success:
+			onSettled: () => {
+				queryClient.invalidateQueries(
+					`commentsOnPost_${route.params.post.postId}`
+				);
+			},
+		}
 	);
 
 	const newComment = () => {
 		if (
 			commentText.length === 0 ||
 			!route.params.post.postId ||
-			!currentUsername
+			!currentUser
 		)
 			return;
 		try {
-			addComment({
+			newCommentMutation.mutate({
 				comment: commentText,
 				postId: route.params.post.postId,
-				user: currentUsername,
+				user: currentUser.username,
+				parentId: parentId ? parentId.id : undefined,
 			});
 			setCommentText("");
 		} catch (err) {
@@ -57,10 +230,8 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 		}
 	};
 
-	const [selectedComment, setSelectedComment] = useState<number | null>(null);
-
 	const selectComment = (username: string, commentId: number) => {
-		if (username === currentUsername) setSelectedComment(commentId);
+		if (username === currentUser?.username) setSelectedComment(commentId);
 	};
 
 	const goBack = () => {
@@ -72,7 +243,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 	};
 
 	const removeComment = () => {
-		if (selectedComment) deleteComment(selectedComment);
+		if (selectedComment) deleteCommentMutation.mutate(selectedComment);
 		setSelectedComment(null);
 	};
 
@@ -82,17 +253,17 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 				flex: 1,
 			}}
 		>
+			<StatusBar
+				backgroundColor="black"
+				barStyle="light-content"
+				animated
+			/>
 			<View
 				style={{
 					backgroundColor: colors.surface,
 					flex: 1,
 				}}
 			>
-				<StatusBar
-					backgroundColor="black"
-					barStyle="light-content"
-					animated
-				/>
 				<Appbar.Header
 					style={{
 						backgroundColor: selectedComment ? "#009688" : "black",
@@ -105,91 +276,42 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 					)}
 				</Appbar.Header>
 
-				{
-					<FlatList
-						ListHeaderComponent={
-							<>
-								<View
-									style={{
-										display: "flex",
-										flexDirection: "row",
-										alignItems: "center",
-										margin: 16,
-									}}
-								>
-									<UserAvatar
-										profilePicture={
-											route.params?.user?.profilePic
-										}
-									/>
-									<View
-										style={{
-											marginHorizontal: 16,
-										}}
-									>
-										<Text
-											style={{
-												fontSize: 16,
-												fontWeight: "bold",
-											}}
-										>
-											{route.params?.user?.username}
-										</Text>
-										<Paragraph>
-											{route.params?.post?.caption}
-										</Paragraph>
-										<Caption>
-											{new Date(
-												route.params?.post?.postedAt
-											).getTime() >
-											new Date().getTime() -
-												1 * 24 * 60 * 60 * 1000
-												? `${formatDistanceToNow(
-														new Date(
-															route.params?.post?.postedAt
-														)
-												  )} ago`
-												: format(
-														new Date(
-															route.params?.post?.postedAt
-														),
-														"LLLL dd, yyyy"
-												  )}
-										</Caption>
-									</View>
-								</View>
-								<Divider />
-							</>
-						}
-						data={comments?.sort(
-							(a, b) =>
-								new Date(b.postedAt).getTime() -
-								new Date(a.postedAt).getTime()
-						)}
-						refreshControl={
-							<RefreshControl
-								refreshing={loading}
-								onRefresh={newComment}
-							/>
-						}
-						ItemSeparatorComponent={Divider}
-						renderItem={({ item }) => (
-							<CommentItem
-								item={item}
-								selectComment={selectComment}
-								selectedComment={selectedComment}
-							/>
-						)}
-						keyExtractor={(item) => item.id}
-						bouncesZoom
-						bounces
-						snapToAlignment={"start"}
-						showsVerticalScrollIndicator
-						style={{
-							backgroundColor: colors.background,
-						}}
-					/>
-				}
+				<FlatList
+					ListHeaderComponent={
+						<PostHeader
+							post={route.params.post}
+							user={route.params.user}
+						/>
+					}
+					data={data?.sort(
+						(a, b) =>
+							new Date(b.postedAt).getTime() -
+							new Date(a.postedAt).getTime()
+					)}
+					refreshControl={
+						<RefreshControl
+							refreshing={isLoading}
+							onRefresh={refetch}
+						/>
+					}
+					ItemSeparatorComponent={Divider}
+					renderItem={({ item }) => (
+						<CommentItem
+							item={item}
+							selectComment={selectComment}
+							selectedComment={selectedComment}
+							onReply={onReply}
+						/>
+					)}
+					keyExtractor={(item) => item.id.toString()}
+					bouncesZoom
+					bounces
+					snapToAlignment={"start"}
+					showsVerticalScrollIndicator
+					style={{
+						backgroundColor: colors.background,
+					}}
+				/>
 			</View>
 			<View
 				style={{
@@ -200,6 +322,7 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 				}}
 			>
 				<TextInput
+					ref={commentInputRef}
 					value={commentText}
 					onChangeText={(text) => setCommentText(text)}
 					placeholder="Add a comment"
@@ -220,6 +343,6 @@ const Comments: React.FC<Props> = observer(({ route, navigation }) => {
 			</View>
 		</View>
 	);
-});
+};
 
 export default Comments;

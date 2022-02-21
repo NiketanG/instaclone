@@ -20,6 +20,9 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+*.env
+*.jks
+google-services.json
 
 # Android/IntelliJ
 #

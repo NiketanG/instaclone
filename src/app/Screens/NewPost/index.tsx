@@ -17,32 +17,36 @@ import {
 	Colors,
 	useTheme,
 } from "react-native-paper";
-import { TabNavigationParams } from "../../types/navigation";
+import { BottomTabParamList } from "../../types/navigation/BottomTab";
 import ImagePicker, {
 	Options,
 	Image as ImageResponse,
 } from "react-native-image-crop-picker";
 
 import { AppContext } from "../../utils/appContext";
-import PostsStore from "../../store/PostsStore";
-import uploadToCloudinary from "../../utils/uploadToCloudinary";
 import { definitions } from "../../types/supabase";
+import { PostDimensions } from "../../utils/Constants";
+import uploadToSupabase from "../../utils/uploadToSupabase";
+import { useMutation } from "react-query";
+import { newPost } from "../../../api";
+import { queryClient } from "../../utils/queryClient";
 
 type Props = {
-	route: RouteProp<TabNavigationParams, "New">;
-	navigation: BottomTabNavigationProp<TabNavigationParams, "New">;
+	route: RouteProp<BottomTabParamList, "New">;
+	navigation: BottomTabNavigationProp<BottomTabParamList, "New">;
 };
 
 const NewPost: React.FC<Props> = ({ navigation }) => {
 	const [imagePath, setImagePath] = useState<string | null>(null);
 
-	const { username } = useContext(AppContext);
+	const { user } = useContext(AppContext);
 
 	const imagePickerOptions: Options = {
 		mediaType: "photo",
 		cropping: true,
-		width: 1024,
-		height: 1024,
+		forceJpg: true,
+		width: PostDimensions.width,
+		height: PostDimensions.height,
 		includeBase64: true,
 	};
 
@@ -56,7 +60,6 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 			if (res) handleImage(res);
 		} catch (err) {
 			console.error("[selectFromGallery]", err);
-			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 		}
 	};
 
@@ -73,26 +76,33 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 	const [caption, setCaption] = useState("");
 	const [uploading, setUploading] = useState(false);
 
+	const newPostMutation = useMutation<
+		unknown,
+		unknown,
+		Pick<definitions["posts"], "caption" | "imageUrl">
+	>((post) => newPost(post), {
+		onSettled: () => {
+			queryClient.invalidateQueries(`feedPosts`);
+			if (user)
+				queryClient.invalidateQueries(`userInfo_${user.username}`);
+		},
+	});
+
 	const uploadPost = async () => {
 		try {
 			if (!imagePath) return;
-			if (!username) return;
+			if (!user) return;
 			setUploading(true);
 
-			const imageUrl = await uploadToCloudinary(imagePath);
+			const imageUrl = await uploadToSupabase(imagePath, "jpg", "posts");
 
 			if (imageUrl) {
-				const data: Pick<
-					definitions["posts"],
-					"caption" | "imageUrl" | "user"
-				> = {
-					caption,
-					imageUrl,
-					user: username,
-				};
-
-				PostsStore.newPost(data);
-
+				const data: Pick<definitions["posts"], "caption" | "imageUrl"> =
+					{
+						caption,
+						imageUrl,
+					};
+				newPostMutation.mutate(data);
 				setUploading(false);
 				ToastAndroid.show("Posted", ToastAndroid.LONG);
 				setImagePath(null);
@@ -176,10 +186,10 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 							source={{
 								uri: imagePath,
 							}}
-							width={width}
-							height={width}
+							width={PostDimensions.width}
+							height={PostDimensions.width}
 							style={{
-								width: width,
+								width,
 								height: width,
 							}}
 						/>

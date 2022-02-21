@@ -1,15 +1,15 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import {
 	TouchableHighlight,
 	View,
 	Image,
 	useWindowDimensions,
 } from "react-native";
-import { Message } from "../../store/MessagesStore";
+import { MessageNoUsers } from "../../types";
 import { AppContext } from "../../utils/appContext";
 
 type Props = {
-	message: Message;
+	message: MessageNoUsers;
 	selectMessage: (username: string, messageId: number) => void;
 	toggleImageExpand: () => void;
 };
@@ -18,7 +18,7 @@ const ImageMessage: React.FC<Props> = ({
 	selectMessage,
 	toggleImageExpand,
 }) => {
-	const { username: currentUser } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
 	const { width } = useWindowDimensions();
 
 	return (
@@ -31,7 +31,7 @@ const ImageMessage: React.FC<Props> = ({
 					display: "flex",
 					flexDirection: "row",
 					justifyContent:
-						message.sender === currentUser
+						message.sender === currentUser?.username
 							? "flex-end"
 							: "flex-start",
 				}}

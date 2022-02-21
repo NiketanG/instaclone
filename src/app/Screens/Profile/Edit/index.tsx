@@ -1,5 +1,19 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
+import { useEffect } from "react";
+import {
+	Image,
+	Keyboard,
+	ScrollView,
+	StatusBar,
+	ToastAndroid,
+	View,
+} from "react-native";
+import { TouchableHighlight } from "react-native-gesture-handler";
+import ImagePicker, {
+	Image as ImageResponse,
+	Options,
+} from "react-native-image-crop-picker";
 import {
 	ActivityIndicator,
 	Appbar,
@@ -9,28 +23,20 @@ import {
 	Title,
 	useTheme,
 } from "react-native-paper";
-import { ProfileStackParams } from "../../../types/navigation";
-import { Image, Keyboard, StatusBar, ToastAndroid, View } from "react-native";
-import { AppContext } from "../../../utils/appContext";
 import Icon from "react-native-vector-icons/Ionicons";
-import ImagePicker, {
-	Options,
-	Image as ImageResponse,
-} from "react-native-image-crop-picker";
-import { TouchableHighlight } from "react-native-gesture-handler";
-
-import UsersStore from "../../../store/UsersStore";
-import supabaseClient from "../../../utils/supabaseClient";
+import { useMutation } from "react-query";
+import { editUser, isUsernameAvailable } from "../../../../api";
+import { ProfileStackParams } from "../../../types/navigation/ProfileStack";
 import { definitions } from "../../../types/supabase";
-import uploadToCloudinary from "../../../utils/uploadToCloudinary";
-import useCurrentUser from "../../../utils/useCurrentUser";
+import { AppContext } from "../../../utils/appContext";
+import { queryClient } from "../../../utils/queryClient";
+import uploadToSupabase from "../../../utils/uploadToSupabase";
+
 type Props = {
 	navigation: StackNavigationProp<ProfileStackParams, "Settings">;
 };
 
 const EditProfile: React.FC<Props> = ({ navigation }) => {
-	const currentUser = useCurrentUser();
-
 	const goBack = () => navigation.goBack();
 
 	const [username, setUsername] = useState("");
@@ -38,24 +44,16 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 	const [bio, setBio] = useState("");
 	const [imagePath, setImagePath] = useState<string | null>(null);
 
-	const {
-		setProfilePic: updateProfilePic,
-		setUsername: updateUsername,
-		setName: updateName,
-		setBio: updateBio,
-	} = useContext(AppContext);
+	const { user, setUser } = useContext(AppContext);
 
 	useEffect(() => {
-		if (currentUser) {
-			setUsername(currentUser.username);
-			setName(currentUser.name || "");
-			setBio(currentUser.bio || "");
-			if (currentUser.profilePic) setImagePath(currentUser.profilePic);
-			setLoading(false);
-		} else {
-			setLoading(true);
+		if (user) {
+			setUsername(user.username);
+			setName(user.name);
+			setBio(user.bio || "");
+			if (user.profilePic) setImagePath(user.profilePic);
 		}
-	}, [currentUser]);
+	}, [user]);
 
 	const { colors } = useTheme();
 
@@ -65,8 +63,9 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 	const imagePickerOptions: Options = {
 		mediaType: "photo",
 		cropping: true,
-		width: 1024,
-		height: 1024,
+		width: 256,
+		forceJpg: true,
+		height: 256,
 		includeBase64: true,
 	};
 
@@ -83,31 +82,34 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 		}
 	};
 
-	const updateProfile = async () => {
+	const editProfileMutation = useMutation<
+		unknown,
+		unknown,
+		Partial<
+			Pick<
+				definitions["users"],
+				"name" | "username" | "bio" | "profilePic"
+			>
+		>
+	>((userToUpdate) => editUser(userToUpdate), {
+		onSettled: () => {
+			user && queryClient.invalidateQueries(`userInfo_${user.username}`);
+		},
+	});
+
+	const profileUpdate = async () => {
+		if (!user) return;
 		try {
 			if (username.length < 3) return;
-			if (!currentUser?.email) {
-				console.error("No email");
-				return;
-			}
 			Keyboard.dismiss();
 			setLoading(true);
 
-			if (username !== currentUser.username) {
-				const userExists = await supabaseClient
-					.from<definitions["users"]>("users")
-					.select("*")
-					.eq("username", username.toLowerCase());
-
-				if (userExists?.error) {
-					console.error(userExists.error);
+			if (username !== user.username) {
+				const isUsernameAvail = await isUsernameAvailable(username);
+				if (isUsernameAvail === null) {
 					ToastAndroid.show("An error occured", ToastAndroid.LONG);
 				}
-				if (
-					userExists &&
-					userExists.data &&
-					userExists.data.length > 0
-				) {
+				if (isUsernameAvail === false) {
 					setLoading(false);
 					setUsernameAvailable(false);
 					return;
@@ -122,22 +124,30 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 				if (imagePath.startsWith("http")) {
 					userImagePath = imagePath;
 				} else {
-					userImagePath = await uploadToCloudinary(imagePath);
+					userImagePath = await uploadToSupabase(
+						imagePath,
+						"jpg",
+						"profilePictures"
+					);
 				}
 			}
 
-			await UsersStore.editUser(currentUser.username, {
-				username: username.toLowerCase(),
-				name,
-				bio,
-				profilePic: userImagePath || "",
+			const dataToUpdate: Partial<
+				Pick<
+					definitions["users"],
+					"username" | "name" | "bio" | "profilePic"
+				>
+			> = {};
+			if (name) dataToUpdate.name = name;
+			if (bio) dataToUpdate.bio = bio;
+			if (username) dataToUpdate.username = username;
+			if (userImagePath) dataToUpdate.profilePic = userImagePath;
+			editProfileMutation.mutate(dataToUpdate);
+
+			setUser({
+				...user,
+				...dataToUpdate,
 			});
-
-			updateName(name);
-			updateBio(bio);
-
-			updateUsername(username);
-			if (userImagePath) updateProfilePic(userImagePath);
 
 			ToastAndroid.show("Profile updated", ToastAndroid.LONG);
 			navigation.goBack();
@@ -177,9 +187,9 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 			>
 				<Appbar.Action icon="arrow-left" onPress={goBack} />
 				<Appbar.Content title="Edit Profile" />
-				<Appbar.Action icon="check" onPress={updateProfile} />
+				<Appbar.Action icon="check" onPress={profileUpdate} />
 			</Appbar.Header>
-			<View
+			<ScrollView
 				style={{
 					padding: 16,
 					flex: 1,
@@ -294,7 +304,24 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 						marginBottom: 16,
 					}}
 				/>
-			</View>
+				<Text
+					style={{
+						color: colors.placeholder,
+					}}
+				>
+					Email
+				</Text>
+				<TextInput
+					placeholder="Email"
+					value={user?.email}
+					disabled
+					dense
+					style={{
+						marginTop: 8,
+						marginBottom: 16,
+					}}
+				/>
+			</ScrollView>
 		</>
 	);
 };

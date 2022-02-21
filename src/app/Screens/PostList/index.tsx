@@ -1,27 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Appbar, Divider, useTheme } from "react-native-paper";
-import { FlatList, StatusBar, useWindowDimensions } from "react-native";
+import { FlatList, StatusBar, Text, useWindowDimensions } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams } from "../../types/navigation";
+import { ProfileStackParams } from "../../types/navigation/ProfileStack";
 import { RouteProp } from "@react-navigation/native";
-import { definitions } from "../../types/supabase";
 import Post from "../../Components/Post";
 import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
+import { View } from "react-native";
+import { PostWithUser } from "../../types";
 
 type Props = {
-	navigation: StackNavigationProp<ProfileStackParams, "Posts">;
-	route: RouteProp<ProfileStackParams, "Posts">;
+	navigation: StackNavigationProp<ProfileStackParams, "PostsList">;
+	route: RouteProp<ProfileStackParams, "PostsList">;
 };
 
 const PostList: React.FC<Props> = ({ navigation, route }) => {
 	const listRef = useRef<FlatList>(null);
-	const goBack = () => {
-		if (route.params.goBack) {
-			route.params.goBack();
-		} else {
-			navigation.goBack();
-		}
-	};
+	const goBack = () => navigation.goBack();
 
 	const { colors } = useTheme();
 
@@ -33,6 +28,7 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 
 			listRef.current?.scrollToIndex({
 				index: postIndex,
+				animated: false,
 			});
 		}
 	}, [route]);
@@ -40,7 +36,7 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 	const { width } = useWindowDimensions();
 
 	const getItemLayout = (
-		data: Array<definitions["posts"]> | null | undefined,
+		data: Array<PostWithUser> | null | undefined,
 		index: number
 	): {
 		length: number;
@@ -55,29 +51,6 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 		};
 	};
 
-	const [openedModalData, setOpenedModalData] = useState<{
-		modalType: "MENU" | "SHARE";
-		username: string;
-		postId: number;
-	} | null>(null);
-
-	const closeModal = () => {
-		setOpenedModalData(null);
-	};
-	const onClose = () => setOpenedModalData(null);
-
-	const openModal = (
-		modalType: "MENU" | "SHARE",
-		username: string,
-		postId: number
-	) => {
-		setOpenedModalData({
-			modalType,
-			postId: postId,
-			username: username,
-		});
-	};
-
 	return (
 		<>
 			<StatusBar
@@ -87,6 +60,8 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 			/>
 			<Appbar.Header
 				style={{
+					zIndex: 5,
+					elevation: 5,
 					backgroundColor: "black",
 				}}
 			>
@@ -94,45 +69,44 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 				<Appbar.Content title="Posts" />
 			</Appbar.Header>
 
-			<PostBottomSheetWrapper
-				onClose={onClose}
-				openedModalData={openedModalData}
-			>
-				{route.params.postList && (
-					<FlatList
-						ref={listRef}
-						getItemLayout={getItemLayout}
-						data={route.params.postList.sort(
-							(a, b) =>
-								new Date(b.postedAt).getTime() -
-								new Date(a.postedAt).getTime()
-						)}
-						ItemSeparatorComponent={Divider}
-						renderItem={({ item }) => (
-							<Post
-								closeModal={closeModal}
-								openModal={openModal}
-								caption={item.caption}
-								imageUrl={item.imageUrl}
-								postId={item.postId}
-								postedAt={item.postedAt}
-								user={{
-									username: item.user,
-									profilePic: undefined,
-								}}
-							/>
-						)}
-						keyExtractor={(item) => item.postId.toString()}
-						bouncesZoom
-						bounces
-						snapToAlignment={"start"}
-						showsVerticalScrollIndicator
-						style={{
-							backgroundColor: colors.background,
-						}}
-					/>
-				)}
-			</PostBottomSheetWrapper>
+			{route.params.postList && (
+				<FlatList
+					ref={listRef}
+					getItemLayout={getItemLayout}
+					ListEmptyComponent={
+						<View
+							style={{
+								display: "flex",
+								flexDirection: "column",
+
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
+							<Text>Nothing to see here, yet.</Text>
+						</View>
+					}
+					data={route.params.postList}
+					ItemSeparatorComponent={Divider}
+					renderItem={({ item }) => (
+						<Post
+							caption={item.caption}
+							imageUrl={item.imageUrl}
+							postId={item.postId}
+							postedAt={item.postedAt}
+							user={item.user}
+						/>
+					)}
+					keyExtractor={(item) => item.postId.toString()}
+					bouncesZoom
+					bounces
+					snapToAlignment={"start"}
+					style={{
+						backgroundColor: colors.background,
+					}}
+				/>
+			)}
+			<PostBottomSheetWrapper />
 		</>
 	);
 };

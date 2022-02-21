@@ -1,11 +1,14 @@
 import { ScrollView, StatusBar, TouchableHighlight, View } from "react-native";
-import { Appbar, Button, Text, Title, useTheme } from "react-native-paper";
+import { Appbar, Button, Text, useTheme } from "react-native-paper";
 import React, { useEffect, useState } from "react";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams } from "../../types/navigation";
-import FollowersStore from "../../store/FollowersStore";
-import useCurrentUser from "../../utils/useCurrentUser";
+import { ProfileStackParams } from "../../types/navigation/ProfileStack";
+import { UserMin } from "../../types";
+import { useContext } from "react";
+import { AppContext } from "../../utils/appContext";
+import { UserAvatar } from "../../Components/UserAvatar";
+import { unfollowUser } from "../../../api";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "Following">;
@@ -16,7 +19,7 @@ const Following: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
 	const goBack = () => navigation.goBack();
 
-	const currentUser = useCurrentUser();
+	const { user: currentUser } = useContext(AppContext);
 	const [isCurrentUser, setIsCurrentUser] = useState(false);
 	useEffect(() => {
 		if (route.params.username === currentUser?.username) {
@@ -26,31 +29,21 @@ const Following: React.FC<Props> = ({ navigation, route }) => {
 		}
 	}, [currentUser, route.params.username]);
 
-	const viewProfile = (username: string) => {
-		navigation.push("ProfilePage", {
-			username,
-			showBackArrow: true,
-		});
-	};
+	const viewProfile = (user: UserMin) => navigation.navigate("Profile", user);
 
 	const [following, setFollowing] = useState(() => route.params.following);
 
-	const unfollowUser = async (username: string) => {
+	const userUnfollow = async (username: string) => {
 		if (!route.params.username || !isCurrentUser) return;
 
-		const res = FollowersStore.unfollowUser(
-			username,
-			route.params.username
-		).then();
-		if (res) {
-			setFollowing(
-				following.filter(
-					(e) =>
-						e.follower !== route.params.username &&
-						e.following !== username
-				)
-			);
-		}
+		unfollowUser(username);
+		setFollowing(
+			following.filter(
+				(e) =>
+					e.follower !== route.params.username &&
+					e.following.username !== username
+			)
+		);
 	};
 
 	return (
@@ -71,7 +64,7 @@ const Following: React.FC<Props> = ({ navigation, route }) => {
 				}}
 			>
 				<Appbar.Action icon="arrow-left" onPress={goBack} />
-				<Appbar.Content title={route.params.username || "Following"} />
+				<Appbar.Content title={"Following"} />
 			</Appbar.Header>
 
 			<ScrollView
@@ -79,11 +72,10 @@ const Following: React.FC<Props> = ({ navigation, route }) => {
 					padding: 16,
 				}}
 			>
-				<Title>All Following</Title>
 				{following &&
 					following.map((follower) => (
 						<TouchableHighlight
-							key={follower.following}
+							key={follower.following.username}
 							onPress={() => viewProfile(follower.following)}
 						>
 							<View
@@ -96,19 +88,48 @@ const Following: React.FC<Props> = ({ navigation, route }) => {
 									alignItems: "center",
 								}}
 							>
-								<Text
+								<View
 									style={{
-										fontWeight: "bold",
-										fontSize: 16,
+										display: "flex",
+										flexDirection: "row",
+										alignItems: "center",
 									}}
 								>
-									{follower.following}
-								</Text>
+									<UserAvatar
+										size={32}
+										profilePicture={
+											follower.following.profilePic
+										}
+									/>
+									<View
+										style={{
+											marginLeft: 12,
+										}}
+									>
+										<Text
+											style={{
+												fontWeight: "bold",
+												fontSize: 16,
+											}}
+										>
+											{follower.following.username}
+										</Text>
+										<Text
+											style={{
+												opacity: 0.7,
+											}}
+										>
+											{follower.following.name}
+										</Text>
+									</View>
+								</View>
 								{isCurrentUser && (
 									<Button
 										mode="outlined"
 										onPress={() => {
-											unfollowUser(follower.following);
+											userUnfollow(
+												follower.following.username
+											);
 										}}
 									>
 										Unfollow

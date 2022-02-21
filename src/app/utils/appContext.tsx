@@ -1,26 +1,15 @@
 import React, { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Theme } from "../types";
+import { Theme, User } from "../types";
 
 type ContextType = {
 	loading: boolean;
+
 	signupDone: boolean;
 	setSignupDone: (newState: boolean) => void;
 
-	username: string | null;
-	setUsername: (newUsername: string) => void;
-
-	email: string | null;
-	setEmail: (newEmail: string) => void;
-
-	name: string | null;
-	setName: (newName: string) => void;
-
-	bio: string | null;
-	setBio: (newBio: string) => void;
-
-	profilePic: string | null;
-	setProfilePic: (newPic: string) => void;
+	user: User | null;
+	setUser: (newUser: User) => void;
 
 	theme: Theme;
 	setTheme: (newTheme: Theme) => void;
@@ -33,23 +22,11 @@ export const AppContext = createContext<ContextType>({
 	signupDone: false,
 	setSignupDone: () => {},
 
-	username: null,
-	setUsername: () => {},
-
-	email: null,
-	setEmail: () => {},
-
-	name: null,
-	setName: () => {},
-
-	bio: null,
-	setBio: () => {},
+	user: null,
+	setUser: (_newUser: User) => {},
 
 	theme: "dark",
 	setTheme: () => {},
-
-	profilePic: null,
-	setProfilePic: () => {},
 
 	signout: () => {},
 });
@@ -60,35 +37,12 @@ type Props = {
 const AppContextProvider: React.FC<Props> = ({ children }) => {
 	const [loading, setLoading] = useState(true);
 	const [signupDone, setSignupDone] = useState(false);
-	const [username, setUsername] = useState<string | null>(null);
-	const [name, setName] = useState<string | null>(null);
-	const [profilePic, setProfilePic] = useState<string | null>(null);
-	const [bio, setBio] = useState<string | null>(null);
-	const [email, setEmail] = useState<string | null>(null);
 
-	const updateBio = (newBio: string) => {
-		setBio(newBio);
-		AsyncStorage.setItem("bio", newBio);
-	};
+	const [user, setUser] = useState<User | null>(null);
 
-	const updateProfilePic = (newProfilePic: string) => {
-		setProfilePic(newProfilePic);
-		AsyncStorage.setItem("profilePic", newProfilePic);
-	};
-
-	const updateUsername = (newUsername: string) => {
-		setUsername(newUsername);
-		AsyncStorage.setItem("username", newUsername);
-	};
-
-	const updateEmail = (newEmail: string) => {
-		setEmail(newEmail);
-		AsyncStorage.setItem("email", newEmail);
-	};
-
-	const updateName = (newName: string) => {
-		setName(newName);
-		AsyncStorage.setItem("name", newName);
+	const updateUser = (newUser: User) => {
+		setUser(newUser);
+		AsyncStorage.setItem("user", JSON.stringify(newUser));
 	};
 
 	const [theme, setTheme] = useState<Theme>("dark");
@@ -102,31 +56,23 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 		AsyncStorage.setItem("signupDone", newState ? "true" : "false");
 	};
 
+	const fetchUser = async () => {
+		const signupDoneRes = await AsyncStorage.getItem("signupDone");
+		const userRes = await AsyncStorage.getItem("user");
+		if (signupDoneRes === "true") setSignupDone(true);
+		if (userRes) setUser(JSON.parse(userRes));
+		setLoading(false);
+	};
+
 	useEffect(() => {
-		AsyncStorage.getItem("signupDone").then((res) => {
-			setLoading(false);
-			setSignupDone(res === "true");
-		});
-		AsyncStorage.getItem("username").then((res) => setUsername(res));
-		AsyncStorage.getItem("email").then((res) => setEmail(res));
-		AsyncStorage.getItem("bio").then((res) => setBio(res));
-		AsyncStorage.getItem("name").then((res) => setName(res));
-		AsyncStorage.getItem("profilePic").then((res) => setProfilePic(res));
+		fetchUser();
 	}, []);
 
 	const signout = async () => {
 		await AsyncStorage.removeItem("signupDone");
-		await AsyncStorage.removeItem("username");
-		await AsyncStorage.removeItem("bio");
-		await AsyncStorage.removeItem("email");
-		await AsyncStorage.removeItem("name");
-		await AsyncStorage.removeItem("profilePic");
+		await AsyncStorage.removeItem("user");
 		setSignupDone(false);
-		setProfilePic(null);
-		setUsername(null);
-		setName(null);
-		setEmail(null);
-		setBio(null);
+		setUser(null);
 	};
 
 	return (
@@ -136,20 +82,8 @@ const AppContextProvider: React.FC<Props> = ({ children }) => {
 				signupDone,
 				setSignupDone: updateSignUpDone,
 
-				profilePic,
-				setProfilePic: updateProfilePic,
-
-				username,
-				setUsername: updateUsername,
-
-				name,
-				setName: updateName,
-
-				email,
-				setEmail: updateEmail,
-
-				bio,
-				setBio: updateBio,
+				user,
+				setUser: updateUser,
 
 				theme,
 				setTheme: updateTheme,

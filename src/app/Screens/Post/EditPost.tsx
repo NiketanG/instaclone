@@ -1,6 +1,7 @@
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
+import { useContext } from "react";
 import { Image, ToastAndroid, useWindowDimensions, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import {
@@ -10,39 +11,66 @@ import {
 	ActivityIndicator,
 	Colors,
 } from "react-native-paper";
-import PostsStore from "../../store/PostsStore";
-import { PostStackNavigationParams } from "../../types/navigation";
-import usePostData from "../../utils/usePostData";
+import { useMutation, useQuery } from "react-query";
+import { editPost, getPostById } from "../../../api";
+import { PostStackParamsList } from "../../types/navigation/PostStack";
+import { definitions } from "../../types/supabase";
+import { AppContext } from "../../utils/appContext";
+import { queryClient } from "../../utils/queryClient";
 
 type Props = {
-	route: RouteProp<PostStackNavigationParams, "EditPost">;
-	navigation: StackNavigationProp<PostStackNavigationParams, "EditPost">;
+	route: RouteProp<PostStackParamsList, "EditPost">;
+	navigation: StackNavigationProp<PostStackParamsList, "EditPost">;
 };
 
 const EditPost: React.FC<Props> = ({ route, navigation }) => {
 	const { colors } = useTheme();
-	const { post, user } = usePostData(route.params.postId);
+
+	const { data, isLoading } = useQuery(
+		`postInfo_${route.params.postId}`,
+		() => getPostById(route.params.postId),
+		{
+			enabled: route.params.postId !== null,
+		}
+	);
 	const [caption, setCaption] = useState(
-		() => route.params.caption || post?.caption || ""
+		() => route.params.caption || data?.caption || ""
 	);
 
+	const { user } = useContext(AppContext);
 	useEffect(() => {
-		if (post && user && post.user !== user.username) {
+		if (!isLoading && user && data?.user?.username !== user.username) {
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
 			navigation.goBack();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [post, user]);
+	}, [data?.user, user, isLoading]);
 
 	useEffect(() => {
-		if (post) setCaption(post.caption || "");
-	}, [post]);
+		if (data) setCaption(data.caption || "");
+	}, [data]);
 
 	const [loading, setLoading] = useState(false);
-	const editPost = async () => {
+
+	const editPostMutation = useMutation<
+		unknown,
+		unknown,
+		Pick<definitions["posts"], "caption" | "postId">
+	>((post) => editPost(post), {
+		onSettled: () => {
+			queryClient.invalidateQueries(`feedPosts`);
+			if (user)
+				queryClient.invalidateQueries(`userInfo_${user.username}`);
+		},
+	});
+
+	const postEdit = async () => {
 		setLoading(true);
 		try {
-			await PostsStore.editPost(route.params.postId, caption);
+			editPostMutation.mutate({
+				postId: route.params.postId,
+				caption,
+			});
 			ToastAndroid.show("Post Updated", ToastAndroid.LONG);
 			setLoading(false);
 			navigation.goBack();
@@ -86,7 +114,7 @@ const EditPost: React.FC<Props> = ({ route, navigation }) => {
 			>
 				<Appbar.BackAction onPress={() => navigation.goBack()} />
 				<Appbar.Content title="Edit Post" />
-				<Appbar.Action icon="check" onPress={editPost} />
+				<Appbar.Action icon="check" onPress={postEdit} />
 			</Appbar.Header>
 			<ScrollView
 				style={{
@@ -94,7 +122,7 @@ const EditPost: React.FC<Props> = ({ route, navigation }) => {
 				}}
 			>
 				<Image
-					source={{ uri: route.params.imageUrl || post?.imageUrl }}
+					source={{ uri: route.params.imageUrl || data?.imageUrl }}
 					style={{
 						width,
 						height: width,

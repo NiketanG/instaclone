@@ -1,9 +1,11 @@
 import { ScrollView, StatusBar, TouchableHighlight, View } from "react-native";
-import { Appbar, Text, Title, useTheme } from "react-native-paper";
+import { Appbar, Text, useTheme } from "react-native-paper";
 import React from "react";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ProfileStackParams } from "../../types/navigation";
+import { ProfileStackParams } from "../../types/navigation/ProfileStack";
+import { UserMin } from "../../types";
+import { UserAvatar } from "../../Components/UserAvatar";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "Followers">;
@@ -13,11 +15,8 @@ type Props = {
 const Followers: React.FC<Props> = ({ navigation, route }) => {
 	const { colors, dark } = useTheme();
 	const goBack = () => navigation.goBack();
-	const viewProfile = (username: string) => {
-		navigation.push("ProfilePage", {
-			username,
-			showBackArrow: true,
-		});
+	const viewProfile = (user: UserMin) => {
+		navigation.navigate("Profile", user);
 	};
 
 	return (
@@ -38,7 +37,7 @@ const Followers: React.FC<Props> = ({ navigation, route }) => {
 				}}
 			>
 				<Appbar.Action icon="arrow-left" onPress={goBack} />
-				<Appbar.Content title={route.params.username || "Following"} />
+				<Appbar.Content title={"Followers"} />
 			</Appbar.Header>
 
 			<ScrollView
@@ -46,10 +45,9 @@ const Followers: React.FC<Props> = ({ navigation, route }) => {
 					padding: 16,
 				}}
 			>
-				<Title>All Followers</Title>
 				{route.params.followers.map((follower) => (
 					<TouchableHighlight
-						key={follower.follower}
+						key={follower.follower.username}
 						onPress={() => viewProfile(follower.follower)}
 					>
 						<View
@@ -57,19 +55,45 @@ const Followers: React.FC<Props> = ({ navigation, route }) => {
 								display: "flex",
 								flexDirection: "row",
 								justifyContent: "space-between",
-
 								paddingVertical: 8,
 								alignItems: "center",
 							}}
 						>
-							<Text
+							<View
 								style={{
-									fontWeight: "bold",
-									fontSize: 16,
+									display: "flex",
+									flexDirection: "row",
+									alignItems: "center",
 								}}
 							>
-								{follower.follower}
-							</Text>
+								<UserAvatar
+									size={32}
+									profilePicture={
+										follower.follower.profilePic
+									}
+								/>
+								<View
+									style={{
+										marginLeft: 12,
+									}}
+								>
+									<Text
+										style={{
+											fontWeight: "bold",
+											fontSize: 16,
+										}}
+									>
+										{follower.follower.username}
+									</Text>
+									<Text
+										style={{
+											opacity: 0.7,
+										}}
+									>
+										{follower.follower.name}
+									</Text>
+								</View>
+							</View>
 						</View>
 					</TouchableHighlight>
 				))}

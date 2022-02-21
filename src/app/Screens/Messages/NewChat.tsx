@@ -11,12 +11,14 @@ import {
 	View,
 } from "react-native";
 import { Appbar, Divider, Text, useTheme } from "react-native-paper";
-import { Follower } from "../../store/FollowersStore";
-import { MessageStackNavigationParams } from "../../types/navigation";
+import { useQuery } from "react-query";
+import { getChatsForUser, getUser } from "../../../api";
+
+import { ChatItem, FollowingFull, UserMin } from "../../types";
+import { MessageStackNavigationParams } from "../../types/navigation/MessagesStack";
 import { AppContext } from "../../utils/appContext";
-import useChatList, { ChatList } from "../../utils/useChatList";
-import useUser from "../../utils/useUser";
-import NewChatItem, { NewChatItemType } from "./NewChatItem";
+
+import NewChatItem from "./NewChatItem";
 
 type Props = {
 	route: RouteProp<MessageStackNavigationParams, "ChatList">;
@@ -26,20 +28,37 @@ type Props = {
 export const NewChat: React.FC<Props> = ({ navigation }) => {
 	const { colors, dark } = useTheme();
 	const { height } = useWindowDimensions();
-	const { messageList, loading, fetchMessageList } = useChatList();
+
 	const [searchTerm, setSearchTerm] = useState("");
+	const {
+		data: messageList,
+		isLoading,
+		refetch: refetchChats,
+	} = useQuery(`chatList`, () => getChatsForUser());
 
-	const { username: currentUsername } = useContext(AppContext);
-	const { following } = useUser(currentUsername);
+	const { user: currentUser } = useContext(AppContext);
+	const { data, refetch: refetchCurrentUser } = useQuery(
+		`userInfo_${currentUser?.username}`,
+		() => getUser(currentUser?.username as any),
+		{
+			enabled: currentUser?.username !== null,
+		}
+	);
 
-	const [chatList, setChatList] = useState<NewChatItemType[]>([]);
+	const refetch = () => {
+		refetchChats();
+		refetchCurrentUser();
+	};
 
-	const getUsersList = (chatsList: ChatList[], followingList: Follower[]) => {
-		const followingListData = followingList.map((user) => ({
-			username: user.following,
-		}));
+	const [chatList, setChatList] = useState<UserMin[]>([]);
 
-		const chatListData = [...chatsList, ...followingListData];
+	const getUsersList = (
+		chatsList: ChatItem[],
+		followingList: FollowingFull[]
+	) => {
+		const tempChatsList = chatsList.map((item) => item.user);
+		const tempFollowingList = followingList.map((item) => item.following);
+		const chatListData = [...tempChatsList, ...tempFollowingList];
 		return [
 			...new Map(
 				chatListData.map((item) => [item.username, item])
@@ -47,16 +66,20 @@ export const NewChat: React.FC<Props> = ({ navigation }) => {
 		];
 	};
 
-	const [searchResults, setSearchResults] = useState<
-		NewChatItemType[] | null
-	>();
+	const [searchResults, setSearchResults] = useState<UserMin[] | null>();
 
 	useEffect(() => {
-		if (searchTerm.length > 0) {
+		if (searchTerm.length > 0 && messageList) {
 			setSearchResults(
-				messageList.filter((item) =>
-					item.username.includes(searchTerm.toLowerCase())
-				)
+				messageList
+					.filter(
+						(item) =>
+							item.user.username.includes(
+								searchTerm.toLowerCase()
+							) ||
+							item.user.name.includes(searchTerm.toLowerCase())
+					)
+					.map((item) => item.user)
 			);
 		} else {
 			setSearchResults(null);
@@ -64,24 +87,28 @@ export const NewChat: React.FC<Props> = ({ navigation }) => {
 	}, [messageList, searchTerm]);
 
 	useEffect(() => {
-		if (messageList && following)
-			setChatList(getUsersList(messageList, following));
-	}, [messageList, following]);
+		if (messageList && data?.following)
+			setChatList(getUsersList(messageList, data.following));
+	}, [messageList, data?.following]);
 
 	const goBack = () => navigation.goBack();
 
-	const openMessage = (username: string) => {
-		navigation.navigate("Messages", {
-			username,
-		});
+	const openMessage = (user: UserMin) => {
+		navigation.navigate("Messages", user);
 	};
 
 	useEffect(() => {
-		if (searchTerm.length > 0) {
+		if (searchTerm.length > 0 && messageList) {
 			setSearchResults(
-				messageList.filter((item) =>
-					item.username.includes(searchTerm.toLowerCase())
-				)
+				messageList
+					.filter(
+						(item) =>
+							item.user.username.includes(
+								searchTerm.toLowerCase()
+							) ||
+							item.user.name.includes(searchTerm.toLowerCase())
+					)
+					.map((item) => item.user)
 			);
 		} else {
 			setSearchResults(null);
@@ -110,7 +137,7 @@ export const NewChat: React.FC<Props> = ({ navigation }) => {
 				<Appbar.Content title="New Message" />
 			</Appbar.Header>
 
-			{loading && (
+			{isLoading && (
 				<View
 					style={{
 						flex: 1,
@@ -177,8 +204,8 @@ export const NewChat: React.FC<Props> = ({ navigation }) => {
 				}}
 				refreshControl={
 					<RefreshControl
-						refreshing={loading}
-						onRefresh={fetchMessageList}
+						refreshing={isLoading}
+						onRefresh={refetch}
 					/>
 				}
 			/>

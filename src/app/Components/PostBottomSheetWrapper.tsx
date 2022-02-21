@@ -1,6 +1,8 @@
 import { useNavigation } from "@react-navigation/core";
 import React, { useContext, useEffect, useRef } from "react";
+import { useState } from "react";
 import {
+	DeviceEventEmitter,
 	StyleSheet,
 	TouchableWithoutFeedback,
 	useWindowDimensions,
@@ -9,39 +11,47 @@ import {
 import Animated from "react-native-reanimated";
 import BottomSheet from "reanimated-bottom-sheet";
 import { useMemoOne } from "use-memo-one";
+import { newMessage } from "../../api";
+import { UserMin } from "../types";
+import { FeedNavigationProp } from "../types/navigation/PostStack";
 import { AppContext } from "../utils/appContext";
 import { PostModal } from "./Post/PostMenuModal";
-import PostShareModal from "./Post/PostShareModal";
+import ShareModal from "./Post/ShareModal";
 
-type Props = {
-	openedModalData: {
-		modalType: "MENU" | "SHARE";
-		username: string;
-		postId: number;
-	} | null;
-	onClose: () => void;
-};
-const PostBottomSheetWrapper: React.FC<Props> = ({
-	openedModalData,
-	onClose,
-	children,
-}) => {
-	const navigation = useNavigation();
+const PostBottomSheetWrapper: React.FC<any> = () => {
+	const navigation = useNavigation<FeedNavigationProp>();
 	const menuModalref = useRef<BottomSheet>(null);
 	const shareModalRef = useRef<BottomSheet>(null);
 
 	const { height } = useWindowDimensions();
-	const { username: currentUsername } = useContext(AppContext);
+	const { user: currentUser } = useContext(AppContext);
+
+	const [modalData, setModalData] = useState<{
+		modalType: "MENU" | "SHARE";
+		postId: number;
+		user: UserMin;
+	} | null>(null);
+
+	const handler = (data: {
+		modalType: "MENU" | "SHARE";
+		postId: number;
+		user: UserMin;
+	}) => {
+		setModalData(data);
+		if (data.modalType === "MENU") menuModalref.current?.snapTo(0);
+		if (data.modalType === "SHARE") shareModalRef.current?.snapTo(1);
+	};
 
 	useEffect(() => {
-		if (openedModalData?.modalType && openedModalData.postId) {
-			if (openedModalData.modalType === "MENU") {
-				menuModalref.current?.snapTo(0);
-			} else {
-				shareModalRef.current?.snapTo(0);
-			}
-		}
-	}, [openedModalData]);
+		const listener = DeviceEventEmitter.addListener(
+			"PostModalOpen",
+			handler
+		);
+
+		return () => {
+			listener.remove();
+		};
+	}, []);
 
 	const fall = useMemoOne(() => new Animated.Value(1), []);
 
@@ -59,48 +69,58 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 	);
 
 	const renderMenuModal = () =>
-		openedModalData && (
+		modalData && (
 			<PostModal
 				viewProfile={viewProfile}
-				username={openedModalData.username}
-				postId={openedModalData.postId}
-				ownPost={currentUsername === openedModalData.username}
+				username={modalData.user.username}
+				postId={modalData.postId}
+				ownPost={currentUser?.username === modalData.user.username}
 				closeModal={() => closeModal("MENU")}
 			/>
 		);
 
+	const sendPost = (user: UserMin) => {
+		newMessage({
+			message_type: "POST",
+			postId: modalData?.postId,
+			receiver: user.username,
+		});
+	};
+
 	const renderShareModal = () =>
-		openedModalData && (
-			<PostShareModal
-				postId={openedModalData.postId}
+		modalData && (
+			<ShareModal
+				sendMessage={sendPost}
 				closeModal={() => closeModal("SHARE")}
 			/>
 		);
 
-	const goBack = () => navigation.goBack();
-
 	const viewProfile = () =>
-		openedModalData &&
+		modalData &&
 		navigation.navigate("Profile", {
-			username: openedModalData?.username,
+			username: modalData?.user.username,
 			isCurrentUser: false,
-			goBack,
-			showBackArrow: true,
-		});
+		} as any);
 
+	const onClose = () => {
+		modalData && closeModal(modalData.modalType);
+	};
 	const closeModal = (modalType: "MENU" | "SHARE") => {
 		if (modalType === "MENU") {
 			menuModalref.current?.snapTo(2);
 		} else {
 			shareModalRef.current?.snapTo(2);
 		}
+		setModalData(null);
 	};
 
 	return (
 		<>
 			<BottomSheet
 				snapPoints={[
-					openedModalData?.username === currentUsername ? 204 : 104,
+					modalData?.user.username === currentUser?.username
+						? 204
+						: 104,
 					0,
 					0,
 				]}
@@ -113,7 +133,7 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 			/>
 
 			<BottomSheet
-				snapPoints={[height / 1.5 + 24, 0, 0]}
+				snapPoints={[height, height / 2, 0]}
 				renderContent={renderShareModal}
 				ref={shareModalRef}
 				initialSnap={2}
@@ -121,19 +141,20 @@ const PostBottomSheetWrapper: React.FC<Props> = ({
 				renderHeader={renderHeader}
 				onCloseEnd={onClose}
 			/>
-			{children}
-			<Animated.View
-				pointerEvents={!openedModalData?.postId ? "none" : "box-only"}
-				style={[
-					styles.shadowContainer,
-					{
-						opacity: Animated.interpolateNode(fall, {
-							inputRange: [0, 1],
-							outputRange: [0.5, 0],
-						}),
-					},
-				]}
-			/>
+			<TouchableWithoutFeedback onPress={onClose}>
+				<Animated.View
+					pointerEvents={modalData !== null ? "box-only" : "none"}
+					style={[
+						styles.shadowContainer,
+						{
+							opacity: Animated.interpolateNode(fall, {
+								inputRange: [0, 1],
+								outputRange: [0.5, 0],
+							}),
+						},
+					]}
+				/>
+			</TouchableWithoutFeedback>
 		</>
 	);
 };
