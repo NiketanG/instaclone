@@ -23,7 +23,12 @@ import { useContext } from "react";
 import { AppContext } from "../../utils/appContext";
 import { UserAvatar } from "../../Components/UserAvatar";
 import { StoryDimensions } from "../../utils/Constants";
-import { getViewsForStory, newMessage, setStoryViewed } from "../../../api";
+import {
+	deleteStory,
+	getViewsForStory,
+	newMessage,
+	setStoryViewed,
+} from "../../../api";
 import { useMutation, useQuery } from "react-query";
 import { useTheme } from "react-native-paper";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
@@ -104,6 +109,17 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 	);
 	const newStory = () => {
 		navigation.navigate("NewStory" as any);
+	};
+
+	const deleteOwnStory = async () => {
+		if (currentStory) {
+			navigation.navigate("Root");
+			ToastAndroid.show("Story deleted", ToastAndroid.LONG);
+			await deleteStory(currentStory.id);
+			queryClient.invalidateQueries(`feedStories`);
+			if (currUser)
+				queryClient.invalidateQueries(`userInfo_${currUser.username}`);
+		}
 	};
 
 	const [storyReplyText, setStoryReplyText] = useState("");
@@ -457,12 +473,30 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 									</View>
 									{currUser?.username ===
 										stories[storyUser].user.username && (
-										<Icon
-											name="add"
-											size={24}
-											onPress={newStory}
-											color="white"
-										/>
+										<View
+											style={{
+												display: "flex",
+												flexDirection: "row",
+												alignItems: "center",
+											}}
+										>
+											<Icon
+												name="trash"
+												size={16}
+												onPress={deleteOwnStory}
+												style={{
+													marginRight: 12,
+													padding: 6,
+												}}
+												color="white"
+											/>
+											<Icon
+												name="add"
+												size={24}
+												onPress={newStory}
+												color="white"
+											/>
+										</View>
 									)}
 								</View>
 

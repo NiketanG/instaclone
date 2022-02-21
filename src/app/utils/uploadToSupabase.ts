@@ -8,9 +8,21 @@ const uploadToSupabase = async (
 	bucketName = "stories"
 ): Promise<string | null> => {
 	try {
+		const base64Str = base64Image.includes("base64,")
+			? base64Image.substring(
+					base64Image.indexOf("base64,") + "base64,".length
+			  )
+			: base64Image;
+		const res = decode(base64Str);
+
+		if (!(res.byteLength > 0)) {
+			console.error("[uploadToSupabase] ArrayBuffer is null");
+			return null;
+		}
+
 		const { data, error } = await supabaseClient.storage
 			.from(bucketName)
-			.upload(`${nanoid()}.${imageExtension}`, decode(base64Image), {
+			.upload(`${nanoid()}.${imageExtension}`, res, {
 				contentType: `image/${imageExtension}`,
 			});
 		if (!data) {

@@ -102,9 +102,7 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 						caption,
 						imageUrl,
 					};
-
 				newPostMutation.mutate(data);
-
 				setUploading(false);
 				ToastAndroid.show("Posted", ToastAndroid.LONG);
 				setImagePath(null);
