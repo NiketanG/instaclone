@@ -105,6 +105,7 @@ const MessagesList: React.FC<Props> = ({ navigation }) => {
 	);
 
 	const { user: currentUser } = useContext(AppContext);
+
 	const newMessageReceived = async (
 		payload: SupabaseRealtimePayload<definitions["messages"]>
 	) => {

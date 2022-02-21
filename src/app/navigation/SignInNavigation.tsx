@@ -9,7 +9,6 @@ const SignInStack = createStackNavigator<SignInNavigationParams>();
 const SignInStackNavigator = () => {
 	return (
 		<SignInStack.Navigator
-			headerMode="none"
 			screenOptions={{
 				headerShown: false,
 				cardStyle: { backgroundColor: "transparent" },

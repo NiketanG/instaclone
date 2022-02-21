@@ -21,6 +21,7 @@ export interface paths {
 					user?: parameters["rowFilter.comments.user"];
 					postedAt?: parameters["rowFilter.comments.postedAt"];
 					comment?: parameters["rowFilter.comments.comment"];
+					parentId?: parameters["rowFilter.comments.parentId"];
 					/** Filtering Columns */
 					select?: parameters["select"];
 					/** Ordering */
@@ -76,6 +77,7 @@ export interface paths {
 					user?: parameters["rowFilter.comments.user"];
 					postedAt?: parameters["rowFilter.comments.postedAt"];
 					comment?: parameters["rowFilter.comments.comment"];
+					parentId?: parameters["rowFilter.comments.parentId"];
 				};
 				header: {
 					/** Preference */
@@ -95,6 +97,7 @@ export interface paths {
 					user?: parameters["rowFilter.comments.user"];
 					postedAt?: parameters["rowFilter.comments.postedAt"];
 					comment?: parameters["rowFilter.comments.comment"];
+					parentId?: parameters["rowFilter.comments.parentId"];
 				};
 				body: {
 					/** comments */
@@ -944,287 +947,445 @@ export interface paths {
 export interface definitions {
 	comments: {
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		id: number;
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
 		 */
 		postId: number;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		user: string;
+		/**
+		 * Format: timestamp with time zone
+		 * @default now()
+		 */
 		postedAt: string;
+		/** Format: text */
 		comment: string;
+		/**
+		 * Format: integer
+		 * @description Note:
+		 * This is a Foreign Key to `comments.id`.<fk table='comments' column='id'/>
+		 */
+		parentId?: number;
 	};
 	followers: {
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		id: number;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		follower: string;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		following: string;
 	};
 	likes: {
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		id: number;
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
 		 */
 		postId: number;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		user: string;
 	};
 	messages: {
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		messageId: number;
-		/** TEXT, IMAGE, POST, STORY, STORYREPLY */
+		/**
+		 * Format: character varying
+		 * @description TEXT, IMAGE, POST, STORY, STORYREPLY
+		 * @default TEXT
+		 */
 		message_type: string;
+		/** Format: text */
 		text?: string;
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
 		 */
 		postId?: number;
+		/** Format: text */
 		imageUrl?: string;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		sender: string;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		receiver: string;
+		/**
+		 * Format: timestamp with time zone
+		 * @default now()
+		 */
 		received_at: string;
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Foreign Key to `stories.id`.<fk table='stories' column='id'/>
 		 */
 		storyId?: number;
 	};
+	/** @description Notifications */
 	notifications: {
 		/**
-		 * Note:
+		 * Format: bigint
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		id: number;
-		/** Type of Notification: COMMENT, LIKE, FOLLOW */
+		/**
+		 * Format: text
+		 * @description Type of Notification: COMMENT, LIKE, FOLLOW
+		 */
 		type: string;
-		/** Created On */
+		/**
+		 * Format: timestamp with time zone
+		 * @description Created On
+		 * @default now()
+		 */
 		createdOn: string;
 		/**
-		 * User
+		 * Format: text
+		 * @description User
 		 *
 		 * Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		toUser: string;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		byUser: string;
 		/**
-		 * Post
+		 * Format: integer
+		 * @description Post
 		 *
 		 * Note:
 		 * This is a Foreign Key to `posts.postId`.<fk table='posts' column='postId'/>
 		 */
 		post?: number;
 		/**
-		 * Note:
+		 * Format: bigint
+		 * @description Note:
 		 * This is a Foreign Key to `comments.id`.<fk table='comments' column='id'/>
 		 */
 		comment?: number;
 	};
 	posts: {
 		/**
-		 * Note:
+		 * Format: integer
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		postId: number;
+		/** Format: text */
 		imageUrl: string;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		user: string;
+		/** Format: text */
 		caption?: string;
+		/**
+		 * Format: timestamp with time zone
+		 * @default now()
+		 */
 		postedAt: string;
 	};
+	/** @description Stories */
 	stories: {
 		/**
-		 * Note:
+		 * Format: bigint
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		id: number;
-		/** Story Image URL */
+		/**
+		 * Format: text
+		 * @description Story Image URL
+		 */
 		imageUrl: string;
 		/**
-		 * User
+		 * Format: text
+		 * @description User
 		 *
 		 * Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		user: string;
-		/** Posted At */
+		/**
+		 * Format: timestamp with time zone
+		 * @description Posted At
+		 * @default now()
+		 */
 		postedAt: string;
 	};
 	storyviews: {
 		/**
-		 * Note:
+		 * Format: bigint
+		 * @description Note:
 		 * This is a Foreign Key to `stories.id`.<fk table='stories' column='id'/>
 		 */
 		storyId: number;
 		/**
-		 * Note:
+		 * Format: bigint
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		id: number;
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Foreign Key to `users.username`.<fk table='users' column='username'/>
 		 */
 		user: string;
 	};
+	/** @description Users */
 	users: {
 		/**
-		 * Note:
+		 * Format: text
+		 * @description Note:
 		 * This is a Primary Key.<pk/>
 		 */
 		username: string;
-		/** Name */
+		/**
+		 * Format: text
+		 * @description Name
+		 */
 		name: string;
-		/** Bio */
+		/**
+		 * Format: text
+		 * @description Bio
+		 */
 		bio?: string;
-		/** Profile Picture */
+		/**
+		 * Format: text
+		 * @description Profile Picture
+		 */
 		profilePic?: string;
+		/** Format: text */
 		email: string;
-		/** Notification Token for FCM */
+		/**
+		 * Format: text
+		 * @description Notification Token for FCM
+		 */
 		notificationToken?: string;
 	};
 }
 
 export interface parameters {
-	/** Preference */
+	/** @description Preference */
 	preferParams: "params=single-object";
-	/** Preference */
+	/** @description Preference */
 	preferReturn: "return=representation" | "return=minimal" | "return=none";
-	/** Preference */
+	/** @description Preference */
 	preferCount: "count=none";
-	/** Filtering Columns */
+	/** @description Filtering Columns */
 	select: string;
-	/** On Conflict */
+	/** @description On Conflict */
 	on_conflict: string;
-	/** Ordering */
+	/** @description Ordering */
 	order: string;
-	/** Limiting and Pagination */
+	/** @description Limiting and Pagination */
 	range: string;
-	/** Limiting and Pagination */
+	/**
+	 * @description Limiting and Pagination
+	 * @default items
+	 */
 	rangeUnit: string;
-	/** Limiting and Pagination */
+	/** @description Limiting and Pagination */
 	offset: string;
-	/** Limiting and Pagination */
+	/** @description Limiting and Pagination */
 	limit: string;
-	/** comments */
+	/** @description comments */
 	"body.comments": definitions["comments"];
+	/** Format: integer */
 	"rowFilter.comments.id": string;
+	/** Format: integer */
 	"rowFilter.comments.postId": string;
+	/** Format: text */
 	"rowFilter.comments.user": string;
+	/** Format: timestamp with time zone */
 	"rowFilter.comments.postedAt": string;
+	/** Format: text */
 	"rowFilter.comments.comment": string;
-	/** followers */
+	/** Format: integer */
+	"rowFilter.comments.parentId": string;
+	/** @description followers */
 	"body.followers": definitions["followers"];
+	/** Format: integer */
 	"rowFilter.followers.id": string;
+	/** Format: text */
 	"rowFilter.followers.follower": string;
+	/** Format: text */
 	"rowFilter.followers.following": string;
-	/** likes */
+	/** @description likes */
 	"body.likes": definitions["likes"];
+	/** Format: integer */
 	"rowFilter.likes.id": string;
+	/** Format: integer */
 	"rowFilter.likes.postId": string;
+	/** Format: text */
 	"rowFilter.likes.user": string;
-	/** messages */
+	/** @description messages */
 	"body.messages": definitions["messages"];
+	/** Format: integer */
 	"rowFilter.messages.messageId": string;
-	/** TEXT, IMAGE, POST, STORY, STORYREPLY */
+	/**
+	 * Format: character varying
+	 * @description TEXT, IMAGE, POST, STORY, STORYREPLY
+	 */
 	"rowFilter.messages.message_type": string;
+	/** Format: text */
 	"rowFilter.messages.text": string;
+	/** Format: integer */
 	"rowFilter.messages.postId": string;
+	/** Format: text */
 	"rowFilter.messages.imageUrl": string;
+	/** Format: text */
 	"rowFilter.messages.sender": string;
+	/** Format: text */
 	"rowFilter.messages.receiver": string;
+	/** Format: timestamp with time zone */
 	"rowFilter.messages.received_at": string;
+	/** Format: integer */
 	"rowFilter.messages.storyId": string;
-	/** notifications */
+	/** @description notifications */
 	"body.notifications": definitions["notifications"];
+	/** Format: bigint */
 	"rowFilter.notifications.id": string;
-	/** Type of Notification: COMMENT, LIKE, FOLLOW */
+	/**
+	 * Format: text
+	 * @description Type of Notification: COMMENT, LIKE, FOLLOW
+	 */
 	"rowFilter.notifications.type": string;
-	/** Created On */
+	/**
+	 * Format: timestamp with time zone
+	 * @description Created On
+	 */
 	"rowFilter.notifications.createdOn": string;
-	/** User */
+	/**
+	 * Format: text
+	 * @description User
+	 */
 	"rowFilter.notifications.toUser": string;
+	/** Format: text */
 	"rowFilter.notifications.byUser": string;
-	/** Post */
+	/**
+	 * Format: integer
+	 * @description Post
+	 */
 	"rowFilter.notifications.post": string;
+	/** Format: bigint */
 	"rowFilter.notifications.comment": string;
-	/** posts */
+	/** @description posts */
 	"body.posts": definitions["posts"];
+	/** Format: integer */
 	"rowFilter.posts.postId": string;
+	/** Format: text */
 	"rowFilter.posts.imageUrl": string;
+	/** Format: text */
 	"rowFilter.posts.user": string;
+	/** Format: text */
 	"rowFilter.posts.caption": string;
+	/** Format: timestamp with time zone */
 	"rowFilter.posts.postedAt": string;
-	/** stories */
+	/** @description stories */
 	"body.stories": definitions["stories"];
+	/** Format: bigint */
 	"rowFilter.stories.id": string;
-	/** Story Image URL */
+	/**
+	 * Format: text
+	 * @description Story Image URL
+	 */
 	"rowFilter.stories.imageUrl": string;
-	/** User */
+	/**
+	 * Format: text
+	 * @description User
+	 */
 	"rowFilter.stories.user": string;
-	/** Posted At */
+	/**
+	 * Format: timestamp with time zone
+	 * @description Posted At
+	 */
 	"rowFilter.stories.postedAt": string;
-	/** storyviews */
+	/** @description storyviews */
 	"body.storyviews": definitions["storyviews"];
+	/** Format: bigint */
 	"rowFilter.storyviews.storyId": string;
+	/** Format: bigint */
 	"rowFilter.storyviews.id": string;
+	/** Format: text */
 	"rowFilter.storyviews.user": string;
-	/** users */
+	/** @description users */
 	"body.users": definitions["users"];
+	/** Format: text */
 	"rowFilter.users.username": string;
-	/** Name */
+	/**
+	 * Format: text
+	 * @description Name
+	 */
 	"rowFilter.users.name": string;
-	/** Bio */
+	/**
+	 * Format: text
+	 * @description Bio
+	 */
 	"rowFilter.users.bio": string;
-	/** Profile Picture */
+	/**
+	 * Format: text
+	 * @description Profile Picture
+	 */
 	"rowFilter.users.profilePic": string;
+	/** Format: text */
 	"rowFilter.users.email": string;
-	/** Notification Token for FCM */
+	/**
+	 * Format: text
+	 * @description Notification Token for FCM
+	 */
 	"rowFilter.users.notificationToken": string;
 }
 

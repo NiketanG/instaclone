@@ -1,7 +1,6 @@
 # To Do
 
 -   [ ] Group Chats
--   [ ] Comment Replies
 -   [ ] Show unseen stories first
 -   [ ] Notifications using FCM: Need Supabase Functions
 -   [ ] Private Accounts
@@ -11,6 +10,7 @@
 -   [ ] React Native Web support
 -   [ ] iOS Support
 
+-   [x] Comment Replies
 -   [x] Stories
 -   [x] Story Seen List
 -   [x] Migrate from MST & Replace custom hooks with useQuery

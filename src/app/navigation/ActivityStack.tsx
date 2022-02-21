@@ -8,7 +8,12 @@ import ProfilePageStack from "./ProfileStack";
 const ActivityStack = createStackNavigator<ActivityStackNavigationParams>();
 
 const ActivityStackNavigator: React.FC<any> = () => (
-	<ActivityStack.Navigator headerMode="none" initialRouteName="Notifications">
+	<ActivityStack.Navigator
+		screenOptions={{
+			headerShown: false,
+		}}
+		initialRouteName="Notifications"
+	>
 		<ActivityStack.Screen name="Notifications" component={Activity} />
 		<ActivityStack.Screen name="Post" component={PostStack} />
 		<ActivityStack.Screen name="Profile" component={ProfilePageStack} />

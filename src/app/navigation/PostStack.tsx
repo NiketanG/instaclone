@@ -1,6 +1,7 @@
 import { RouteProp } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
+import { DeviceEventEmitter } from "react-native";
 import Comments from "../Screens/Comments";
 import Home from "../Screens/Home";
 import Likes from "../Screens/Likes";
@@ -18,8 +19,22 @@ type Props = {
 };
 const PostStack: React.FC<Props> = ({ route }) => {
 	return (
-		<Stack.Navigator headerMode="none" initialRouteName="Feed">
-			<Stack.Screen name="Feed" component={Home} />
+		<Stack.Navigator
+			screenOptions={{
+				headerShown: false,
+			}}
+			initialRouteName="Feed"
+		>
+			<Stack.Screen
+				name="Feed"
+				component={Home}
+				listeners={{
+					blur: (e) =>
+						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+					focus: (e) =>
+						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+				}}
+			/>
 			<Stack.Screen name="Comments" component={Comments} />
 			<Stack.Screen name="EditPost" component={EditPost} />
 			<Stack.Screen name="Likes" component={Likes} />

@@ -6,12 +6,27 @@ import ChatList from "../Screens/Messages/ChatList";
 import Messages from "../Screens/Messages/Messages";
 import NewChat from "../Screens/Messages/NewChat";
 import { MessageStackNavigationParams } from "../types/navigation/MessagesStack";
+import { DeviceEventEmitter } from "react-native";
 
 const Stack = createStackNavigator<MessageStackNavigationParams>();
 
 const MessageStack: React.FC<any> = () => (
-	<Stack.Navigator headerMode="none" initialRouteName="ChatList">
-		<Stack.Screen name="ChatList" component={ChatList} />
+	<Stack.Navigator
+		screenOptions={{
+			headerShown: false,
+		}}
+		initialRouteName="ChatList"
+	>
+		<Stack.Screen
+			name="ChatList"
+			component={ChatList}
+			listeners={{
+				blur: (e) =>
+					DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+				focus: (e) =>
+					DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+			}}
+		/>
 		<Stack.Screen name="Messages" component={Messages} />
 		<Stack.Screen name="NewChat" component={NewChat} />
 		<Stack.Screen name="Post" component={PostStack} />

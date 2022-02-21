@@ -781,19 +781,39 @@ export const toggleLike = async (postId: number) => {
 	}
 };
 
+export interface CommentWithUser extends CommentFull {
+	user: Pick<User, "name" | "profilePic" | "username">;
+}
+
+export interface NestedComments extends CommentWithUser {
+	replies?: NestedComments[];
+	parent?: CommentWithUser;
+}
+
 export const getCommentsOnPost = async (
 	postId: number
-): Promise<CommentFull[] | null> => {
-	const { data, error } = await supabaseClient
-		.from("comments")
-		.select(
-			`
-	*,
-	user:comments_user_key (
+): Promise<NestedComments[] | null> => {
+	const userRelationFields = `
 		name,
 		username,
 		profilePic
-	)
+	`;
+
+	const commentFields = `
+		*,
+		user (
+			${userRelationFields}
+		)
+	`;
+
+	const { data, error } = await supabaseClient
+		.from<CommentWithUser>("comments")
+		.select(
+			`
+		${commentFields},
+		parent:parentId (
+			${commentFields}
+		)
 	`
 		)
 		.eq("postId", postId);
@@ -803,8 +823,26 @@ export const getCommentsOnPost = async (
 		return null;
 	}
 	if (!data) return null;
-	return data as any;
+
+	const nestedComments: NestedComments[] = [];
+
+	for (let i = 0; i < data.length; i++) {
+		const comment = data[i];
+
+		const idx = nestedComments.findIndex(
+			(item) => item.id === comment.parentId
+		);
+
+		if (idx === -1) {
+			nestedComments.push({ ...comment, replies: [] });
+		} else {
+			nestedComments[idx].replies?.push(comment);
+		}
+	}
+
+	return nestedComments;
 };
+
 export const addComment = async (
 	comment: Pick<definitions["comments"], "comment" | "postId" | "user">
 ): Promise<CommentFull | null> => {

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import {
 	BackHandler,
 	RefreshControl,
@@ -28,7 +28,7 @@ import { CommentItem } from "./CommentItem";
 import { useMutation, useQuery } from "react-query";
 import { addComment, deleteComment, getCommentsOnPost } from "../../../api";
 import { definitions } from "../../types/supabase";
-import { CommentFull } from "../../types";
+import { CommentFull, User } from "../../types";
 import { queryClient } from "../../utils/queryClient";
 
 type Props = {
@@ -36,11 +36,72 @@ type Props = {
 	navigation: StackNavigationProp<PostStackParamsList, "Comments">;
 };
 
+type PostHeaderProps = {
+	post: Pick<
+		definitions["posts"],
+		"postId" | "caption" | "user" | "postedAt"
+	>;
+	user: Partial<User>;
+};
+const PostHeader: React.FC<PostHeaderProps> = ({
+	post: { postedAt, caption },
+	user: { username, profilePic },
+}) => {
+	return (
+		<>
+			<View
+				style={{
+					display: "flex",
+					flexDirection: "row",
+					alignItems: "center",
+					margin: 16,
+				}}
+			>
+				<UserAvatar profilePicture={profilePic} />
+				<View
+					style={{
+						marginHorizontal: 16,
+					}}
+				>
+					<Text
+						style={{
+							fontSize: 16,
+							fontWeight: "bold",
+						}}
+					>
+						{username}
+					</Text>
+					<Paragraph>{caption}</Paragraph>
+					<Caption>
+						{new Date(postedAt).getTime() >
+						new Date().getTime() - 1 * 24 * 60 * 60 * 1000
+							? `${formatDistanceToNow(new Date(postedAt))} ago`
+							: format(new Date(postedAt), "LLLL dd, yyyy")}
+					</Caption>
+				</View>
+			</View>
+			<Divider />
+		</>
+	);
+};
+
 const Comments: React.FC<Props> = ({ route, navigation }) => {
 	const { colors } = useTheme();
 	const { user: currentUser } = useContext(AppContext);
 
 	const [commentText, setCommentText] = useState("");
+
+	const [parentId, setParentId] = useState<CommentFull | null>(null);
+
+	const commentInputRef = useRef<any>(null);
+
+	const onReply = (parentComment: CommentFull | null) => {
+		setParentId(parentComment);
+		if (parentComment) {
+			setCommentText(`@${parentComment.user.username} `);
+			commentInputRef?.current?.focus();
+		}
+	};
 
 	const { data, isLoading, refetch } = useQuery(
 		`commentsOnPost_${route.params.post.postId}`,
@@ -70,7 +131,10 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 	const newCommentMutation = useMutation<
 		CommentFull | null,
 		unknown,
-		Pick<definitions["comments"], "comment" | "postId" | "user">
+		Pick<
+			definitions["comments"],
+			"comment" | "postId" | "user" | "parentId"
+		>
 	>((newComment) => addComment(newComment), {
 		onMutate: async (addedComment) => {
 			await queryClient.cancelQueries(
@@ -157,6 +221,7 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 				comment: commentText,
 				postId: route.params.post.postId,
 				user: currentUser.username,
+				parentId: parentId ? parentId.id : undefined,
 			});
 			setCommentText("");
 		} catch (err) {
@@ -213,58 +278,10 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 
 				<FlatList
 					ListHeaderComponent={
-						<>
-							<View
-								style={{
-									display: "flex",
-									flexDirection: "row",
-									alignItems: "center",
-									margin: 16,
-								}}
-							>
-								<UserAvatar
-									profilePicture={
-										route.params?.user?.profilePic
-									}
-								/>
-								<View
-									style={{
-										marginHorizontal: 16,
-									}}
-								>
-									<Text
-										style={{
-											fontSize: 16,
-											fontWeight: "bold",
-										}}
-									>
-										{route.params?.user?.username}
-									</Text>
-									<Paragraph>
-										{route.params?.post?.caption}
-									</Paragraph>
-									<Caption>
-										{new Date(
-											route.params?.post?.postedAt
-										).getTime() >
-										new Date().getTime() -
-											1 * 24 * 60 * 60 * 1000
-											? `${formatDistanceToNow(
-													new Date(
-														route.params?.post?.postedAt
-													)
-											  )} ago`
-											: format(
-													new Date(
-														route.params?.post?.postedAt
-													),
-													"LLLL dd, yyyy"
-											  )}
-									</Caption>
-								</View>
-							</View>
-							<Divider />
-						</>
+						<PostHeader
+							post={route.params.post}
+							user={route.params.user}
+						/>
 					}
 					data={data?.sort(
 						(a, b) =>
@@ -283,9 +300,10 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 							item={item}
 							selectComment={selectComment}
 							selectedComment={selectedComment}
+							onReply={onReply}
 						/>
 					)}
-					keyExtractor={(item) => item.id}
+					keyExtractor={(item) => item.id.toString()}
 					bouncesZoom
 					bounces
 					snapToAlignment={"start"}
@@ -304,6 +322,7 @@ const Comments: React.FC<Props> = ({ route, navigation }) => {
 				}}
 			>
 				<TextInput
+					ref={commentInputRef}
 					value={commentText}
 					onChangeText={(text) => setCommentText(text)}
 					placeholder="Add a comment"

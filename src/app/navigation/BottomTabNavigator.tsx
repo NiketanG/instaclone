@@ -1,15 +1,14 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
+import Feather from "react-native-vector-icons/Feather";
+import Foundation from "react-native-vector-icons/Foundation";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import NewPost from "../Screens/NewPost";
 import { BottomTabParamList } from "../types/navigation/BottomTab";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import Foundation from "react-native-vector-icons/Foundation";
-import Feather from "react-native-vector-icons/Feather";
-import ProfilePageStack from "./ProfileStack";
+import ActivityStackNavigator from "./ActivityStack";
 import ExploreStackNavigator from "./ExploreStack";
 import HomePageStack from "./HomeStack";
-import ActivityStackNavigator from "./ActivityStack";
-import { DeviceEventEmitter } from "react-native";
+import ProfilePageStack from "./ProfileStack";
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -26,20 +25,15 @@ const BottomTabNavigator: React.FC<any> = () => {
 	return (
 		<BottomTab.Navigator
 			initialRouteName="Home"
-			tabBarOptions={{
-				showLabel: false,
-				tabStyle: { height: 48 },
+			screenOptions={{
+				headerShown: false,
+				tabBarShowLabel: false,
+				tabBarLabel: "test",
 			}}
 		>
 			<BottomTab.Screen
 				name="Home"
 				component={HomePageStack}
-				listeners={{
-					blur: (e) =>
-						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
-					focus: (e) =>
-						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
-				}}
 				options={{
 					tabBarIcon: ({ color, focused }) =>
 						focused ? (

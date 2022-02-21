@@ -1,3 +1,4 @@
+import { StackNavigationProp } from "@react-navigation/stack";
 import { FollowerFull, FollowingFull, PostWithUser, User } from "../../types";
 
 export type ProfileStackParams = {
@@ -15,3 +16,8 @@ export type ProfileStackParams = {
 	Settings: undefined;
 	EditProfile: undefined;
 };
+
+export type ProfileStackNavigationProp = StackNavigationProp<
+	ProfileStackParams,
+	"Profile"
+>;

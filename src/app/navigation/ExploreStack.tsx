@@ -7,7 +7,12 @@ import PostStack from "./PostStack";
 const ExploreStack = createStackNavigator<ExploreStackNavigationParams>();
 
 const ExploreStackNavigator: React.FC<any> = () => (
-	<ExploreStack.Navigator headerMode="none" initialRouteName="Explore">
+	<ExploreStack.Navigator
+		screenOptions={{
+			headerShown: false,
+		}}
+		initialRouteName="Explore"
+	>
 		<ExploreStack.Screen name="Explore" component={Explore} />
 		<ExploreStack.Screen name="PostsList" component={PostStack} />
 	</ExploreStack.Navigator>

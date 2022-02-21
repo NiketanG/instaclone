@@ -27,7 +27,7 @@ export type LikeFull = Pick<definitions["likes"], "id" | "postId"> & {
 
 export type CommentFull = Pick<
 	definitions["comments"],
-	"comment" | "postId" | "postedAt" | "id"
+	"comment" | "postId" | "postedAt" | "id" | "parentId"
 > & {
 	user: UserMin;
 };

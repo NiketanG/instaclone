@@ -140,18 +140,20 @@ const PostBottomSheetWrapper: React.FC<any> = () => {
 				renderHeader={renderHeader}
 				onCloseEnd={onClose}
 			/>
-			<Animated.View
-				pointerEvents={modalData !== null ? "box-only" : "none"}
-				style={[
-					styles.shadowContainer,
-					{
-						opacity: Animated.interpolateNode(fall, {
-							inputRange: [0, 1],
-							outputRange: [0.5, 0],
-						}),
-					},
-				]}
-			/>
+			<TouchableWithoutFeedback onPress={onClose}>
+				<Animated.View
+					pointerEvents={modalData !== null ? "box-only" : "none"}
+					style={[
+						styles.shadowContainer,
+						{
+							opacity: Animated.interpolateNode(fall, {
+								inputRange: [0, 1],
+								outputRange: [0.5, 0],
+							}),
+						},
+					]}
+				/>
+			</TouchableWithoutFeedback>
 		</>
 	);
 };

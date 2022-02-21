@@ -39,6 +39,7 @@ import { newStory } from "../../../api";
 import { definitions } from "../../types/supabase";
 import { AppContext } from "../../utils/appContext";
 import { queryClient } from "../../utils/queryClient";
+import { TabsNavigationProp } from "../../types/navigation/SwipeTab";
 
 const NewStory = () => {
 	const checkPermissions = async () => {
@@ -151,14 +152,14 @@ const NewStory = () => {
 		},
 	});
 
-	const navigation = useNavigation();
+	const navigation = useNavigation<TabsNavigationProp>();
 	const goBack = () => {
 		if (imagePath || base64Data || imageExtension) {
 			setImagePath(null);
 			setBase64Data(null);
 			setImageExtension(null);
 		} else {
-			navigation.goBack();
+			navigation.navigate("Tabs");
 		}
 	};
 

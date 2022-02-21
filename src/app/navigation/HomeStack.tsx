@@ -6,7 +6,12 @@ import PostStack from "./PostStack";
 const Stack = createStackNavigator<HomeStackNavigationParams>();
 
 const HomePageStack: React.FC<any> = () => (
-	<Stack.Navigator headerMode="none" initialRouteName="Feed">
+	<Stack.Navigator
+		screenOptions={{
+			headerShown: false,
+		}}
+		initialRouteName="Feed"
+	>
 		<Stack.Screen name="Feed" component={PostStack} />
 	</Stack.Navigator>
 );

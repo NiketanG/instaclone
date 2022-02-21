@@ -18,8 +18,9 @@ const SignedInStack = () => {
 	}, []);
 	return (
 		<RootStack.Navigator
-			headerMode="none"
-			screenOptions={{ headerShown: false }}
+			screenOptions={{
+				headerShown: false,
+			}}
 		>
 			<RootStack.Screen name="Root" component={SwipeTabNavigation} />
 			<RootStack.Screen name="ViewStory" component={StoryView} />

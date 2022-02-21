@@ -1,21 +1,21 @@
-import React, { useContext } from "react";
 import { RouteProp } from "@react-navigation/native";
-import {
-	createStackNavigator,
-	StackNavigationProp,
-} from "@react-navigation/stack";
+import { createStackNavigator } from "@react-navigation/stack";
+import React, { useContext } from "react";
+import PostList from "../Screens/PostList";
 import Profile from "../Screens/Profile";
-import { ProfileStackParams } from "../types/navigation/ProfileStack";
-import Settings from "../Screens/Profile/Settings";
 import EditProfile from "../Screens/Profile/Edit";
 import Followers from "../Screens/Profile/Followers";
 import Following from "../Screens/Profile/Following";
+import Settings from "../Screens/Profile/Settings";
+import {
+	ProfileStackNavigationProp,
+	ProfileStackParams,
+} from "../types/navigation/ProfileStack";
 import { AppContext } from "../utils/appContext";
-import PostList from "../Screens/PostList";
 
 type Props = {
 	route: RouteProp<ProfileStackParams, "Profile">;
-	navigation: StackNavigationProp<ProfileStackParams, "Profile">;
+	navigation: ProfileStackNavigationProp;
 };
 
 const Stack = createStackNavigator<ProfileStackParams>();
@@ -23,7 +23,12 @@ const Stack = createStackNavigator<ProfileStackParams>();
 const ProfilePageStack: React.FC<Props> = ({ route }) => {
 	const { user } = useContext(AppContext);
 	return (
-		<Stack.Navigator headerMode="none" initialRouteName="Profile">
+		<Stack.Navigator
+			screenOptions={{
+				headerShown: false,
+			}}
+			initialRouteName="Profile"
+		>
 			<Stack.Screen
 				name="Profile"
 				component={Profile}

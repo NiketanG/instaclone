@@ -28,9 +28,23 @@ const SwipeTabNavigation: React.FC<any> = () => {
 		<Tab.Navigator
 			initialRouteName="Tabs"
 			tabBar={() => null}
-			swipeEnabled={swipeEnabled}
+			screenOptions={{
+				tabBarShowLabel: false,
+				swipeEnabled,
+				tabBarLabel: "test",
+			}}
+			backBehavior="initialRoute"
 		>
-			<Tab.Screen name="NewStory" component={NewStory} />
+			<Tab.Screen
+				name="NewStory"
+				component={NewStory}
+				listeners={{
+					blur: (e) =>
+						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+					focus: (e) =>
+						DeviceEventEmitter.emit("HomeTab", { type: e.type }),
+				}}
+			/>
 			<Tab.Screen name="Tabs" component={BottomTabNavigator} />
 			<Tab.Screen name="Messages" component={MessageStack} />
 		</Tab.Navigator>
