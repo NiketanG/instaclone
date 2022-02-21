@@ -13,12 +13,13 @@ import BottomSheet from "reanimated-bottom-sheet";
 import { useMemoOne } from "use-memo-one";
 import { newMessage } from "../../api";
 import { UserMin } from "../types";
+import { FeedNavigationProp } from "../types/navigation/PostStack";
 import { AppContext } from "../utils/appContext";
 import { PostModal } from "./Post/PostMenuModal";
 import ShareModal from "./Post/ShareModal";
 
 const PostBottomSheetWrapper: React.FC<any> = () => {
-	const navigation = useNavigation();
+	const navigation = useNavigation<FeedNavigationProp>();
 	const menuModalref = useRef<BottomSheet>(null);
 	const shareModalRef = useRef<BottomSheet>(null);
 
@@ -99,7 +100,7 @@ const PostBottomSheetWrapper: React.FC<any> = () => {
 		navigation.navigate("Profile", {
 			username: modalData?.user.username,
 			isCurrentUser: false,
-		});
+		} as any);
 
 	const onClose = () => {
 		modalData && closeModal(modalData.modalType);

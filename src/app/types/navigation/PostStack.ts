@@ -24,7 +24,8 @@ export type PostStackParamsList = {
 		postId: number;
 		postList: Array<definitions["posts"]>;
 	};
-	EditPost: definitions["posts"];
+	EditPost: Pick<definitions["posts"], "postId"> &
+		Partial<Omit<definitions["posts"], "postId">>;
 
 	Profile: Partial<User>;
 };

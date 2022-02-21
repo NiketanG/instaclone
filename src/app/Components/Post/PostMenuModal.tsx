@@ -8,6 +8,7 @@ import { useContext } from "react";
 import { AppContext } from "../../utils/appContext";
 import { queryClient } from "../../utils/queryClient";
 import { UserFull } from "../../types";
+import { FeedNavigationProp } from "../../types/navigation/PostStack";
 
 type ModalProps = {
 	closeModal: () => void;
@@ -24,7 +25,7 @@ export const PostModal: React.FC<ModalProps> = ({
 	viewProfile,
 }) => {
 	const { width } = useWindowDimensions();
-	const navigation = useNavigation();
+	const navigation = useNavigation<FeedNavigationProp>();
 	const { user: currUser } = useContext(AppContext);
 
 	const deletePostMutation = useMutation<boolean | null, unknown, number>(
