@@ -14,7 +14,7 @@ npm install
 
 Setup Supabase Project and configure [`supabaseClient.ts`](src/app/utils/supabaseClient.ts)
 
-> Use the Database structure from [db_structure.sql](db_structure.sql) in Supabase.
+> Use the Database structure from [db_dump.sql](db_dump.sql) in Supabase.
 
 Enable Google Auth in Supabase ,and set up Google Cloud Project and add Oauth Clients in Supabase App Dashboard.
 
