@@ -15,7 +15,6 @@ import { useQuery } from "react-query";
 import { getFeedPosts, getFeedStories } from "../../../api";
 import Error from "../../Components/Error";
 import Post from "../../Components/Post";
-import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
 import Stories from "../../Components/Story";
 import { HomeStackNavigationParams } from "../../types/navigation/HomeStack";
 
@@ -155,7 +154,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
 					/>
 				}
 			/>
-			<PostBottomSheetWrapper />
 		</View>
 	);
 };

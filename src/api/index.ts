@@ -50,7 +50,7 @@ export function responseInterceptor<ResponseType>(
 
 export const getLikesForPost = async (postId: number) => {
 	const response = await supabaseClient
-		.from<definitions["likes"]>("likes")
+		.from<"likes", definitions["likes"]>("likes")
 		.select("*")
 		.eq("postId", postId);
 
@@ -59,19 +59,19 @@ export const getLikesForPost = async (postId: number) => {
 
 export const checkUserExists = async (email: string) => {
 	const response = await supabaseClient
-		.from<definitions["users"]>("users")
+		.from<"users", definitions["users"]>("users")
 		.select("*")
 		.eq("email", email)
 		.single();
 
-	if (response && response.data) return response.data;
+	if (response && response.data) return response.data as definitions["users"];
 
 	return null;
 };
 
 export const isUsernameAvailable = async (username: string) => {
 	const { data, error } = await supabaseClient
-		.from<definitions["users"]>("users")
+		.from<"users", definitions["users"]>("users")
 		.select("*")
 		.eq("username", username.toLowerCase())
 		.maybeSingle();
@@ -102,7 +102,7 @@ export const editUser = async (
 	if (user.profilePic) dataToUpdate.profilePic = user.profilePic;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["users"]>("users")
+		.from<"users", definitions["users"]>("users")
 		.update(dataToUpdate)
 		.match({
 			username: currentUser.username,
@@ -120,7 +120,7 @@ export const getFollowingForUser = async (
 ): Promise<definitions["followers"][] | null> => {
 	if (!username || username.length === 0) return null;
 	const response = await supabaseClient
-		.from<definitions["followers"]>("followers")
+		.from<"followers", definitions["followers"]>("followers")
 		.select("*")
 		.eq("follower", username.toLowerCase());
 	return responseInterceptor(response) || [];
@@ -131,7 +131,7 @@ export const getFollowersForUser = async (
 ): Promise<definitions["followers"][] | null> => {
 	if (!username || username.length === 0) return null;
 	const response = await supabaseClient
-		.from<definitions["followers"]>("followers")
+		.from<"followers", definitions["followers"]>("followers")
 		.select("*")
 		.eq("following", username.toLowerCase());
 	return responseInterceptor(response) || [];
@@ -143,7 +143,7 @@ export const checkIfFollowing = async (username: string) => {
 	if (!currentUser) return null;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["followers"]>("followers")
+		.from<"followers", definitions["followers"]>("followers")
 		.select("*")
 		.eq("follower", currentUser.username)
 		.eq("following", username)
@@ -193,7 +193,7 @@ export const unfollowUser = async (username: string): Promise<boolean> => {
 	if (!isFollowing) return false;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["followers"]>("followers")
+		.from<"followers", definitions["followers"]>("followers")
 		.delete()
 		.match({
 			follower: currentUser.username,
@@ -243,7 +243,7 @@ export const checkNotificationExists = async (
 	if (notification.post) dataToMatch.post = notification.post;
 	if (notification.comment) dataToMatch.comment = notification.comment;
 	const { data, error } = await supabaseClient
-		.from<definitions["notifications"]>("notifications")
+		.from<"notifications", definitions["notifications"]>("notifications")
 		.select("*")
 		.match(dataToMatch as definitions["notifications"])
 		.maybeSingle();
@@ -308,7 +308,7 @@ export const newNotification = async (
 	if (notification.comment) dataToInsert.comment = notification.comment;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["notifications"]>("notifications")
+		.from<"notifications", definitions["notifications"]>("notifications")
 		.insert(dataToInsert);
 
 	if (error) {
@@ -361,7 +361,7 @@ export const getStoryById = async (
 ): Promise<StoryFull | null> => {
 	if (!storyId) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["stories"]>("stories")
+		.from<"stories", definitions["stories"]>("stories")
 		.select(
 			`
 		*,
@@ -491,7 +491,7 @@ export const getFeedStories = async () => {
 
 export const getUser = async (username: string): Promise<UserFull | null> => {
 	const { data, error } = await supabaseClient
-		.from<definitions["users"]>("users")
+		.from<"users", definitions["users"]>("users")
 		.select(
 			`
 				*,
@@ -536,7 +536,7 @@ export const newStory = async (
 
 		if (!currentUser) return null;
 		const { data, error } = await supabaseClient
-			.from<definitions["stories"]>("stories")
+			.from<"stories", definitions["stories"]>("stories")
 			.insert({
 				imageUrl: storyData.imageUrl,
 				user: currentUser.username,
@@ -562,7 +562,7 @@ export const deleteStory = async (storyId: number) => {
 
 	try {
 		const { data, error } = await supabaseClient
-			.from<definitions["stories"]>("stories")
+			.from<"stories", definitions["stories"]>("stories")
 			.delete()
 			.match({
 				id: storyId,
@@ -594,7 +594,7 @@ export const isStoryViewed = async (storyId: number) => {
 	const currentUser = await getCurrentUser();
 	if (!currentUser) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["storyviews"]>("storyviews")
+		.from<"storyviews", definitions["storyviews"]>("storyviews")
 		.select("*")
 		.eq("user", currentUser.username)
 		.eq("storyId", storyId)
@@ -618,7 +618,7 @@ export const setStoryViewed = async (storyId: number) => {
 	if (checkIsViewed === null || checkIsViewed === true) return null;
 	if (checkIsViewed === false) {
 		const { data, error } = await supabaseClient
-			.from<definitions["storyviews"]>("storyviews")
+			.from<"storyviews", definitions["storyviews"]>("storyviews")
 			.insert({
 				storyId,
 				user: currentUser.username,
@@ -638,7 +638,7 @@ export const getViewsForStory = async (
 ): Promise<StoryViews[] | null> => {
 	if (!storyId) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["storyviews"]>("storyviews")
+		.from<"storyviews", definitions["storyviews"]>("storyviews")
 		.select(
 			`
 			*,
@@ -659,7 +659,7 @@ export const getNotifications = async (): Promise<Notification[] | null> => {
 	const currentUser = await getCurrentUser();
 	if (!currentUser) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["notifications"]>("notifications")
+		.from<"notifications", definitions["notifications"]>("notifications")
 		.select(
 			`
 				*,
@@ -692,7 +692,7 @@ export const checkIfLiked = async (
 	if (!currentUser) return null;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["likes"]>("likes")
+		.from<"likes", definitions["likes"]>("likes")
 		.select(
 			`
 		*,
@@ -849,7 +849,7 @@ export const addComment = async (
 	const currentUser = await getCurrentUser();
 	if (!currentUser) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["comments"]>("comments")
+		.from<"comments", definitions["comments"]>("comments")
 		.insert({
 			...comment,
 			user: currentUser.username,
@@ -888,14 +888,14 @@ export const deleteComment = async (commentId: number) => {
 	if (!currentUser) return null;
 
 	const postForComment = await supabaseClient
-		.from<definitions["comments"]>("comments")
+		.from<"comments", definitions["comments"]>("comments")
 		.select("*")
 		.eq("id", commentId)
 		.maybeSingle();
 
 	if (postForComment.data) {
 		const postInfo = await supabaseClient
-			.from<definitions["posts"]>("posts")
+			.from<"posts", definitions["posts"]>("posts")
 			.select("*")
 			.eq("postId", postForComment.data.postId)
 			.maybeSingle();
@@ -934,7 +934,7 @@ export const newPost = async (
 	const currentUser = await getCurrentUser();
 	if (!currentUser) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["posts"]>("posts")
+		.from<"posts", definitions["posts"]>("posts")
 		.insert({
 			...postData,
 			user: currentUser.username,
@@ -955,7 +955,7 @@ export const editPost = async (
 	if (!currentUser) return null;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["posts"]>("posts")
+		.from<"posts", definitions["posts"]>("posts")
 		.update({
 			caption: post.caption,
 		})
@@ -976,7 +976,7 @@ export const deletePost = async (postId: number) => {
 	const currentUser = await getCurrentUser();
 	if (!currentUser) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["posts"]>("posts")
+		.from<"posts", definitions["posts"]>("posts")
 		.delete()
 		.match({
 			postId,
@@ -1077,7 +1077,7 @@ export const newMessage = async (
 	if (!currentUser) return null;
 	if (currentUser.username === message.receiver) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["messages"]>("messages")
+		.from<"messages", definitions["messages"]>("messages")
 		.insert({
 			...message,
 			sender: currentUser.username,
@@ -1096,7 +1096,7 @@ export const deleteMessage = async (messageId: number): Promise<boolean> => {
 	if (!currentUser) return false;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["messages"]>("messages")
+		.from<"messages", definitions["messages"]>("messages")
 		.delete()
 		.match({
 			messageId,
@@ -1150,7 +1150,7 @@ export const getExplorePosts = async (): Promise<PostFull[] | null> => {
 export const searchUsers = async (searchTerm: string) => {
 	if (searchTerm.length === 0) return null;
 	const { data, error } = await supabaseClient
-		.from<definitions["users"]>("users")
+		.from<"users", definitions["users"]>("users")
 		.select("*")
 		.or(
 			`name.ilike.%${searchTerm.toLowerCase()}%,username.ilike.%${searchTerm.toLowerCase()}%`
@@ -1170,7 +1170,7 @@ export const setNotificationToken = async (token: string) => {
 	if (!token || token.length === 0) return false;
 
 	const { data, error } = await supabaseClient
-		.from<definitions["users"]>("users")
+		.from<"users", definitions["users"]>("users")
 		.update({
 			notificationToken: token,
 		})

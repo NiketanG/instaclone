@@ -145,7 +145,7 @@ export const NewChat: React.FC<Props> = ({ navigation }) => {
 						justifyContent: "center",
 					}}
 				>
-					<ActivityIndicator color={colors.text} />
+					<ActivityIndicator color={colors.onBackground} />
 				</View>
 			)}
 
@@ -164,7 +164,7 @@ export const NewChat: React.FC<Props> = ({ navigation }) => {
 								backgroundColor: "#3a3a3a",
 								borderRadius: 6,
 								paddingHorizontal: 16,
-								color: colors.text,
+								color: colors.onBackground,
 							}}
 						/>
 						<Divider />

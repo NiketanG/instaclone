@@ -1,13 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Image, ToastAndroid, TouchableHighlight, View } from "react-native";
-import {
-	TextInput,
-	Button,
-	Title,
-	Text,
-	Colors,
-	useTheme,
-} from "react-native-paper";
+import { TextInput, Button, Title, Text, useTheme } from "react-native-paper";
 import ImagePicker, {
 	Options,
 	Image as ImageResponse,
@@ -111,7 +104,7 @@ const Signup: React.FC<Props> = ({ route }) => {
 			}
 
 			const newUserRes = await supabaseClient
-				.from<definitions["users"]>("users")
+				.from<"users", definitions["users"]>("users")
 				.insert([
 					{
 						bio: "",
@@ -231,7 +224,7 @@ const Signup: React.FC<Props> = ({ route }) => {
 					{!usernameAvailable && (
 						<Text
 							style={{
-								color: Colors.red500,
+								color: "red",
 								marginHorizontal: 8,
 								marginTop: 8,
 							}}

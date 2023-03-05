@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import Feather from "react-native-vector-icons/Feather";
@@ -28,7 +29,7 @@ const BottomTabNavigator: React.FC<any> = () => {
 			screenOptions={{
 				headerShown: false,
 				tabBarShowLabel: false,
-				tabBarLabel: "test",
+				tabBarInactiveTintColor: "gray",
 			}}
 		>
 			<BottomTab.Screen
@@ -81,7 +82,7 @@ const BottomTabNavigator: React.FC<any> = () => {
 			/>
 			<BottomTab.Screen
 				name="CurrentUser"
-				component={ProfilePageStack}
+				component={ProfilePageStack as any}
 				options={{
 					tabBarIcon: ({ color, focused }) => (
 						<TabBarIcon

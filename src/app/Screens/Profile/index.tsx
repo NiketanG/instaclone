@@ -247,7 +247,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 							style={{
 								marginTop: -4,
 								marginLeft: 16,
-								color: colors.text,
+								color: colors.onBackground,
 							}}
 						>
 							{route.params.username}
@@ -363,9 +363,9 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 					{isCurrentUser ? (
 						<Button
 							mode="outlined"
-							color={colors.text}
+							color={colors.onBackground}
 							style={{
-								borderColor: colors.text,
+								borderColor: colors.onBackground,
 								marginTop: 16,
 							}}
 							compact
@@ -388,7 +388,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 									color={colors.primary}
 									style={{
 										width: width - 32,
-										borderColor: colors.text,
+										borderColor: colors.onBackground,
 										marginTop: 16,
 									}}
 									onPress={userFollow}
@@ -409,7 +409,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 										color={colors.primary}
 										style={{
 											width: width / 2 - 24,
-											borderColor: colors.text,
+											borderColor: colors.onBackground,
 											marginTop: 16,
 										}}
 										onPress={userUnfollow}
@@ -421,7 +421,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 										color={colors.primary}
 										style={{
 											width: width / 2 - 24,
-											borderColor: colors.text,
+											borderColor: colors.onBackground,
 											marginTop: 16,
 										}}
 										onPress={openMessage}
@@ -457,7 +457,7 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 								flexGrow: 1,
 							}}
 						>
-							<ActivityIndicator color={colors.text} />
+							<ActivityIndicator color={colors.onBackground} />
 						</View>
 					)}
 
@@ -474,11 +474,11 @@ const Profile: React.FC<Props> = ({ navigation, route }) => {
 								<Icon
 									name="camera-outline"
 									size={36}
-									color={colors.text}
+									color={colors.onBackground}
 								/>
 								<Text
 									style={{
-										color: colors.text,
+										color: colors.onBackground,
 									}}
 								>
 									No posts yet

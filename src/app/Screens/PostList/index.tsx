@@ -5,7 +5,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { ProfileStackParams } from "../../types/navigation/ProfileStack";
 import { RouteProp } from "@react-navigation/native";
 import Post from "../../Components/Post";
-import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
 import { View } from "react-native";
 import { PostWithUser } from "../../types";
 
@@ -106,7 +105,6 @@ const PostList: React.FC<Props> = ({ navigation, route }) => {
 					}}
 				/>
 			)}
-			<PostBottomSheetWrapper />
 		</>
 	);
 };

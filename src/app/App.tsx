@@ -1,16 +1,19 @@
 import React, { useContext } from "react";
 import { LogBox } from "react-native";
 import "react-native-gesture-handler";
-import { DarkTheme, Provider as PaperProvider } from "react-native-paper";
+import {
+	MD3DarkTheme as DarkTheme,
+	Provider as PaperProvider,
+} from "react-native-paper";
 import { QueryClientProvider } from "react-query";
 import Navigation from "./navigation";
 import Splash from "./Screens/Splash";
 import AppContextProvider, { AppContext } from "./utils/appContext";
 import { queryClient } from "./utils/queryClient";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 
-// eslint-disable-next-line no-undef
-const theme: ReactNativePaper.Theme = {
+const theme: typeof DarkTheme = {
 	...DarkTheme,
 	dark: true,
 	colors: {
@@ -30,13 +33,15 @@ const Main = () => {
 };
 
 const App = () => (
-	<QueryClientProvider client={queryClient}>
-		<PaperProvider theme={theme}>
-			<AppContextProvider>
-				<Main />
-			</AppContextProvider>
-		</PaperProvider>
-	</QueryClientProvider>
+	<GestureHandlerRootView style={{ flex: 1 }}>
+		<QueryClientProvider client={queryClient}>
+			<PaperProvider theme={theme}>
+				<AppContextProvider>
+					<Main />
+				</AppContextProvider>
+			</PaperProvider>
+		</QueryClientProvider>
+	</GestureHandlerRootView>
 );
 
 export default App;

@@ -96,8 +96,6 @@ export const PostModal: React.FC<ModalProps> = ({
 				backgroundColor: "#1f1f1f",
 				justifyContent: "center",
 				paddingVertical: 16,
-				zIndex: 6,
-				elevation: 6,
 			}}
 		>
 			{ownPost && (

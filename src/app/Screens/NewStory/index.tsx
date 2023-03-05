@@ -26,7 +26,6 @@ import RNFetchBlob from "rn-fetch-blob";
 
 import { useWindowDimensions } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import { StoryDimensions } from "../../utils/Constants";
 import ImagePicker, {
 	Options,
@@ -213,11 +212,7 @@ const NewStory = () => {
 						position: "absolute",
 					}}
 				>
-					<ActivityIndicator
-						animating={true}
-						color={Colors.blue500}
-						size={48}
-					/>
+					<ActivityIndicator animating={true} size={48} />
 				</TouchableOpacity>
 			)}
 			{!imagePath ? (

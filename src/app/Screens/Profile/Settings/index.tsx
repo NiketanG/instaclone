@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useContext } from "react";
 import { Appbar, Caption, List, useTheme } from "react-native-paper";

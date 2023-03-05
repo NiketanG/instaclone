@@ -1,43 +1,35 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
 	Image,
 	Keyboard,
 	ScrollView,
-	StyleSheet,
 	Text,
 	TextInput,
+	ToastAndroid,
 	TouchableOpacity,
 	useWindowDimensions,
 	View,
 } from "react-native";
+import { useTheme } from "react-native-paper";
 import Icon from "react-native-vector-icons/Ionicons";
-import Animated from "react-native-reanimated";
-import BottomSheet from "reanimated-bottom-sheet";
-import { getTimeDistance } from "../../utils/utils";
-import { useEffect } from "react";
-import {
-	ViewStoryNavigationProp,
-	ViewStoryRouteProp,
-} from "../../types/navigation/RootStack";
-import { useContext } from "react";
-import { AppContext } from "../../utils/appContext";
-import { UserAvatar } from "../../Components/UserAvatar";
-import { StoryDimensions } from "../../utils/Constants";
+import { useMutation, useQuery } from "react-query";
 import {
 	deleteStory,
 	getViewsForStory,
 	newMessage,
 	setStoryViewed,
 } from "../../../api";
-import { useMutation, useQuery } from "react-query";
-import { useTheme } from "react-native-paper";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { useMemoOne } from "use-memo-one";
+import { UserAvatar } from "../../Components/UserAvatar";
+import { MessageNoUsers } from "../../types";
+import {
+	ViewStoryNavigationProp,
+	ViewStoryRouteProp,
+} from "../../types/navigation/RootStack";
 import { definitions } from "../../types/supabase";
+import { AppContext } from "../../utils/appContext";
+import { StoryDimensions } from "../../utils/Constants";
 import { queryClient } from "../../utils/queryClient";
-import { MessageNoUsers, UserMin } from "../../types";
-import { ToastAndroid } from "react-native";
-import ShareModal from "../../Components/Post/ShareModal";
+import { getTimeDistance } from "../../utils/utils";
 
 type StoryViewProps = {
 	route: ViewStoryRouteProp;
@@ -48,7 +40,6 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 
 	const { width, height } = useWindowDimensions();
 	const scrollView = useRef<ScrollView>(null);
-	7;
 
 	const { user: currUser } = useContext(AppContext);
 
@@ -124,20 +115,12 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 
 	const [storyReplyText, setStoryReplyText] = useState("");
 
-	const sendStory = (user: UserMin) => {
-		currentStory?.id &&
-			newMessage({
-				message_type: "STORY",
-				storyId: currentStory?.id,
-				receiver: user.username,
-			});
+	const openShareModal = () => {
+		navigation.navigate("PostShareMenu", {
+			type: "STORY",
+			storyId: currentStory?.id,
+		});
 	};
-
-	const openShareModal = () => shareModalRef.current?.snapTo(1);
-	const closeShareModal = () => shareModalRef.current?.snapTo(2);
-	const renderShareModal = () => (
-		<ShareModal sendMessage={sendStory} closeModal={closeShareModal} />
-	);
 
 	const sendReply = () => {
 		if (storyReplyText.length === 0 || !currentStory) return;
@@ -247,108 +230,22 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 		}
 	};
 
-	const openProfile = (
-		userItem: Pick<definitions["users"], "name" | "username" | "profilePic">
-	) => {
-		navigation.navigate("Root" as any, {
-			screen: "Tabs",
-			params: {
-				screen: "Home",
-				params: {
-					screen: "Feed",
-					params: {
-						screen: "Profile",
-						params: userItem,
-					},
-				},
-			},
-		});
-	};
-
 	const onStoryViewed = (storyId: number) => {
 		setStoryViewed(storyId);
 	};
 
-	const sheetRef = React.useRef<BottomSheet>(null);
-	const shareModalRef = useRef<BottomSheet>(null);
-
-	const fall = useMemoOne(() => new Animated.Value(1), []);
-
 	const { colors } = useTheme();
 
 	const openSheet = () => {
-		setIsSheetOpen(true);
-		sheetRef?.current?.snapTo(1);
+		if (!currentStory) {
+			return;
+		}
+		navigation.navigate("StorySheet", {
+			story: currentStory,
+			views: data ?? [],
+		});
 	};
 
-	const renderContent = () => (
-		<View
-			style={{
-				backgroundColor: colors.surface,
-				padding: 16,
-				height: height,
-			}}
-		>
-			<Text style={{ color: "white", fontWeight: "bold" }}>Views</Text>
-			<ScrollView
-				style={{
-					marginTop: 12,
-				}}
-			>
-				{data?.map((item) => (
-					<TouchableOpacity
-						onPress={() => openProfile(item.user)}
-						key={item.id}
-						style={{
-							display: "flex",
-							flexDirection: "row",
-							alignItems: "center",
-						}}
-					>
-						<UserAvatar profilePicture={item.user.profilePic} />
-						<View
-							style={{
-								marginLeft: 12,
-							}}
-						>
-							<Text
-								style={{
-									color: "white",
-									fontWeight: "bold",
-								}}
-							>
-								{item.user.username}
-							</Text>
-							<Text
-								style={{
-									color: "white",
-									opacity: 0.5,
-								}}
-							>
-								{item.user.name}
-							</Text>
-						</View>
-					</TouchableOpacity>
-				))}
-			</ScrollView>
-		</View>
-	);
-
-	const renderHeader = () => (
-		<TouchableWithoutFeedback>
-			<View
-				style={{
-					...styles.panelHeader,
-					backgroundColor: colors.surface,
-					marginBottom: -2,
-				}}
-			>
-				<View style={styles.panelHandle} />
-			</View>
-		</TouchableWithoutFeedback>
-	);
-
-	const [isSheetOpen, setIsSheetOpen] = useState(false);
 	return (
 		<>
 			<ScrollView
@@ -520,6 +417,7 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 									width={StoryDimensions.width}
 									height={StoryDimensions.height}
 									style={{
+										backgroundColor: "gray",
 										borderRadius: 12,
 										width,
 										height:
@@ -695,7 +593,7 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 												marginLeft: 8,
 											}}
 											onPress={openShareModal}
-											color={colors.text}
+											color={colors.onBackground}
 											backgroundColor="transparent"
 											name={"paper-plane-outline"}
 											size={22}
@@ -706,63 +604,8 @@ const StoryView: React.FC<StoryViewProps> = ({ navigation, route }) => {
 						</View>
 					))}
 			</ScrollView>
-
-			<BottomSheet
-				callbackNode={fall}
-				initialSnap={2}
-				ref={sheetRef}
-				snapPoints={[height, height / 2, 0]}
-				renderContent={renderContent}
-				renderHeader={renderHeader}
-				onCloseEnd={() => setIsSheetOpen(false)}
-			/>
-			<BottomSheet
-				snapPoints={[height, height / 1.5, 0]}
-				renderContent={renderShareModal}
-				ref={shareModalRef}
-				initialSnap={2}
-				callbackNode={fall}
-				renderHeader={renderHeader}
-				onCloseEnd={() => setIsSheetOpen(false)}
-			/>
-			<Animated.View
-				pointerEvents={isSheetOpen ? "box-only" : "none"}
-				style={[
-					styles.shadowContainer,
-					{
-						opacity: Animated.interpolateNode(fall, {
-							inputRange: [0, 1],
-							outputRange: [0.7, 0],
-						}),
-					},
-				]}
-			/>
 		</>
 	);
 };
-
-const styles = StyleSheet.create({
-	panelHeader: {
-		width: "100%",
-		height: 24,
-		alignItems: "center",
-		borderTopLeftRadius: 15,
-		borderTopRightRadius: 15,
-		marginBottom: -1,
-		paddingHorizontal: 16,
-	},
-	panelHandle: {
-		width: 40,
-		height: 4,
-		backgroundColor: "#646464",
-		borderRadius: 4,
-		marginVertical: 16,
-	},
-	// Shadow
-	shadowContainer: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: "#000",
-	},
-});
 
 export default StoryView;

@@ -14,7 +14,6 @@ import {
 	Appbar,
 	Button,
 	TextInput,
-	Colors,
 	useTheme,
 } from "react-native-paper";
 import { BottomTabParamList } from "../../types/navigation/BottomTab";
@@ -145,11 +144,7 @@ const NewPost: React.FC<Props> = ({ navigation }) => {
 						position: "absolute",
 					}}
 				>
-					<ActivityIndicator
-						animating={true}
-						color={Colors.blue500}
-						size={48}
-					/>
+					<ActivityIndicator animating={true} size={48} />
 				</View>
 			)}
 			<StatusBar backgroundColor="black" barStyle="light-content" />

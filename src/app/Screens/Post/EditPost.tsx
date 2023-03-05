@@ -9,7 +9,6 @@ import {
 	useTheme,
 	TextInput,
 	ActivityIndicator,
-	Colors,
 } from "react-native-paper";
 import { useMutation, useQuery } from "react-query";
 import { editPost, getPostById } from "../../../api";
@@ -100,11 +99,7 @@ const EditPost: React.FC<Props> = ({ route, navigation }) => {
 						position: "absolute",
 					}}
 				>
-					<ActivityIndicator
-						animating={true}
-						color={Colors.blue500}
-						size={48}
-					/>
+					<ActivityIndicator animating={true} size={48} />
 				</View>
 			)}
 			<Appbar.Header

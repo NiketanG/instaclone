@@ -109,7 +109,7 @@ const Likes: React.FC<Props> = ({ route, navigation }) => {
 								backgroundColor: "#3a3a3a",
 								borderRadius: 6,
 								paddingHorizontal: 16,
-								color: colors.text,
+								color: colors.onBackground,
 							}}
 						/>
 						<Divider />

@@ -1,12 +1,12 @@
+import { useNetInfo } from "@react-native-community/netinfo";
 import { NavigationContainer } from "@react-navigation/native";
+import React from "react";
+import { StatusBar } from "react-native";
+import { useTheme } from "react-native-paper";
+import Error from "../Components/Error";
+import { User } from "../types";
 import SignedInStack from "./SignedInStackNavigator";
 import SignInStackNavigator from "./SignInNavigation";
-import React from "react";
-import { useTheme } from "react-native-paper";
-import { User } from "../types";
-import { useNetInfo } from "@react-native-community/netinfo";
-import Error from "../Components/Error";
-import { StatusBar } from "react-native";
 
 type NavigationProps = {
 	user?: User | null;
@@ -18,14 +18,20 @@ const Navigation: React.FC<NavigationProps> = ({ user }) => {
 	const { colors } = useTheme();
 	return (
 		<NavigationContainer
+			linking={{
+				prefixes: [
+					"https://instaclone.nikketan.dev",
+					"com.nikketan.instaclone://",
+				],
+			}}
 			theme={{
 				colors: {
 					background: "#0f0f0f",
-					border: colors.disabled,
+					border: colors.surface,
 					card: "#262626",
-					notification: colors.notification,
+					notification: colors.primary,
 					primary: colors.primary,
-					text: colors.text,
+					text: colors.onBackground,
 				},
 				dark: true,
 			}}

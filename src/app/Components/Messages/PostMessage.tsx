@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { useNavigation } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useContext } from "react";
@@ -113,7 +114,7 @@ const PostMessage: React.FC<Props> = ({ message, selectMessage }) => {
 							{data?.caption ? (
 								<Text
 									style={{
-										color: colors.placeholder,
+										color: colors.onSurface,
 									}}
 								>
 									{data.caption.substr(0, 10)}

@@ -43,6 +43,10 @@ or
 npm run android
 ```
 
+### Additional Steps
+
+Make sure you enable 'Realtime' for messages table from Supabase Dashboard. Otherwise realtime messaging wont work.
+
 ### Note
 
 This is not a 1:1 Replica of Instagram and will never be. The aim of this project was to try and test out [Supabase](https://supabase.io/).

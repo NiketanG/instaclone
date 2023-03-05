@@ -1,10 +1,7 @@
+/* eslint-disable react/no-unstable-nested-components */
+import { useNavigation } from "@react-navigation/native";
 import React, { useContext, useState } from "react";
-import {
-	DeviceEventEmitter,
-	Image,
-	Text,
-	useWindowDimensions,
-} from "react-native";
+import { Image, Text, useWindowDimensions } from "react-native";
 import {
 	Caption,
 	Card,
@@ -14,17 +11,16 @@ import {
 	useTheme,
 } from "react-native-paper";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import { UserAvatar } from "../UserAvatar";
 import { getTimeDistance } from "../../utils/utils";
+import { UserAvatar } from "../UserAvatar";
 
-import { FeedNavigationProp } from "../../types/navigation/PostStack";
-import { PostDimensions } from "../../utils/Constants";
-import { LikeFull, PostFull, PostWithUser } from "../../types";
 import { useMutation, useQuery } from "react-query";
 import { getPostById, toggleLike } from "../../../api";
-import { queryClient } from "../../utils/queryClient";
+import { LikeFull, PostFull, PostWithUser } from "../../types";
+import { FeedNavigationProp } from "../../types/navigation/PostStack";
 import { AppContext } from "../../utils/appContext";
+import { PostDimensions } from "../../utils/Constants";
+import { queryClient } from "../../utils/queryClient";
 
 type Props = PostWithUser;
 
@@ -122,17 +118,13 @@ const Post: React.FC<Props> = ({
 		});
 
 	const openMenuModal = () => {
-		// openModal("MENU", user.username, postId);
-		DeviceEventEmitter.emit("PostModalOpen", {
-			modalType: "MENU",
+		navigation.navigate("PostMenu" as any, {
 			postId,
 			user,
 		});
 	};
 	const openShareModal = () => {
-		// openModal("SHARE", user.username, postId);
-		DeviceEventEmitter.emit("PostModalOpen", {
-			modalType: "SHARE",
+		navigation.navigate("PostShareMenu" as any, {
 			postId,
 			user,
 		});
@@ -174,7 +166,7 @@ const Post: React.FC<Props> = ({
 					marginLeft: -16,
 				}}
 				style={{
-					borderBottomColor: colors.placeholder,
+					borderBottomColor: colors.surface,
 					borderBottomWidth: 0.5,
 					alignItems: "center",
 					display: "flex",
@@ -187,12 +179,14 @@ const Post: React.FC<Props> = ({
 				width={PostDimensions.width}
 				height={PostDimensions.height}
 				style={{
+					backgroundColor: colors.surface,
 					width,
 					height: width,
 				}}
 			/>
 			<Card.Actions
 				style={{
+					alignSelf: "flex-start",
 					marginTop: -4,
 					marginBottom: -8,
 				}}
@@ -204,7 +198,7 @@ const Post: React.FC<Props> = ({
 						paddingRight: 0,
 					}}
 					onPress={likeToggle}
-					color={colors.text}
+					color={colors.onBackground}
 					backgroundColor="transparent"
 					name={data?.isLiked ? "heart" : "heart-outline"}
 					size={22}
@@ -215,7 +209,7 @@ const Post: React.FC<Props> = ({
 						paddingLeft: 8,
 						paddingRight: 0,
 					}}
-					color={colors.text}
+					color={colors.onBackground}
 					onPress={openComments}
 					backgroundColor="transparent"
 					name="chatbubble-outline"
@@ -228,7 +222,7 @@ const Post: React.FC<Props> = ({
 						paddingRight: 0,
 					}}
 					onPress={openShareModal}
-					color={colors.text}
+					color={colors.onBackground}
 					backgroundColor="transparent"
 					name={"paper-plane-outline"}
 					size={22}
@@ -239,7 +233,7 @@ const Post: React.FC<Props> = ({
 					<Text
 						onPress={openLikes}
 						style={{
-							color: colors.placeholder,
+							color: colors.onSurface,
 						}}
 					>
 						{data.likes.length > 1
@@ -261,7 +255,7 @@ const Post: React.FC<Props> = ({
 							<Text
 								style={{
 									fontWeight: "bold",
-									color: colors.placeholder,
+									color: colors.onSurface,
 								}}
 							>
 								{expandedCaption ? "Less" : "More"}

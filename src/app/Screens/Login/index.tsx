@@ -14,7 +14,7 @@ type Props = {
 import { InAppBrowser } from "react-native-inappbrowser-reborn";
 import { parseParams } from "../../utils/utils";
 import { checkUserExists } from "../../../api";
-
+import Config from "react-native-config";
 const Login: React.FC<Props> = ({ navigation }) => {
 	const { setSignupDone, setUser } = useContext(AppContext);
 
@@ -22,7 +22,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 
 	const redirectUri = "com.nikketan.instaclone://";
 
-	const authUrl = `https://klmmjevfuntzgwauurst.supabase.co/auth/v1/authorize?provider=google&redirect_to=${redirectUri}`;
+	const authUrl = `${Config.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUri}`;
 
 	const { colors } = useTheme();
 
@@ -46,22 +46,35 @@ const Login: React.FC<Props> = ({ navigation }) => {
 				return null;
 			}
 
+			console.log(res);
+
 			const params = parseParams(res.url.replace(`${redirectUri}#`, ""));
-			if (!params?.refresh_token) {
+			if (!params?.refresh_token || !params?.access_token) {
+				setLoading(false);
 				return null;
 			}
 
-			const { user, error } = await supabaseClient.auth.signIn({
-				refreshToken: params.refresh_token,
+			const { data, error } = await supabaseClient.auth.setSession({
+				refresh_token: params.refresh_token,
+				access_token: params.access_token,
 			});
 
-			if (error) console.error(error);
+			console.log("data", data);
+			const user = data.user;
+
+			if (error) {
+				console.error(error);
+				setLoading(false);
+			}
 			if (!user || !user.email) {
 				console.error("[signIn] No User/email", user);
+				setLoading(false);
+
 				return null;
 			}
 			const userExists = await checkUserExists(user.email);
 
+			console.log("userExists", userExists);
 			if (userExists) {
 				setUser(userExists);
 				setSignupDone(true);
@@ -75,6 +88,8 @@ const Login: React.FC<Props> = ({ navigation }) => {
 		} catch (err) {
 			console.error("[signIn]", err);
 			ToastAndroid.show("An error occured", ToastAndroid.LONG);
+			setLoading(false);
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -109,6 +124,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 					<Button
 						onPress={signIn}
 						loading={loading}
+						disabled={loading}
 						mode="contained"
 						style={{
 							padding: 4,

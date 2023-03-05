@@ -4,7 +4,6 @@ import React from "react";
 import { View } from "react-native";
 import { Appbar, useTheme } from "react-native-paper";
 import Post from "../../Components/Post";
-import PostBottomSheetWrapper from "../../Components/PostBottomSheetWrapper";
 import { PostStackParamsList } from "../../types/navigation/PostStack";
 
 type Props = {
@@ -38,7 +37,6 @@ const PostDetail: React.FC<Props> = ({ route, navigation }) => {
 				postedAt={route.params.post.postedAt}
 				user={route.params.user}
 			/>
-			<PostBottomSheetWrapper />
 		</View>
 	);
 };

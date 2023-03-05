@@ -1,6 +1,6 @@
 import { RouteProp } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { SupabaseRealtimePayload } from "@supabase/supabase-js";
+import { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
 import React, { useContext, useEffect, useState } from "react";
 import {
 	ActivityIndicator,
@@ -107,7 +107,7 @@ const MessagesList: React.FC<Props> = ({ navigation }) => {
 	const { user: currentUser } = useContext(AppContext);
 
 	const newMessageReceived = async (
-		payload: SupabaseRealtimePayload<definitions["messages"]>
+		payload: RealtimePostgresInsertPayload<definitions["messages"]>
 	) => {
 		const message = payload.new;
 		await queryClient.cancelQueries(`messagesByUser_${message.sender}`);
@@ -133,14 +133,20 @@ const MessagesList: React.FC<Props> = ({ navigation }) => {
 	useEffect(() => {
 		if (currentUser) {
 			const messageSubscription = supabaseClient
-				.from<definitions["messages"]>(
-					`messages:receiver=eq.${currentUser.username}`
+				.channel("table-db-changes")
+				.on(
+					"postgres_changes",
+					{
+						event: "INSERT",
+						schema: "public",
+						table: "messages",
+						filter: `receiver=eq.${currentUser.username}`,
+					},
+					newMessageReceived
 				)
-				.on("INSERT", newMessageReceived)
 				.subscribe();
-
 			return () => {
-				supabaseClient.removeSubscription(messageSubscription);
+				messageSubscription.unsubscribe();
 			};
 		}
 	}, [currentUser]);
@@ -208,7 +214,7 @@ const MessagesList: React.FC<Props> = ({ navigation }) => {
 						justifyContent: "center",
 					}}
 				>
-					<ActivityIndicator color={colors.text} />
+					<ActivityIndicator color={colors.onBackground} />
 				</View>
 			)}
 			{currentUser && (
@@ -227,7 +233,7 @@ const MessagesList: React.FC<Props> = ({ navigation }) => {
 									backgroundColor: "#3a3a3a",
 									borderRadius: 6,
 									paddingHorizontal: 16,
-									color: colors.text,
+									color: colors.onBackground,
 								}}
 							/>
 							<Divider />

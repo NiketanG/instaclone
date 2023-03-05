@@ -1,0 +1,13 @@
+current directory: /Users/nikketan/code/instaclone/vendor/bundle/ruby/2.7.0/gems/json-2.6.3/ext/json
+/Users/nikketan/.rbenv/versions/2.7.6/bin/ruby -I /Users/nikketan/.rbenv/versions/2.7.6/lib/ruby/2.7.0 -r ./siteconf20230305-77415-13xgt4x.rb extconf.rb
+creating Makefile
+
+current directory: /Users/nikketan/code/instaclone/vendor/bundle/ruby/2.7.0/gems/json-2.6.3/ext/json
+make "DESTDIR=" clean
+
+current directory: /Users/nikketan/code/instaclone/vendor/bundle/ruby/2.7.0/gems/json-2.6.3/ext/json
+make "DESTDIR="
+make: Nothing to be done for `all'.
+
+current directory: /Users/nikketan/code/instaclone/vendor/bundle/ruby/2.7.0/gems/json-2.6.3/ext/json
+make "DESTDIR=" install

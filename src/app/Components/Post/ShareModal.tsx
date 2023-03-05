@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
-	StatusBar,
 	TextInput,
 	useWindowDimensions,
 	View,
@@ -16,11 +15,10 @@ import { ChatItem, FollowingFull, UserMin } from "../../types";
 import { AppContext } from "../../utils/appContext";
 
 type ModalProps = {
-	closeModal: () => void;
 	sendMessage: (user: UserMin) => void;
 };
 
-const ShareModal: React.FC<ModalProps> = ({ sendMessage, closeModal }) => {
+const ShareModal: React.FC<ModalProps> = ({ sendMessage }) => {
 	const { colors } = useTheme();
 	const { height } = useWindowDimensions();
 	const { data: messageList, isLoading } = useQuery(`chatList`, () =>
@@ -98,7 +96,6 @@ const ShareModal: React.FC<ModalProps> = ({ sendMessage, closeModal }) => {
 
 	const sendNewMessage = async (user: UserMin) => {
 		sendMessage(user);
-		closeModal();
 	};
 
 	return (
@@ -120,7 +117,7 @@ const ShareModal: React.FC<ModalProps> = ({ sendMessage, closeModal }) => {
 						justifyContent: "center",
 					}}
 				>
-					<ActivityIndicator color={colors.text} />
+					<ActivityIndicator color={colors.onBackground} />
 				</View>
 			)}
 
@@ -139,7 +136,7 @@ const ShareModal: React.FC<ModalProps> = ({ sendMessage, closeModal }) => {
 								backgroundColor: "#3a3a3a",
 								borderRadius: 6,
 								paddingHorizontal: 16,
-								color: colors.text,
+								color: colors.onBackground,
 							}}
 						/>
 						<Divider />
@@ -158,7 +155,7 @@ const ShareModal: React.FC<ModalProps> = ({ sendMessage, closeModal }) => {
 						style={{
 							display: "flex",
 							flexDirection: "column",
-							height: height - (StatusBar.currentHeight || 0),
+							marginTop: 16,
 							alignItems: "center",
 							justifyContent: "center",
 						}}

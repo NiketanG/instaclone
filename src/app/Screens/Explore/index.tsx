@@ -96,7 +96,7 @@ const Explore: React.FC<Props> = ({ navigation }) => {
 						backgroundColor: "#2a2a2a",
 						borderRadius: 12,
 						paddingHorizontal: 16,
-						color: colors.text,
+						color: colors.onBackground,
 					}}
 				/>
 			</View>

@@ -34,21 +34,19 @@ const uploadToSupabase = async (
 			console.error("[uploadToSupabase] upload: ", error);
 			return null;
 		}
-		const { publicURL, error: urlError } = supabaseClient.storage
+
+		const {
+			data: { publicUrl },
+		} = supabaseClient.storage
 			.from(bucketName)
-			.getPublicUrl(data.Key.replace(`${bucketName}/`, ""));
+			.getPublicUrl(data.path.replace(`${bucketName}/`, ""));
 
-		if (urlError) {
-			console.error("[uploadToSupabase] PublicURL: ", urlError);
-			return null;
-		}
-
-		if (!publicURL) {
+		if (!publicUrl) {
 			console.error("[uploadToSupabase] publicURL is null");
 			return null;
 		}
 
-		return publicURL;
+		return publicUrl;
 	} catch (err) {
 		console.error(err);
 		return null;

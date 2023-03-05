@@ -442,7 +442,7 @@ const Messages: React.FC<Props> = ({ navigation, route }) => {
 					style={{
 						flex: 1,
 						paddingLeft: 16,
-						color: colors.text,
+						color: colors.onBackground,
 					}}
 					onSubmitEditing={sendMessage}
 				/>

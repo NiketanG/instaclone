@@ -17,7 +17,6 @@ import ImagePicker, {
 import {
 	ActivityIndicator,
 	Appbar,
-	Colors,
 	Text,
 	TextInput,
 	Title,
@@ -172,11 +171,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 						position: "absolute",
 					}}
 				>
-					<ActivityIndicator
-						animating={true}
-						color={Colors.blue500}
-						size={48}
-					/>
+					<ActivityIndicator animating={true} size={48} />
 				</View>
 			)}
 			<StatusBar backgroundColor="black" barStyle="light-content" />
@@ -240,7 +235,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 
 				<Text
 					style={{
-						color: colors.placeholder,
+						color: colors.onSurface,
 					}}
 				>
 					Name
@@ -258,7 +253,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 
 				<Text
 					style={{
-						color: colors.placeholder,
+						color: colors.onSurface,
 					}}
 				>
 					Username
@@ -277,7 +272,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 				{!usernameAvailable && (
 					<Text
 						style={{
-							color: Colors.red500,
+							color: "red",
 							marginHorizontal: 8,
 							marginBottom: 8,
 							marginTop: -8,
@@ -289,7 +284,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 
 				<Text
 					style={{
-						color: colors.placeholder,
+						color: colors.onBackground,
 					}}
 				>
 					Bio
@@ -306,7 +301,7 @@ const EditProfile: React.FC<Props> = ({ navigation }) => {
 				/>
 				<Text
 					style={{
-						color: colors.placeholder,
+						color: colors.onSurface,
 					}}
 				>
 					Email

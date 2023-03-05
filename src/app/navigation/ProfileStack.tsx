@@ -20,7 +20,7 @@ type Props = {
 
 const Stack = createStackNavigator<ProfileStackParams>();
 
-const ProfilePageStack: React.FC<Props> = ({ route }) => {
+const ProfilePageStack = ({ route }: Props) => {
 	const { user } = useContext(AppContext);
 	return (
 		<Stack.Navigator

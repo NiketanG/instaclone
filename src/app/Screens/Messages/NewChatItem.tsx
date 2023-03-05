@@ -1,5 +1,5 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Caption, Text } from "react-native-paper";
 import { UserAvatar } from "../../Components/UserAvatar";
@@ -11,6 +11,12 @@ type NewChatItemProps = {
 };
 
 const NewChatItem: React.FC<NewChatItemProps> = ({ item, openMessage }) => {
+	const [isLoading, setIsLoading] = useState(false);
+
+	const onPress = () => {
+		setIsLoading(true);
+		openMessage(item);
+	};
 	return (
 		<TouchableOpacity
 			key={item.username}
@@ -20,23 +26,34 @@ const NewChatItem: React.FC<NewChatItemProps> = ({ item, openMessage }) => {
 				alignItems: "center",
 				margin: 16,
 			}}
-			onPress={() => openMessage(item)}
+			onPress={onPress}
 		>
-			<UserAvatar size={32} profilePicture={item.profilePic} />
 			<View
 				style={{
-					marginLeft: 16,
+					flexGrow: 1,
+					display: "flex",
+					flexDirection: "row",
+					alignItems: "center",
 				}}
 			>
-				<Text
+				<UserAvatar size={32} profilePicture={item.profilePic} />
+				<View
 					style={{
-						fontSize: 18,
+						marginLeft: 16,
 					}}
 				>
-					{item.username}
-				</Text>
-				<Caption>{item.name}</Caption>
+					<Text
+						style={{
+							fontSize: 18,
+						}}
+					>
+						{item.username}
+					</Text>
+					<Caption>{item.name}</Caption>
+				</View>
 			</View>
+
+			{isLoading && <ActivityIndicator size={12} />}
 		</TouchableOpacity>
 	);
 };
