@@ -9,7 +9,9 @@ const supabaseClient = createClient(
 	Config.SUPABASE_URL!,
 	Config.SUPABASE_KEY!,
 	{
-		localStorage: AsyncStorage as any,
+		auth: {
+			storage: AsyncStorage,
+		},
 	}
 );
 
